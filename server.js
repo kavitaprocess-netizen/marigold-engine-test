@@ -18,8 +18,10 @@ const supabase = createClient(
   process.env.SUPABASE_SECRET_KEY
 );
 
-// ============================================================================
-// GET /api/traditions
+// Root redirect — the only UI on this server is the advisor review interface
+app.get('/', (req, res) => {
+  res.redirect('/advisor');
+});
 // Lists all traditions currently approved and live in the database
 // ============================================================================
 app.get('/api/traditions', async (req, res) => {
