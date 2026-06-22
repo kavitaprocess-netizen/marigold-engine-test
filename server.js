@@ -309,7 +309,10 @@ async function selectTradition(id){
   document.getElementById('main-content').innerHTML='<div class="empty"><div class="spinner"></div></div>';
   try{
     allVersions=await api('/traditions/'+id+'/versions');
-    currentVersion=allVersions[0]||null;
+    // Default to the approved current version — not just the most recent,
+    // which could be a draft from a previous session
+    const approvedCurrent = allVersions.find(v => v.is_current && v.status === 'approved');
+    currentVersion = approvedCurrent || allVersions[0] || null;
     initWorkingData();activeTab='content';renderMain();
   }catch(e){toast('Failed to load: '+e.message,'error');}
 }
