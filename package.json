@@ -1,0 +1,14 @@
+{
+  "name": "marigold-engine-test",
+  "version": "0.1.0",
+  "description": "Deterministic CIE engine test server — separate from the demo, connects to real Supabase data.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build": "echo ok"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "@supabase/supabase-js": "^2.45.0"
+  }
+}

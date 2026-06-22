@@ -1,0 +1,12 @@
+{
+  "name": "marigold-cie-engine",
+  "version": "0.1.0",
+  "description": "Deterministic Cultural Intelligence Engine — reads only from advisor-approved Supabase taxonomy data. No AI calls in this path. Kept fully separate from the demo app (marigold-deploy/public, marigold-deploy/server.js), which is untouched and continues running independently.",
+  "main": "index.js",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0"
+  },
+  "scripts": {
+    "test": "node ../tests/engine.test.js"
+  }
+}
