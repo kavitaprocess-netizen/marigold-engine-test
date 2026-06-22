@@ -131,6 +131,231 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// ============================================================================
+// ADVISOR REVIEW ROUTES
+// All Supabase calls go through these server-side routes — the service role
+// key never touches the browser. This is why the advisor review UI is served
+// from this server rather than as a standalone HTML file connecting to
+// Supabase directly (which browsers block as a security measure).
+// ============================================================================
+
+// Serve the advisor review UI
+app.get('/advisor', (req, res) => {
+  res.sendFile(__dirname + '/advisor-review/index.html');
+});
+
+// GET /api/advisor/traditions
+// All traditions with all versions (not just live — advisors need to see drafts)
+app.get('/api/advisor/traditions', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('cultural_traditions')
+      .select(`
+        id, slug, name, region, priority, created_at,
+        tradition_versions (
+          id, version_number, status, is_current,
+          proposed_at, reviewed_at, review_notes,
+          avg_budget_low, avg_budget_high, typical_event_count
+        )
+      `)
+      .order('priority')
+      .order('name');
+    if (error) throw error;
+    res.json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /api/advisor/traditions/:id/versions
+// All versions for a single tradition, full content
+app.get('/api/advisor/traditions/:id/versions', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('tradition_versions')
+      .select('*')
+      .eq('tradition_id', req.params.id)
+      .order('version_number', { ascending: false });
+    if (error) throw error;
+    res.json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /api/advisor/versions/:id
+// Single version by ID — full content
+app.get('/api/advisor/versions/:id', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('tradition_versions')
+      .select('*')
+      .eq('id', req.params.id)
+      .single();
+    if (error) throw error;
+    res.json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /api/advisor/traditions/:id/draft
+// Create a new draft version (copy of current content)
+app.post('/api/advisor/traditions/:id/draft', async (req, res) => {
+  try {
+    const { base } = req.body; // existing version content to copy from
+
+    // Get next version number
+    const { data: latest } = await supabase
+      .from('tradition_versions')
+      .select('version_number')
+      .eq('tradition_id', req.params.id)
+      .order('version_number', { ascending: false })
+      .limit(1);
+
+    const nextVersion = latest?.length ? latest[0].version_number + 1 : 1;
+
+    const { data, error } = await supabase
+      .from('tradition_versions')
+      .insert({
+        tradition_id: req.params.id,
+        version_number: nextVersion,
+        avg_budget_low: base?.avg_budget_low || null,
+        avg_budget_high: base?.avg_budget_high || null,
+        budget_currency: base?.budget_currency || 'USD',
+        typical_event_count: base?.typical_event_count || null,
+        ceremony_sequence: base?.ceremony_sequence || [],
+        vendor_categories: base?.vendor_categories || [],
+        budget_allocation: base?.budget_allocation || [],
+        checklist_template: base?.checklist_template || [],
+        cultural_notes: base?.cultural_notes || '',
+        sources: base?.sources || '',
+        status: 'draft',
+        review_notes: '',
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// PATCH /api/advisor/versions/:id
+// Save edits to a draft or in_review version
+app.patch('/api/advisor/versions/:id', async (req, res) => {
+  try {
+    // Safety check — never allow editing an approved or retired version
+    const { data: existing } = await supabase
+      .from('tradition_versions')
+      .select('status')
+      .eq('id', req.params.id)
+      .single();
+
+    if (!['draft', 'in_review'].includes(existing?.status)) {
+      return res.status(403).json({ error: `Cannot edit a version with status "${existing?.status}". Create a new editing copy instead.` });
+    }
+
+    const { data, error } = await supabase
+      .from('tradition_versions')
+      .update(req.body)
+      .eq('id', req.params.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /api/advisor/versions/:id/submit
+// Submit a draft for review
+app.post('/api/advisor/versions/:id/submit', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('tradition_versions')
+      .update({ status: 'in_review' })
+      .eq('id', req.params.id)
+      .select()
+      .single();
+    if (error) throw error;
+    res.json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /api/advisor/versions/:id/approve
+// Approve a version — makes it live, retires the previous current
+app.post('/api/advisor/versions/:id/approve', async (req, res) => {
+  try {
+    const { notes } = req.body;
+    const { data, error } = await supabase
+      .from('tradition_versions')
+      .update({
+        status: 'approved',
+        is_current: true,
+        reviewed_at: new Date().toISOString(),
+        review_notes: notes || 'Approved via advisor review interface.',
+      })
+      .eq('id', req.params.id)
+      .select()
+      .single();
+    if (error) throw error;
+    res.json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /api/advisor/versions/:id/reject
+// Reject — returns to draft with notes
+app.post('/api/advisor/versions/:id/reject', async (req, res) => {
+  try {
+    const { notes } = req.body;
+    if (!notes) return res.status(400).json({ error: 'Rejection reason required' });
+    const { data, error } = await supabase
+      .from('tradition_versions')
+      .update({ status: 'draft', review_notes: notes })
+      .eq('id', req.params.id)
+      .select()
+      .single();
+    if (error) throw error;
+    res.json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /api/advisor/traditions/:id/audit
+// Audit trail for a tradition
+app.get('/api/advisor/traditions/:id/audit', async (req, res) => {
+  try {
+    const { data: versions } = await supabase
+      .from('tradition_versions')
+      .select('id')
+      .eq('tradition_id', req.params.id);
+
+    const versionIds = (versions || []).map(v => v.id);
+    if (!versionIds.length) return res.json([]);
+
+    const { data, error } = await supabase
+      .from('tradition_version_audit')
+      .select('*')
+      .in('tradition_version_id', versionIds)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    res.json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Marigold engine test running on port ${PORT}`));
 module.exports = app;

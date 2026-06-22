@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marigold — Cultural Advisor Review</title>
+<style>
+  :root {
+    --bg: #FDFAF0;
+    --surface: #FFFFFF;
+    --border: #E0D4B0;
+    --text: #2A2010;
+    --muted: #9A8A6A;
+    --gold: #C8A820;
+    --gold-dark: #9A7E10;
+    --gold-light: #FDF8E8;
+    --deep: #3C3010;
+    --warm: #F5F0E8;
+    --red: #C0392B;
+    --red-light: #FDECEA;
+    --green: #1E7C4E;
+    --green-light: #E8F5EE;
+    --orange: #D4550A;
+    --orange-light: #FDF0E8;
+    --radius: 6px;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono: 'SF Mono', 'Fira Code', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+
+  .layout { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+  .sidebar { background: var(--surface); border-right: 1px solid var(--border); position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .main { padding: 32px; max-width: 900px; }
+
+  .sidebar-header { padding: 20px 20px 16px; border-bottom: 1px solid var(--border); }
+  .sidebar-header h1 { font-size: 15px; font-weight: 600; letter-spacing: -0.2px; color: var(--deep); }
+  .sidebar-header p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .sidebar-section { padding: 12px 20px 4px; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
+  .tradition-item { display: flex; align-items: center; gap: 10px; padding: 8px 20px; cursor: pointer; border-left: 3px solid transparent; transition: background 0.1s; }
+  .tradition-item:hover { background: var(--warm); }
+  .tradition-item.active { background: var(--gold-light); border-left-color: var(--gold); }
+  .tradition-item .t-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .t-priority { font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 3px; }
+  .p0 { background: var(--red-light); color: var(--red); }
+  .p1 { background: var(--orange-light); color: var(--orange); }
+  .p2 { background: var(--warm); color: var(--muted); }
+
+  .badge { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+  .badge-approved { background: var(--green-light); color: var(--green); }
+  .badge-draft { background: var(--gold-light); color: var(--gold-dark); }
+  .badge-in_review { background: var(--orange-light); color: var(--orange); }
+  .badge-retired { background: var(--border); color: var(--muted); }
+
+  .page-title { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 4px; color: var(--deep); }
+  .page-meta { font-size: 13px; color: var(--muted); margin-bottom: 24px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 20px; }
+  .card-header { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .card-title { font-size: 13px; font-weight: 600; }
+  .card-body { padding: 20px; }
+
+  .action-bar { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; align-items: flex-start; }
+  .action-group { display: flex; flex-direction: column; gap: 4px; }
+  .action-hint { font-size: 11px; color: var(--muted); }
+
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius); font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid transparent; transition: all 0.1s; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary { background: var(--deep); color: white; border-color: var(--deep); }
+  .btn-primary:hover:not(:disabled) { background: #2a1e08; }
+  .btn-success { background: var(--green); color: white; }
+  .btn-success:hover:not(:disabled) { background: #165e3a; }
+  .btn-warning { background: var(--orange); color: white; }
+  .btn-danger { background: var(--red); color: white; }
+  .btn-outline { background: white; color: var(--text); border-color: var(--border); }
+  .btn-outline:hover:not(:disabled) { background: var(--warm); }
+  .btn-gold { background: var(--gold); color: var(--deep); border-color: var(--gold); }
+  .btn-gold:hover:not(:disabled) { background: var(--gold-dark); color: white; }
+
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
+  .field input, .field textarea, .field select { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-family: var(--font); font-size: 13px; background: white; color: var(--text); }
+  .field input:focus, .field textarea:focus { outline: none; border-color: var(--gold); }
+  .field textarea { min-height: 120px; resize: vertical; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  .json-editor { width: 100%; min-height: 200px; font-family: var(--mono); font-size: 12px; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); resize: vertical; }
+  .json-editor:focus { outline: none; border-color: var(--gold); }
+  .json-error { font-size: 11px; color: var(--red); margin-top: 4px; display: none; }
+  .json-error.visible { display: block; }
+
+  .audit-item { padding: 12px 0; border-bottom: 1px solid var(--border); display: flex; gap: 12px; }
+  .audit-item:last-child { border-bottom: none; }
+  .audit-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); margin-top: 5px; flex-shrink: 0; }
+  .audit-dot.approved { background: var(--green); }
+  .audit-dot.created { background: var(--gold); }
+  .audit-dot.submitted_for_review { background: var(--orange); }
+  .audit-dot.rejected { background: var(--red); }
+  .audit-dot.retired { background: var(--muted); }
+  .audit-action { font-size: 12px; font-weight: 600; }
+  .audit-meta { font-size: 11px; color: var(--muted); }
+  .audit-notes { font-size: 12px; margin-top: 2px; font-style: italic; color: var(--text); }
+
+  .version-item { padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+  .version-item.current { border-color: var(--gold); background: var(--gold-light); }
+
+  .banner { padding: 12px 16px; border-radius: var(--radius); margin-bottom: 20px; display: flex; align-items: flex-start; gap: 10px; }
+  .banner-editing { background: var(--gold-light); border: 1px solid var(--gold); border-left: 4px solid var(--gold); }
+  .banner-locked { background: var(--warm); border: 1px solid var(--border); border-left: 4px solid var(--border); }
+  .banner-title { font-size: 13px; font-weight: 600; color: var(--gold-dark); }
+  .banner-locked .banner-title { color: var(--muted); }
+  .banner-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+  .tab { padding: 8px 16px; font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; color: var(--muted); transition: all 0.1s; }
+  .tab.active { color: var(--deep); border-bottom-color: var(--gold); }
+
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--deep); color: white; padding: 12px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 500; z-index: 1000; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+  .toast.visible { opacity: 1; }
+  .toast.error { background: var(--red); }
+  .toast.success { background: var(--green); }
+
+  .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.6s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h1>Marigold · Advisor Review</h1>
+      <p id="sidebar-count">Loading…</p>
+    </div>
+    <div id="tradition-list"></div>
+  </aside>
+  <main class="main" id="main-content">
+    <div class="empty">
+      <div style="font-size:32px;margin-bottom:12px">📋</div>
+      <p>Select a tradition from the sidebar to begin reviewing.</p>
+    </div>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// All API calls go to /api/advisor/* on this server.
+// The server uses the Supabase service role key — it never reaches the browser.
+
+const API = '/api/advisor';
+let traditions = [];
+let currentTradition = null;
+let currentVersion = null;
+let allVersions = [];
+let activeTab = 'content';
+
+// ============================================================================
+// INIT
+// ============================================================================
+window.onload = () => loadTraditions();
+
+async function api(path, method = 'GET', body = null) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(API + path, opts);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || res.statusText);
+  }
+  return res.json();
+}
+
+// ============================================================================
+// LOAD TRADITIONS
+// ============================================================================
+async function loadTraditions() {
+  try {
+    traditions = await api('/traditions');
+    renderSidebar();
+  } catch (e) {
+    toast('Failed to load traditions: ' + e.message, 'error');
+  }
+}
+
+function renderSidebar() {
+  document.getElementById('sidebar-count').textContent = `${traditions.length} traditions`;
+  const byPriority = { P0: [], P1: [], P2: [] };
+  traditions.forEach(t => (byPriority[t.priority] || byPriority.P2).push(t));
+
+  let html = '';
+  const labels = { P0: 'Highest priority', P1: 'Important', P2: 'Standard' };
+  for (const [p, items] of Object.entries(byPriority)) {
+    if (!items.length) continue;
+    html += `<div class="sidebar-section">${p} — ${labels[p]}</div>`;
+    items.forEach(t => {
+      const versions = t.tradition_versions || [];
+      const current = versions.find(v => v.is_current);
+      const latest = versions.sort((a,b) => b.version_number - a.version_number)[0];
+      const statusV = current || latest;
+      html += `
+        <div class="tradition-item ${currentTradition?.id === t.id ? 'active' : ''}" onclick="selectTradition('${t.id}')">
+          <div class="t-name">${t.name}</div>
+          <span class="t-priority ${p.toLowerCase()}">${p}</span>
+        </div>`;
+    });
+  }
+  document.getElementById('tradition-list').innerHTML = html;
+}
+
+// ============================================================================
+// SELECT TRADITION
+// ============================================================================
+async function selectTradition(id) {
+  currentTradition = traditions.find(t => t.id === id);
+  renderSidebar();
+  document.getElementById('main-content').innerHTML = '<div class="empty"><div class="spinner"></div></div>';
+
+  try {
+    allVersions = await api(`/traditions/${id}/versions`);
+    currentVersion = allVersions[0] || null;
+    activeTab = 'content';
+    renderMain();
+  } catch (e) {
+    toast('Failed to load versions: ' + e.message, 'error');
+  }
+}
+
+// ============================================================================
+// RENDER MAIN
+// ============================================================================
+function renderMain() {
+  if (!currentTradition) return;
+  const v = currentVersion;
+  const canSubmit = v?.status === 'draft';
+  const canApprove = v?.status === 'in_review';
+  const canEdit = v?.status === 'draft' || v?.status === 'in_review';
+
+  document.getElementById('main-content').innerHTML = `
+    <div class="page-title">${currentTradition.name}</div>
+    <div class="page-meta">
+      <span>${currentTradition.slug}</span>
+      <span>·</span><span>${currentTradition.region || '—'}</span>
+      <span>·</span>
+      ${v ? `<span class="badge badge-${v.status}">${v.status.replace('_',' ')}</span> <span>v${v.version_number}</span>` : '<span class="badge badge-draft">no versions</span>'}
+    </div>
+
+    <div class="action-bar">
+      <div class="action-group">
+        <button class="btn btn-gold" onclick="createEditingCopy()">✏️ Create editing copy</button>
+        <span class="action-hint">Makes a copy to edit — live content stays unchanged</span>
+      </div>
+      <button class="btn btn-warning" onclick="submitForReview()" ${canSubmit ? '' : 'disabled'}>📤 Submit for review</button>
+      <button class="btn btn-success" onclick="approveVersion()" ${canApprove ? '' : 'disabled'}>✅ Approve</button>
+      <button class="btn btn-outline" onclick="rejectVersion()" ${canApprove ? '' : 'disabled'}>❌ Reject</button>
+    </div>
+
+    <div class="tabs">
+      <div class="tab ${activeTab==='content'?'active':''}" onclick="switchTab('content')">Content</div>
+      <div class="tab ${activeTab==='versions'?'active':''}" onclick="switchTab('versions')">Versions (${allVersions.length})</div>
+      <div class="tab ${activeTab==='audit'?'active':''}" onclick="switchTab('audit')">Audit trail</div>
+    </div>
+
+    <div id="tab-content">
+      ${activeTab==='content' ? renderContentTab(v, canEdit) : ''}
+      ${activeTab==='versions' ? renderVersionsTab() : ''}
+      ${activeTab==='audit' ? '<div class="empty"><div class="spinner"></div></div>' : ''}
+    </div>
+  `;
+
+  if (activeTab === 'audit') loadAuditTrail();
+}
+
+function switchTab(tab) {
+  activeTab = tab;
+  renderMain();
+}
+
+// ============================================================================
+// CONTENT TAB
+// ============================================================================
+function renderContentTab(v, canEdit) {
+  if (!v) return `<div class="empty"><div style="font-size:32px;margin-bottom:12px">📭</div><p>No content yet. A developer will seed the initial content for this tradition via SQL, then you can create an editing copy to review and approve it.</p></div>`;
+
+  const dis = canEdit ? '' : 'disabled';
+
+  const banner = canEdit
+    ? `<div class="banner banner-editing">
+        <span style="font-size:20px">✏️</span>
+        <div><div class="banner-title">You are editing a copy (v${v.version_number})</div>
+        <div class="banner-sub">The live approved version is untouched. Your edits only go live once you submit and approve this copy.</div></div>
+      </div>`
+    : `<div class="banner banner-locked">
+        <span style="font-size:20px">🔒</span>
+        <div><div class="banner-title">Viewing live approved version (v${v.version_number}) — read only</div>
+        <div class="banner-sub">Click "Create editing copy" above to make an editable copy.</div></div>
+      </div>`;
+
+  return `
+    ${banner}
+    <div class="card">
+      <div class="card-header"><div class="card-title">Overview</div></div>
+      <div class="card-body">
+        <div class="field-row">
+          <div class="field"><label>Avg budget low ($)</label><input type="number" id="f-budget-low" value="${v.avg_budget_low||''}" ${dis}></div>
+          <div class="field"><label>Avg budget high ($)</label><input type="number" id="f-budget-high" value="${v.avg_budget_high||''}" ${dis}></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Currency</label><input type="text" id="f-currency" value="${v.budget_currency||'USD'}" ${dis}></div>
+          <div class="field"><label>Typical event count</label><input type="number" id="f-event-count" value="${v.typical_event_count||''}" ${dis}></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Cultural notes</div></div>
+      <div class="card-body">
+        <div class="field"><textarea id="f-cultural-notes" ${dis}>${v.cultural_notes||''}</textarea></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Sources</div></div>
+      <div class="card-body">
+        <div class="field"><textarea id="f-sources" style="min-height:80px" ${dis}>${v.sources||''}</textarea></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Checklist template</div>
+        <span style="font-size:12px;color:var(--muted)">${(v.checklist_template||[]).length} items</span>
+      </div>
+      <div class="card-body">
+        <textarea class="json-editor" id="f-checklist" ${dis}>${JSON.stringify(v.checklist_template||[],null,2)}</textarea>
+        <div class="json-error" id="err-checklist">Invalid JSON — fix before saving</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Ceremony sequence</div>
+        <span style="font-size:12px;color:var(--muted)">${(v.ceremony_sequence||[]).length} events</span>
+      </div>
+      <div class="card-body">
+        <textarea class="json-editor" id="f-ceremony" ${dis}>${JSON.stringify(v.ceremony_sequence||[],null,2)}</textarea>
+        <div class="json-error" id="err-ceremony">Invalid JSON — fix before saving</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Vendor categories</div>
+        <span style="font-size:12px;color:var(--muted)">${(v.vendor_categories||[]).length} categories</span>
+      </div>
+      <div class="card-body">
+        <textarea class="json-editor" id="f-vendors" ${dis}>${JSON.stringify(v.vendor_categories||[],null,2)}</textarea>
+        <div class="json-error" id="err-vendors">Invalid JSON — fix before saving</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Budget allocation</div>
+        <span style="font-size:12px;color:var(--muted)">${(v.budget_allocation||[]).length} categories</span>
+      </div>
+      <div class="card-body">
+        <textarea class="json-editor" id="f-budget" ${dis}>${JSON.stringify(v.budget_allocation||[],null,2)}</textarea>
+        <div class="json-error" id="err-budget">Invalid JSON — fix before saving</div>
+      </div>
+    </div>
+
+    ${canEdit ? `
+    <div style="margin-bottom:40px">
+      <div class="field">
+        <label>Review notes (visible in audit trail)</label>
+        <textarea id="f-review-notes" style="min-height:80px" placeholder="Note changes made, questions for other advisors, or verification still needed…">${v.review_notes||''}</textarea>
+      </div>
+      <button class="btn btn-primary" onclick="saveEdits()">Save changes</button>
+    </div>` : ''}
+  `;
+}
+
+// ============================================================================
+// VERSIONS TAB
+// ============================================================================
+function renderVersionsTab() {
+  if (!allVersions.length) return '<div class="empty">No versions yet.</div>';
+  return allVersions.map(v => `
+    <div class="version-item ${v.is_current ? 'current' : ''}">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-weight:600">v${v.version_number}</span>
+        <span class="badge badge-${v.status}">${v.status.replace('_',' ')}</span>
+        ${v.is_current ? '<span class="badge badge-approved" style="font-size:10px">LIVE</span>' : ''}
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;color:var(--muted)">${new Date(v.proposed_at).toLocaleDateString()}</span>
+        ${v.id !== currentVersion?.id
+          ? `<button class="btn btn-outline" style="padding:4px 10px;font-size:12px" onclick="loadVersion('${v.id}')">View</button>`
+          : '<span style="font-size:12px;color:var(--muted)">viewing</span>'}
+      </div>
+    </div>`).join('');
+}
+
+async function loadVersion(versionId) {
+  try {
+    currentVersion = await api(`/versions/${versionId}`);
+    activeTab = 'content';
+    renderMain();
+  } catch (e) {
+    toast('Failed to load version: ' + e.message, 'error');
+  }
+}
+
+// ============================================================================
+// AUDIT TRAIL
+// ============================================================================
+async function loadAuditTrail() {
+  try {
+    const audit = await api(`/traditions/${currentTradition.id}/audit`);
+    const html = audit.length
+      ? audit.map(a => `
+          <div class="audit-item">
+            <div class="audit-dot ${a.action}"></div>
+            <div>
+              <div class="audit-action">${a.action.replace(/_/g,' ')}</div>
+              <div class="audit-meta">${new Date(a.created_at).toLocaleString()}</div>
+              ${a.notes ? `<div class="audit-notes">${a.notes}</div>` : ''}
+            </div>
+          </div>`).join('')
+      : '<div class="empty">No audit entries yet.</div>';
+    document.getElementById('tab-content').innerHTML = html;
+  } catch (e) {
+    document.getElementById('tab-content').innerHTML = `<div class="empty">Failed to load audit trail: ${e.message}</div>`;
+  }
+}
+
+// ============================================================================
+// WORKFLOW ACTIONS
+// ============================================================================
+async function createEditingCopy() {
+  try {
+    const base = currentVersion;
+    const newVersion = await api(`/traditions/${currentTradition.id}/draft`, 'POST', { base });
+    toast(`Editing copy created (v${newVersion.version_number}) — make your changes and save`, 'success');
+    allVersions = await api(`/traditions/${currentTradition.id}/versions`);
+    currentVersion = newVersion;
+    activeTab = 'content';
+    renderMain();
+  } catch (e) {
+    toast('Failed to create editing copy: ' + e.message, 'error');
+  }
+}
+
+async function saveEdits() {
+  const jsonFields = [
+    { id: 'f-checklist', errId: 'err-checklist', key: 'checklist_template' },
+    { id: 'f-ceremony',  errId: 'err-ceremony',  key: 'ceremony_sequence' },
+    { id: 'f-vendors',   errId: 'err-vendors',   key: 'vendor_categories' },
+    { id: 'f-budget',    errId: 'err-budget',    key: 'budget_allocation' },
+  ];
+
+  let hasError = false;
+  const updates = {};
+
+  for (const f of jsonFields) {
+    const errEl = document.getElementById(f.errId);
+    try {
+      updates[f.key] = JSON.parse(document.getElementById(f.id).value);
+      errEl.classList.remove('visible');
+    } catch {
+      errEl.classList.add('visible');
+      hasError = true;
+    }
+  }
+  if (hasError) return toast('Fix JSON errors before saving', 'error');
+
+  updates.avg_budget_low    = parseFloat(document.getElementById('f-budget-low').value) || null;
+  updates.avg_budget_high   = parseFloat(document.getElementById('f-budget-high').value) || null;
+  updates.budget_currency   = document.getElementById('f-currency').value || 'USD';
+  updates.typical_event_count = parseInt(document.getElementById('f-event-count').value) || null;
+  updates.cultural_notes    = document.getElementById('f-cultural-notes').value;
+  updates.sources           = document.getElementById('f-sources').value;
+  updates.review_notes      = document.getElementById('f-review-notes').value;
+
+  try {
+    currentVersion = await api(`/versions/${currentVersion.id}`, 'PATCH', updates);
+    toast('Changes saved', 'success');
+    allVersions = await api(`/traditions/${currentTradition.id}/versions`);
+    renderMain();
+  } catch (e) {
+    toast('Save failed: ' + e.message, 'error');
+  }
+}
+
+async function submitForReview() {
+  try {
+    currentVersion = await api(`/versions/${currentVersion.id}/submit`, 'POST');
+    toast('Submitted for review');
+    allVersions = await api(`/traditions/${currentTradition.id}/versions`);
+    await loadTraditions();
+    renderMain();
+  } catch (e) {
+    toast('Failed: ' + e.message, 'error');
+  }
+}
+
+async function approveVersion() {
+  const notes = prompt('Approval notes (optional):') || 'Approved via advisor review interface.';
+  try {
+    currentVersion = await api(`/versions/${currentVersion.id}/approve`, 'POST', { notes });
+    toast('Version approved — now live ✅', 'success');
+    allVersions = await api(`/traditions/${currentTradition.id}/versions`);
+    await loadTraditions();
+    renderMain();
+  } catch (e) {
+    toast('Approval failed: ' + e.message, 'error');
+  }
+}
+
+async function rejectVersion() {
+  const notes = prompt('Rejection reason (required):');
+  if (!notes) return;
+  try {
+    currentVersion = await api(`/versions/${currentVersion.id}/reject`, 'POST', { notes });
+    toast('Version returned to draft');
+    allVersions = await api(`/traditions/${currentTradition.id}/versions`);
+    renderMain();
+  } catch (e) {
+    toast('Failed: ' + e.message, 'error');
+  }
+}
+
+// ============================================================================
+// TOAST
+// ============================================================================
+function toast(msg, type = 'default') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `toast visible${type === 'error' ? ' error' : type === 'success' ? ' success' : ''}`;
+  setTimeout(() => el.className = 'toast', 3000);
+}
+</script>
+</body>
+</html>
