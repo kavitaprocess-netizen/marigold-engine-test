@@ -333,7 +333,31 @@ app.post('/api/advisor/versions/:id/reject', async (req, res) => {
   }
 });
 
-// GET /api/advisor/traditions/:id/audit
+// POST /api/advisor/versions/:id/cancel
+// Delete a draft version (used when advisor clicks "Cancel editing")
+app.post('/api/advisor/versions/:id/cancel', async (req, res) => {
+  try {
+    const { data: existing } = await supabase
+      .from('tradition_versions')
+      .select('status')
+      .eq('id', req.params.id)
+      .single();
+
+    if (existing?.status !== 'draft') {
+      return res.status(403).json({ error: 'Can only cancel draft versions' });
+    }
+
+    const { error } = await supabase
+      .from('tradition_versions')
+      .delete()
+      .eq('id', req.params.id);
+
+    if (error) throw error;
+    res.json({ deleted: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
 // Audit trail for a tradition
 app.get('/api/advisor/traditions/:id/audit', async (req, res) => {
   try {
