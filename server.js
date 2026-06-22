@@ -9,8 +9,10 @@ const { calculateBudget } = require('./engine/budgetCalculator');
 const { mergeTraditions } = require('./engine/interfaithMerge');
 const UNIVERSAL_CHECKLIST = require('./engine/universalChecklist.json');
 
+const path = require('path');
 const app = express();
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'advisor-review')));
 
 // Supabase client — server-side only, uses the secret key
 const supabase = createClient(
@@ -141,7 +143,7 @@ app.get('/api/health', (req, res) => {
 
 // Serve the advisor review UI
 app.get('/advisor', (req, res) => {
-  res.sendFile(__dirname + '/advisor-review/index.html');
+  res.sendFile(path.resolve(__dirname, 'advisor-review', 'index.html'));
 });
 
 // GET /api/advisor/traditions
