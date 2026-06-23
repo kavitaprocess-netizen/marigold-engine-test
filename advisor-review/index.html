@@ -102,6 +102,13 @@
   .audit-meta { font-size: 11px; color: var(--muted); }
   .audit-notes { font-size: 12px; margin-top: 2px; font-style: italic; }
   .toast { position: fixed; bottom: 24px; right: 24px; background: var(--deep); color: white; padding: 12px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 500; z-index: 1000; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 200; display: flex; align-items: center; justify-content: center; }
+  .modal-box { background: white; border-radius: var(--radius); padding: 28px; width: 420px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); }
+  .modal-title { font-size: 15px; font-weight: 700; color: var(--deep); margin-bottom: 8px; }
+  .modal-body { font-size: 13px; color: var(--muted); margin-bottom: 20px; line-height: 1.6; }
+  .modal-input { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; font-family: var(--font); margin-bottom: 16px; }
+  .modal-input:focus { outline: none; border-color: var(--gold); }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
   .toast.visible { opacity: 1; }
   .toast.error { background: var(--red); }
   .toast.success { background: var(--green); }
@@ -127,6 +134,14 @@
   </main>
 </div>
 <div class="toast" id="toast"></div>
+<div id="custom-modal" class="modal-backdrop" style="display:none">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-body" id="modal-body"></div>
+    <input type="text" class="modal-input" id="modal-input" style="display:none" placeholder="">
+    <div class="modal-actions" id="modal-actions"></div>
+  </div>
+</div>
 <script>
 const API='/api/advisor';
 let traditions=[],currentTradition=null,currentVersion=null,allVersions=[],activeTab='content',workingData={};
@@ -368,7 +383,46 @@ function renderBudgetItems(canEdit){
     </div>`).join('');
 }
 function toggleItem(id){const el=document.getElementById(id);if(el)el.classList.toggle('open');}
-function removeItem(field,index){if(!confirm('Remove this item?'))return;workingData[field].splice(index,1);refreshLists();}
+// ============================================================================
+// CUSTOM MODAL — replaces browser confirm() and prompt()
+// ============================================================================
+let _modalResolve = null;
+
+function showModal({ title, body, input = false, inputPlaceholder = '', confirmLabel = 'OK', confirmClass = 'btn-primary', cancelLabel = 'Cancel' }) {
+  return new Promise(resolve => {
+    _modalResolve = resolve;
+    document.getElementById('modal-title').textContent = title;
+    document.getElementById('modal-body').textContent = body;
+    const inp = document.getElementById('modal-input');
+    if (input) { inp.style.display = 'block'; inp.placeholder = inputPlaceholder; inp.value = ''; setTimeout(() => inp.focus(), 50); }
+    else { inp.style.display = 'none'; }
+    document.getElementById('modal-actions').innerHTML = `
+      <button class="btn btn-outline" onclick="closeModal(null)">${cancelLabel}</button>
+      <button class="btn ${confirmClass}" onclick="closeModal(${input ? "'input'" : 'true'})">${confirmLabel}</button>`;
+    document.getElementById('custom-modal').style.display = 'flex';
+  });
+}
+
+function closeModal(result) {
+  const val = result === "'input'" ? document.getElementById('modal-input').value.trim() : result;
+  document.getElementById('custom-modal').style.display = 'none';
+  if (_modalResolve) { _modalResolve(val); _modalResolve = null; }
+}
+
+// Allow Enter key to confirm in input modals
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('custom-modal').style.display !== 'none') {
+    const inp = document.getElementById('modal-input');
+    if (inp.style.display !== 'none') closeModal("'input'");
+    else closeModal(true);
+  }
+  if (e.key === 'Escape' && document.getElementById('custom-modal').style.display !== 'none') closeModal(null);
+});
+
+function removeItem(field,index){
+  showModal({ title:'Remove item', body:'Are you sure you want to remove this item?', confirmLabel:'Remove', confirmClass:'btn-danger' })
+  .then(ok => { if(ok){ workingData[field].splice(index,1); refreshLists(); } });
+}
 function addChecklistItem(){workingData.checklist_template.push({milestone:'',label:'',assignee:'',notes:'',type:'Required'});refreshLists();openLast('c',workingData.checklist_template.length-1);}
 function addCeremonyItem(){workingData.ceremony_sequence.push({order:workingData.ceremony_sequence.length+1,name:'',timing:'',duration:'',typical_size:'',location_type:'',notes:''});refreshLists();openLast('e',workingData.ceremony_sequence.length-1);}
 function addVendorItem(){workingData.vendor_categories.push({category:'',tag:'',priority:'Required',typical_spend_pct_low:0,typical_spend_pct_high:0,notes:''});refreshLists();openLast('v',workingData.vendor_categories.length-1);}
@@ -415,7 +469,8 @@ async function createEditingCopy(){
   }catch(e){toast('Failed: '+e.message,'error');}
 }
 async function cancelEditing(){
-  if(!confirm('Discard this editing copy? All unsaved changes will be lost.'))return;
+  const ok = await showModal({ title:'Discard editing copy?', body:'All unsaved changes will be lost. The editing copy will be deleted and the live approved version will be restored.', confirmLabel:'Discard', confirmClass:'btn-danger' });
+  if(!ok)return;
   try{
     await api('/versions/'+currentVersion.id+'/cancel','POST');
   }catch(e){}
@@ -450,12 +505,15 @@ async function submitForReview(){
   catch(e){toast('Failed: '+e.message,'error');}
 }
 async function approveVersion(){
-  const notes=prompt('Approval notes (optional):')||'Approved via advisor review interface.';
-  try{currentVersion=await api('/versions/'+currentVersion.id+'/approve','POST',{notes});toast('Version approved — now live','success');allVersions=await api('/traditions/'+currentTradition.id+'/versions');await loadTraditions();renderMain();}
+  const notes = await showModal({ title:'Approve this version?', body:'This version will become live immediately. Add any notes for the audit trail (optional).', input:true, inputPlaceholder:'Approval notes (optional)', confirmLabel:'Approve', confirmClass:'btn-success' });
+  if(notes === null)return;
+  const finalNotes = notes || 'Approved via advisor review interface.';
+  try{currentVersion=await api('/versions/'+currentVersion.id+'/approve','POST',{notes:finalNotes});toast('Version approved — now live','success');allVersions=await api('/traditions/'+currentTradition.id+'/versions');await loadTraditions();renderMain();}
   catch(e){toast('Failed: '+e.message,'error');}
 }
 async function rejectVersion(){
-  const notes=prompt('Rejection reason (required):');if(!notes)return;
+  const notes = await showModal({ title:'Return to draft?', body:'Please explain what needs to be changed. This note will appear in the audit trail.', input:true, inputPlaceholder:'Reason for rejection (required)', confirmLabel:'Return to draft', confirmClass:'btn-warning' });
+  if(!notes)return;
   try{currentVersion=await api('/versions/'+currentVersion.id+'/reject','POST',{notes});toast('Returned to draft');allVersions=await api('/traditions/'+currentTradition.id+'/versions');renderMain();}
   catch(e){toast('Failed: '+e.message,'error');}
 }
