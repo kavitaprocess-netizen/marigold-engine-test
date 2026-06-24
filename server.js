@@ -1375,7 +1375,7 @@ const LANDING_HTML = `<!DOCTYPE html>
 </svg>
 
 <h1>Marigold Weddings</h1>
-<p class="tagline">Culturally intelligent wedding planning for interfaith and multicultural couples.</p>
+<p class="tagline">Your wedding, your traditions. Planning that actually gets it.</p>
 
 <div class="cards">
   <a href="/questionnaire" class="card primary">
