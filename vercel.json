@@ -5,7 +5,9 @@
   ],
   "routes": [
     { "src": "/", "dest": "/server.js" },
+    { "src": "/questionnaire", "dest": "/server.js" },
     { "src": "/advisor", "dest": "/server.js" },
+    { "src": "/brand.css", "dest": "/server.js" },
     { "src": "/api/(.*)", "dest": "/server.js" }
   ]
 }
