@@ -1240,9 +1240,169 @@ const supabase = createClient(
   process.env.SUPABASE_SECRET_KEY
 );
 
-// Root redirect
+// Landing page — links to questionnaire (couples) and advisor review (advisors)
+const LANDING_HTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marigold Weddings</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --gold: #C8A820;
+    --gold-light: #F7D44C;
+    --gold-pale: #FDFAF0;
+    --brown-deep: #3C3010;
+    --brown-mid: #6B5A20;
+    --brown-mute: #9A8A6A;
+    --brown-hint: #D4C8A0;
+  }
+  html, body {
+    min-height: 100vh;
+    background: var(--gold-pale);
+    font-family: Georgia, serif;
+    color: var(--brown-deep);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+  }
+  .flower {
+    margin-bottom: 32px;
+  }
+  h1 {
+    font-size: 36px;
+    font-weight: normal;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    color: var(--brown-deep);
+  }
+  .tagline {
+    font-size: 15px;
+    color: var(--brown-mute);
+    font-family: -apple-system, sans-serif;
+    margin-bottom: 64px;
+    text-align: center;
+    line-height: 1.6;
+    max-width: 380px;
+  }
+  .cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 560px;
+    width: 100%;
+  }
+  @media (max-width: 480px) { .cards { grid-template-columns: 1fr; } }
+  .card {
+    background: white;
+    border: 1.5px solid var(--brown-hint);
+    border-radius: 14px;
+    padding: 28px 24px;
+    text-decoration: none;
+    color: var(--brown-deep);
+    transition: border-color 0.2s, transform 0.15s;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .card:hover {
+    border-color: var(--gold);
+    transform: translateY(-2px);
+  }
+  .card-eyebrow {
+    font-size: 10px;
+    font-family: -apple-system, sans-serif;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .card-title {
+    font-size: 18px;
+    font-weight: normal;
+    color: var(--brown-deep);
+  }
+  .card-desc {
+    font-size: 13px;
+    color: var(--brown-mute);
+    font-family: -apple-system, sans-serif;
+    line-height: 1.5;
+    margin-top: 4px;
+  }
+  .card-cta {
+    font-size: 13px;
+    color: var(--gold);
+    font-family: -apple-system, sans-serif;
+    margin-top: 12px;
+  }
+  .card.primary {
+    border-color: var(--gold);
+    background: #FFFAEA;
+  }
+  .footer {
+    margin-top: 64px;
+    font-size: 12px;
+    color: var(--brown-hint);
+    font-family: -apple-system, sans-serif;
+    text-align: center;
+    line-height: 1.8;
+  }
+  .status-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: #27AE60;
+    border-radius: 50%;
+    margin-right: 5px;
+    vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+
+<svg class="flower" width="52" height="52" viewBox="0 0 32 32" fill="none">
+  <circle cx="16" cy="16" r="4" fill="#C8A820"/>
+  <ellipse cx="16" cy="8" rx="3" ry="5" fill="#F7D44C" opacity="0.9"/>
+  <ellipse cx="16" cy="24" rx="3" ry="5" fill="#F7D44C" opacity="0.9"/>
+  <ellipse cx="8" cy="16" rx="5" ry="3" fill="#F7D44C" opacity="0.9"/>
+  <ellipse cx="24" cy="16" rx="5" ry="3" fill="#F7D44C" opacity="0.9"/>
+  <ellipse cx="10.3" cy="10.3" rx="3" ry="5" fill="#E8C020" opacity="0.75" transform="rotate(-45 10.3 10.3)"/>
+  <ellipse cx="21.7" cy="21.7" rx="3" ry="5" fill="#E8C020" opacity="0.75" transform="rotate(-45 21.7 21.7)"/>
+  <ellipse cx="21.7" cy="10.3" rx="3" ry="5" fill="#E8C020" opacity="0.75" transform="rotate(45 21.7 10.3)"/>
+  <ellipse cx="10.3" cy="21.7" rx="3" ry="5" fill="#E8C020" opacity="0.75" transform="rotate(45 10.3 21.7)"/>
+</svg>
+
+<h1>Marigold Weddings</h1>
+<p class="tagline">Culturally intelligent wedding planning for interfaith and multicultural couples.</p>
+
+<div class="cards">
+  <a href="/questionnaire" class="card primary">
+    <div class="card-eyebrow">For couples</div>
+    <div class="card-title">Build your wedding plan</div>
+    <div class="card-desc">Answer 6 questions. Get a personalised plan built from our cultural taxonomy — checklist, ceremony timeline, and budget.</div>
+    <div class="card-cta">Start now →</div>
+  </a>
+  <a href="/advisor" class="card">
+    <div class="card-eyebrow">For advisors</div>
+    <div class="card-title">Review cultural content</div>
+    <div class="card-desc">Review, edit, and approve taxonomy entries across all traditions. Changes go live immediately in the engine.</div>
+    <div class="card-cta">Open advisor review →</div>
+  </a>
+</div>
+
+<div class="footer">
+  <span class="status-dot"></span>Engine live · 35 traditions · Supabase connected<br>
+  Confidential — internal build · June 2026
+</div>
+
+</body>
+</html>`;
+
 app.get('/', (req, res) => {
-  res.redirect('/questionnaire');
+  res.setHeader('Content-Type', 'text/html');
+  res.send(LANDING_HTML);
 });
 
 // Questionnaire — the couple-facing onboarding UI
