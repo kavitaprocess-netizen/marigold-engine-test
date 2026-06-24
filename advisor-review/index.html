@@ -62,6 +62,36 @@
   .section { margin-bottom: 28px; }
   .section-title { font-size: 12px; font-weight: 700; color: var(--deep); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
   .section-sub { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+  /* Diff / tracked changes */
+  .diff-wrap { font-size: 13px; line-height: 1.8; }
+  .diff-wrap p { margin-bottom: 10px; }
+  .diff-wrap strong { font-weight: 700; }
+  .diff-wrap ol { margin: 6px 0 12px 20px; }
+  .diff-wrap li { margin-bottom: 6px; }
+  ins.diff-add { background: #D4EDDA; color: #155724; text-decoration: none; border-radius: 2px; padding: 0 2px; }
+  del.diff-del { background: #F8D7DA; color: #721C24; text-decoration: line-through; border-radius: 2px; padding: 0 2px; }
+  .diff-legend { display: flex; gap: 16px; margin-bottom: 12px; font-size: 11px; font-family: -apple-system, sans-serif; }
+  .diff-legend span { display: flex; align-items: center; gap: 4px; }
+  .diff-dot-add { width: 10px; height: 10px; border-radius: 2px; background: #D4EDDA; border: 1px solid #28a745; }
+  .diff-dot-del { width: 10px; height: 10px; border-radius: 2px; background: #F8D7DA; border: 1px solid #dc3545; }
+  .diff-no-change { color: var(--muted); font-size: 12px; font-style: italic; padding: 12px 0; }
+  /* Rich text editor */
+  .rich-editor-wrap { border: 1.5px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .rich-editor-toolbar { display: flex; gap: 4px; padding: 6px 8px; background: #FDFAF0; border-bottom: 1px solid var(--border); }
+  .rich-editor-toolbar button { padding: 3px 8px; border: 1px solid var(--border); border-radius: 4px; background: white; font-size: 12px; cursor: pointer; color: var(--deep); font-family: Georgia, serif; }
+  .rich-editor-toolbar button:hover { background: #F7D44C; border-color: #C8A820; }
+  .rich-editor-toolbar button.active { background: #F7D44C; border-color: #C8A820; font-weight: 700; }
+  .rich-editor-content { min-height: 160px; padding: 12px; font-size: 13px; line-height: 1.7; color: var(--deep); outline: none; background: white; }
+  .rich-editor-content:focus { background: #FFFDF8; }
+  .rich-editor-content strong { font-weight: 700; }
+  .rich-editor-content ol { margin: 6px 0 12px 20px; }
+  .rich-editor-content li { margin-bottom: 6px; }
+  /* Rendered view */
+  .cultural-notes-rendered { font-size: 13px; line-height: 1.7; color: #3C3010; }
+  .cultural-notes-rendered p { margin-bottom: 12px; }
+  .cultural-notes-rendered strong { font-weight: 700; color: #2C2408; }
+  .cultural-notes-rendered ol { margin: 8px 0 16px 20px; }
+  .cultural-notes-rendered li { margin-bottom: 10px; line-height: 1.6; }
   .field-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
   .field { margin-bottom: 12px; }
   .field label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 5px; }
@@ -253,8 +283,313 @@ function renderContentTab(v,canEdit){
     </div>
     <div class="section">
       <div class="section-title">Cultural notes</div>
-      <div class="section-sub">Key facts, sensitivities, and guidance for vendors and planners. Write in plain English.</div>
-      <div class="field"><textarea rows="6" ${dis} oninput="workingData.cultural_notes=this.value">${workingData.cultural_notes}</textarea></div>
+      <div class="section-sub">Key vendor and planner briefing notes. Use <strong>bold</strong> for headings and numbered lists for the "three things" format.</div>
+      <div class="field">
+        ${canEdit ? `
+          <div class="rich-editor-wrap">
+            <div class="rich-editor-toolbar">
+              <button onclick="execCmd('bold')" title="Bold"><b>B</b></button>
+              <button onclick="execCmd('insertOrderedList')" title="Numbered list">1. List</button>
+              <button onclick="execCmd('insertUnorderedList')" title="Bullet list">• List</button>
+              <button onclick="execCmd('removeFormat')" title="Clear formatting">Clear</button>
+            </div>
+            <div class="rich-editor-content" id="cultural-notes-editor" contenteditable="true"
+              oninput="syncCulturalNotes()"
+              onpaste="handlePaste(event)">${htmlToEditor(workingData.cultural_notes)}</div>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:6px">Changes will appear highlighted in the version history diff view.</div>
+        ` : `<div class="cultural-notes-rendered">${renderCulturalNotes(workingData.cultural_notes)}</div>`}
+      </div>tml lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marigold — Cultural Advisor Review</title>
+<style>
+  :root {
+    --bg: #FDFAF0; --surface: #FFFFFF; --border: #E0D4B0; --text: #2A2010;
+    --muted: #9A8A6A; --gold: #C8A820; --gold-dark: #9A7E10; --gold-light: #FDF8E8;
+    --deep: #3C3010; --warm: #F5F0E8; --red: #C0392B; --red-light: #FDECEA;
+    --green: #1E7C4E; --green-light: #E8F5EE; --orange: #D4550A; --orange-light: #FDF0E8;
+    --radius: 6px; --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+  .layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+  .sidebar { background: var(--surface); border-right: 1px solid var(--border); position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .main { padding: 32px; max-width: 860px; }
+  .sidebar-header { padding: 18px 20px 14px; border-bottom: 1px solid var(--border); }
+  .sidebar-header h1 { font-size: 14px; font-weight: 700; color: var(--deep); }
+  .sidebar-header p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .tradition-item { display: flex; align-items: center; justify-content: space-between; padding: 9px 20px; cursor: pointer; border-left: 3px solid transparent; }
+  .tradition-item:hover { background: var(--warm); }
+  .tradition-item.active { background: var(--gold-light); border-left-color: var(--gold); }
+  .t-name { font-size: 13px; font-weight: 500; }
+  .t-status { font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 10px; }
+  .s-approved { background: var(--green-light); color: var(--green); }
+  .s-draft { background: var(--gold-light); color: var(--gold-dark); }
+  .s-in_review { background: var(--orange-light); color: var(--orange); }
+  .action-bar { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; align-items: flex-start; }
+  .action-group { display: flex; flex-direction: column; gap: 3px; }
+  .action-hint { font-size: 11px; color: var(--muted); }
+  .btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 14px; border-radius: var(--radius); font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid transparent; white-space: nowrap; }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-primary { background: var(--deep); color: white; }
+  .btn-gold { background: var(--gold); color: var(--deep); border-color: var(--gold); font-weight: 600; }
+  .btn-gold:hover:not(:disabled) { background: var(--gold-dark); color: white; }
+  .btn-success { background: var(--green); color: white; }
+  .btn-warning { background: var(--orange); color: white; }
+  .btn-outline { background: white; color: var(--text); border-color: var(--border); }
+  .btn-outline:hover:not(:disabled) { background: var(--warm); }
+  .btn-danger { background: var(--red); color: white; }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  .page-title { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 4px; color: var(--deep); }
+  .page-meta { font-size: 13px; color: var(--muted); margin-bottom: 24px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .badge { display: inline-flex; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+  .badge-approved { background: var(--green-light); color: var(--green); }
+  .badge-draft { background: var(--gold-light); color: var(--gold-dark); }
+  .badge-in_review { background: var(--orange-light); color: var(--orange); }
+  .badge-retired { background: var(--border); color: var(--muted); }
+  .banner { padding: 12px 16px; border-radius: var(--radius); margin-bottom: 20px; display: flex; align-items: flex-start; gap: 10px; border-left: 4px solid; }
+  .banner-editing { background: var(--gold-light); border-color: var(--gold); }
+  .banner-locked { background: var(--warm); border-color: var(--border); }
+  .banner-title { font-size: 13px; font-weight: 600; }
+  .banner-editing .banner-title { color: var(--gold-dark); }
+  .banner-locked .banner-title { color: var(--muted); }
+  .banner-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+  .tab { padding: 8px 16px; font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; color: var(--muted); }
+  .tab.active { color: var(--deep); border-bottom-color: var(--gold); }
+  .section { margin-bottom: 28px; }
+  .section-title { font-size: 12px; font-weight: 700; color: var(--deep); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .section-sub { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+  /* Diff / tracked changes */
+  .diff-wrap { font-size: 13px; line-height: 1.8; }
+  .diff-wrap p { margin-bottom: 10px; }
+  .diff-wrap strong { font-weight: 700; }
+  .diff-wrap ol { margin: 6px 0 12px 20px; }
+  .diff-wrap li { margin-bottom: 6px; }
+  ins.diff-add { background: #D4EDDA; color: #155724; text-decoration: none; border-radius: 2px; padding: 0 2px; }
+  del.diff-del { background: #F8D7DA; color: #721C24; text-decoration: line-through; border-radius: 2px; padding: 0 2px; }
+  .diff-legend { display: flex; gap: 16px; margin-bottom: 12px; font-size: 11px; font-family: -apple-system, sans-serif; }
+  .diff-legend span { display: flex; align-items: center; gap: 4px; }
+  .diff-dot-add { width: 10px; height: 10px; border-radius: 2px; background: #D4EDDA; border: 1px solid #28a745; }
+  .diff-dot-del { width: 10px; height: 10px; border-radius: 2px; background: #F8D7DA; border: 1px solid #dc3545; }
+  .diff-no-change { color: var(--muted); font-size: 12px; font-style: italic; padding: 12px 0; }
+  /* Rich text editor */
+  .rich-editor-wrap { border: 1.5px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .rich-editor-toolbar { display: flex; gap: 4px; padding: 6px 8px; background: #FDFAF0; border-bottom: 1px solid var(--border); }
+  .rich-editor-toolbar button { padding: 3px 8px; border: 1px solid var(--border); border-radius: 4px; background: white; font-size: 12px; cursor: pointer; color: var(--deep); font-family: Georgia, serif; }
+  .rich-editor-toolbar button:hover { background: #F7D44C; border-color: #C8A820; }
+  .rich-editor-toolbar button.active { background: #F7D44C; border-color: #C8A820; font-weight: 700; }
+  .rich-editor-content { min-height: 160px; padding: 12px; font-size: 13px; line-height: 1.7; color: var(--deep); outline: none; background: white; }
+  .rich-editor-content:focus { background: #FFFDF8; }
+  .rich-editor-content strong { font-weight: 700; }
+  .rich-editor-content ol { margin: 6px 0 12px 20px; }
+  .rich-editor-content li { margin-bottom: 6px; }
+  /* Rendered view */
+  .cultural-notes-rendered { font-size: 13px; line-height: 1.7; color: #3C3010; }
+  .cultural-notes-rendered p { margin-bottom: 12px; }
+  .cultural-notes-rendered strong { font-weight: 700; color: #2C2408; }
+  .cultural-notes-rendered ol { margin: 8px 0 16px 20px; }
+  .cultural-notes-rendered li { margin-bottom: 10px; line-height: 1.6; }
+  .field-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  .field { margin-bottom: 12px; }
+  .field label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 5px; }
+  .field input, .field textarea, .field select { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius); font-family: var(--font); font-size: 13px; background: white; color: var(--text); }
+  .field input:focus, .field textarea:focus { outline: none; border-color: var(--gold); }
+  .field textarea { resize: vertical; }
+  .item-list { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 8px; }
+  .item-row { border-bottom: 1px solid var(--border); }
+  .item-row:last-child { border-bottom: none; }
+  .item-row-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; cursor: pointer; background: var(--surface); }
+  .item-row-header:hover { background: var(--warm); }
+  .item-row-label { font-size: 13px; font-weight: 500; flex: 1; padding-right: 8px; }
+  .item-row-meta { font-size: 11px; color: var(--muted); margin-right: 8px; white-space: nowrap; }
+  .item-row-body { padding: 14px; background: var(--bg); border-top: 1px solid var(--border); display: none; }
+  .item-row-body.open { display: block; }
+  .item-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .item-fields.three { grid-template-columns: 1fr 1fr 1fr; }
+  .item-fields .full { grid-column: 1 / -1; }
+  .item-field label { display: block; font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 4px; }
+  .item-field input, .item-field textarea, .item-field select { width: 100%; padding: 6px 8px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 12px; font-family: var(--font); background: white; color: var(--text); }
+  .item-field input:focus, .item-field textarea:focus { outline: none; border-color: var(--gold); }
+  .item-field textarea { min-height: 60px; resize: vertical; }
+  .item-actions { display: flex; justify-content: flex-end; gap: 6px; margin-top: 10px; }
+  .add-item-btn { width: 100%; padding: 10px; text-align: center; font-size: 13px; color: var(--gold-dark); font-weight: 500; cursor: pointer; background: var(--gold-light); border: 1px dashed var(--gold); border-radius: var(--radius); margin-top: 4px; }
+  .add-item-btn:hover { background: var(--warm); }
+  .save-bar { position: sticky; bottom: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 14px 0; margin-top: 32px; display: flex; gap: 8px; align-items: center; }
+  .save-bar-hint { font-size: 12px; color: var(--muted); margin-left: auto; }
+  .version-item { padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+  .version-item.current { border-color: var(--gold); background: var(--gold-light); }
+  .audit-item { padding: 12px 0; border-bottom: 1px solid var(--border); display: flex; gap: 12px; }
+  .audit-item:last-child { border-bottom: none; }
+  .audit-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); margin-top: 5px; flex-shrink: 0; }
+  .audit-dot.approved { background: var(--green); }
+  .audit-dot.created { background: var(--gold); }
+  .audit-dot.submitted_for_review { background: var(--orange); }
+  .audit-dot.rejected { background: var(--red); }
+  .audit-action { font-size: 12px; font-weight: 600; }
+  .audit-meta { font-size: 11px; color: var(--muted); }
+  .audit-notes { font-size: 12px; margin-top: 2px; font-style: italic; }
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--deep); color: white; padding: 12px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 500; z-index: 1000; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 200; display: flex; align-items: center; justify-content: center; }
+  .modal-box { background: white; border-radius: var(--radius); padding: 28px; width: 420px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); }
+  .modal-title { font-size: 15px; font-weight: 700; color: var(--deep); margin-bottom: 8px; }
+  .modal-body { font-size: 13px; color: var(--muted); margin-bottom: 20px; line-height: 1.6; }
+  .modal-input { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; font-family: var(--font); margin-bottom: 16px; }
+  .modal-input:focus { outline: none; border-color: var(--gold); }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+  .toast.visible { opacity: 1; }
+  .toast.error { background: var(--red); }
+  .toast.success { background: var(--green); }
+  .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.6s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h1>Marigold · Advisor Review</h1>
+      <p id="sidebar-count">Loading…</p>
+    </div>
+    <div id="tradition-list"></div>
+  </aside>
+  <main class="main" id="main-content">
+    <div class="empty">
+      <div style="font-size:32px;margin-bottom:12px">📋</div>
+      <p>Select a tradition from the sidebar to begin reviewing.</p>
+    </div>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+<div id="custom-modal" class="modal-backdrop" style="display:none">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-body" id="modal-body"></div>
+    <input type="text" class="modal-input" id="modal-input" style="display:none" placeholder="">
+    <div class="modal-actions" id="modal-actions"></div>
+  </div>
+</div>
+<script>
+const API='/api/advisor';
+let traditions=[],currentTradition=null,currentVersion=null,allVersions=[],activeTab='content',workingData={};
+window.onload=()=>loadTraditions();
+async function api(path,method='GET',body=null){
+  const opts={method,headers:{'Content-Type':'application/json'}};
+  if(body)opts.body=JSON.stringify(body);
+  const res=await fetch(API+path,opts);
+  if(!res.ok){const err=await res.json().catch(()=>({error:res.statusText}));throw new Error(err.error||res.statusText);}
+  return res.json();
+}
+async function loadTraditions(){
+  try{traditions=await api('/traditions');renderSidebar();}
+  catch(e){toast('Failed to load: '+e.message,'error');}
+}
+function renderSidebar(){
+  document.getElementById('sidebar-count').textContent=traditions.length+' traditions';
+  const sorted=[...traditions].sort((a,b)=>a.name.localeCompare(b.name));
+  document.getElementById('tradition-list').innerHTML=sorted.map(t=>{
+    const versions=t.tradition_versions||[];
+    const current=versions.find(v=>v.is_current);
+    const latest=[...versions].sort((a,b)=>b.version_number-a.version_number)[0];
+    const sv=current||latest;
+    const status=sv?.status||'no versions';
+    return `<div class="tradition-item ${currentTradition?.id===t.id?'active':''}" onclick="selectTradition('${t.id}')">
+      <span class="t-name">${t.name}</span>
+      <span class="t-status s-${status.replace('_','-')}">${status.replace('_',' ')}</span>
+    </div>`;
+  }).join('');
+}
+async function selectTradition(id){
+  currentTradition=traditions.find(t=>t.id===id);
+  renderSidebar();
+  document.getElementById('main-content').innerHTML='<div class="empty"><div class="spinner"></div></div>';
+  try{
+    allVersions=await api('/traditions/'+id+'/versions');
+    // Default to the approved current version — not just the most recent,
+    // which could be a draft from a previous session
+    const approvedCurrent = allVersions.find(v => v.is_current && v.status === 'approved');
+    currentVersion = approvedCurrent || allVersions[0] || null;
+    initWorkingData();activeTab='content';renderMain();
+  }catch(e){toast('Failed to load: '+e.message,'error');}
+}
+function initWorkingData(){
+  if(!currentVersion){workingData={};return;}
+  workingData={
+    avg_budget_low:currentVersion.avg_budget_low||'',
+    avg_budget_high:currentVersion.avg_budget_high||'',
+    budget_currency:currentVersion.budget_currency||'USD',
+    typical_event_count:currentVersion.typical_event_count||'',
+    cultural_notes:currentVersion.cultural_notes||'',
+    sources:currentVersion.sources||'',
+    review_notes:currentVersion.review_notes||'',
+    checklist_template:JSON.parse(JSON.stringify(currentVersion.checklist_template||[])),
+    ceremony_sequence:JSON.parse(JSON.stringify(currentVersion.ceremony_sequence||[])),
+    vendor_categories:JSON.parse(JSON.stringify(currentVersion.vendor_categories||[])),
+    budget_allocation:JSON.parse(JSON.stringify(currentVersion.budget_allocation||[])),
+  };
+}
+function renderMain(){
+  const v=currentVersion;
+  const canSubmit=v?.status==='draft';
+  const canApprove=v?.status==='in_review';
+  const canEdit=v?.status==='draft'||v?.status==='in_review';
+  document.getElementById('main-content').innerHTML=`
+    <div class="page-title">${currentTradition.name}</div>
+    <div class="page-meta">
+      <span>${currentTradition.slug}</span><span>·</span><span>${currentTradition.region||'—'}</span><span>·</span>
+      ${v?`<span class="badge badge-${v.status}">${v.status.replace('_',' ')}</span><span style="color:var(--muted)">v${v.version_number}</span>`:'<span class="badge badge-draft">no content yet</span>'}
+    </div>
+    <div class="action-bar">
+      <div class="action-group">
+        <button class="btn btn-gold" onclick="createEditingCopy()">✏️ Create editing copy</button>
+        <span class="action-hint">Makes a copy to edit — live content stays unchanged</span>
+      </div>
+      ${canEdit?`<button class="btn btn-outline" onclick="cancelEditing()">✕ Cancel editing</button>`:''}
+      <button class="btn btn-warning" onclick="submitForReview()" ${canSubmit?'':'disabled'}>📤 Submit for review</button>
+      <button class="btn btn-success" onclick="approveVersion()" ${canApprove?'':'disabled'}>✅ Approve</button>
+      <button class="btn btn-outline" onclick="rejectVersion()" ${canApprove?'':'disabled'}>❌ Reject</button>
+    </div>
+    <div class="tabs">
+      <div class="tab ${activeTab==='content'?'active':''}" onclick="switchTab('content')">Content</div>
+      <div class="tab ${activeTab==='versions'?'active':''}" onclick="switchTab('versions')">Version history</div>
+      <div class="tab ${activeTab==='audit'?'active':''}" onclick="switchTab('audit')">Audit trail</div>
+    </div>
+    <div id="tab-content">
+      ${activeTab==='content'?renderContentTab(v,canEdit):''}
+      ${activeTab==='versions'?renderVersionsTab():''}
+      ${activeTab==='audit'?'<div class="empty"><div class="spinner"></div></div>':''}
+    </div>`;
+  if(activeTab==='audit')loadAuditTrail();
+}
+function switchTab(tab){activeTab=tab;renderMain();}
+function renderContentTab(v,canEdit){
+  if(!v)return`<div class="empty"><div style="font-size:32px;margin-bottom:12px">📭</div><p>No content yet. Content is seeded by developers, then you review and approve it here.</p></div>`;
+  const dis=canEdit?'':'disabled';
+  const banner=canEdit
+    ?`<div class="banner banner-editing"><span style="font-size:18px">✏️</span><div><div class="banner-title">Editing copy — version ${v.version_number}</div><div class="banner-sub">The live approved version is untouched. Your changes only go live once you approve this copy.</div></div></div>`
+    :`<div class="banner banner-locked"><span style="font-size:18px">🔒</span><div><div class="banner-title">Live approved version (v${v.version_number}) — read only</div><div class="banner-sub">Click "Create editing copy" to make an editable copy.</div></div></div>`;
+  return banner+`
+    <div class="section">
+      <div class="section-title">Overview</div>
+      <div class="field-group">
+        <div class="field"><label>Average budget — low ($)</label><input type="number" value="${workingData.avg_budget_low}" ${dis} oninput="workingData.avg_budget_low=this.value"></div>
+        <div class="field"><label>Average budget — high ($)</label><input type="number" value="${workingData.avg_budget_high}" ${dis} oninput="workingData.avg_budget_high=this.value"></div>
+        <div class="field"><label>Currency</label><input type="text" value="${workingData.budget_currency}" ${dis} oninput="workingData.budget_currency=this.value"></div>
+        <div class="field"><label>Typical number of events</label><input type="number" value="${workingData.typical_event_count}" ${dis} oninput="workingData.typical_event_count=this.value"></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Cultural notes</div>
+      <div class="section-sub">Key vendor and planner briefing notes. Bold headings (**text**) and numbered lists are rendered when viewing.</div>
+      <div class="field">
+        ${canEdit
+          ? `<textarea rows="10" oninput="workingData.cultural_notes=this.value">${workingData.cultural_notes}</textarea>`
+          : `<div class="cultural-notes-rendered">${renderCulturalNotes(workingData.cultural_notes)}</div>`
+        }
+      </div>
     </div>
     <div class="section">
       <div class="section-title">Checklist (${workingData.checklist_template.length} items)</div>
@@ -298,6 +633,156 @@ function renderContentTab(v,canEdit){
     </div>`:''}`;
 }
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+// ── Rich text editor helpers ──
+function execCmd(cmd) {
+  document.getElementById('cultural-notes-editor')?.focus();
+  document.execCommand(cmd, false, null);
+}
+
+function handlePaste(e) {
+  e.preventDefault();
+  const text = e.clipboardData.getData('text/plain');
+  document.execCommand('insertText', false, text);
+}
+
+function syncCulturalNotes() {
+  const el = document.getElementById('cultural-notes-editor');
+  if (!el) return;
+  workingData.cultural_notes = editorToText(el);
+}
+
+// Convert stored plain text (with **bold** markers) to contenteditable HTML
+function htmlToEditor(text) {
+  if (!text) return '';
+  return text
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/((?:^|\n)\d+\. .+)+/gm, match => {
+      const items = match.trim().split('\n').map(l => '<li>' + l.replace(/^\d+\. /, '') + '</li>').join('');
+      return '<ol>' + items + '</ol>';
+    })
+    .split('\n\n').map(p => {
+      p = p.trim();
+      if (!p) return '';
+      if (p.startsWith('<ol>')) return p;
+      return '<p>' + p.replace(/\n/g, '<br>') + '</p>';
+    }).join('');
+}
+
+// Convert contenteditable HTML back to plain text with **bold** markers
+function editorToText(el) {
+  function nodeToText(node) {
+    if (node.nodeType === Node.TEXT_NODE) return node.textContent;
+    const tag = node.tagName?.toLowerCase();
+    const inner = Array.from(node.childNodes).map(nodeToText).join('');
+    if (tag === 'strong' || tag === 'b') return '**' + inner + '**';
+    if (tag === 'p' || tag === 'div') return inner + '\n\n';
+    if (tag === 'br') return '\n';
+    if (tag === 'ol' || tag === 'ul') {
+      let i = 0;
+      return Array.from(node.childNodes).filter(n=>n.tagName?.toLowerCase()==='li').map(li => {
+        i++;
+        return i + '. ' + Array.from(li.childNodes).map(nodeToText).join('').trim();
+      }).join('\n') + '\n\n';
+    }
+    if (tag === 'li') return inner;
+    return inner;
+  }
+  return Array.from(el.childNodes).map(nodeToText).join('').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+// ── Diff engine — word-level diff between two plain text strings ──
+function diffText(oldText, newText) {
+  if (!oldText && !newText) return '<div class="diff-no-change">No content in either version.</div>';
+  if (!oldText) return '<div class="diff-wrap">' + renderCulturalNotes(newText).replace(/<p>/g, '<p><ins class="diff-add">').replace(/<\/p>/g, '</ins></p>') + '</div>';
+  if (!newText) return '<div class="diff-wrap">' + renderCulturalNotes(oldText).replace(/<p>/g, '<p><del class="diff-del">').replace(/<\/p>/g, '</del></p>') + '</div>';
+  if (oldText === newText) return '<div class="diff-no-change">No changes to cultural notes in this draft.</div>';
+
+  // Word-level diff using LCS
+  const oldWords = tokenize(oldText);
+  const newWords = tokenize(newText);
+  const ops = lcs(oldWords, newWords);
+
+  let html = '';
+  let paraBuffer = '';
+
+  ops.forEach(op => {
+    const word = escHtml(op.text);
+    if (op.type === 'equal') paraBuffer += word;
+    else if (op.type === 'insert') paraBuffer += '<ins class="diff-add">' + word + '</ins>';
+    else if (op.type === 'delete') paraBuffer += '<del class="diff-del">' + word + '</del>';
+    if (op.text === '\n\n') { html += '<p>' + paraBuffer + '</p>'; paraBuffer = ''; }
+  });
+  if (paraBuffer.trim()) html += '<p>' + paraBuffer + '</p>';
+
+  // Apply bold formatting
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+
+  return '<div class="diff-wrap">' + (html || '<div class="diff-no-change">No visible changes.</div>') + '</div>';
+}
+
+function escHtml(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function tokenize(text) {
+  // Split into words + punctuation + newlines, keeping delimiters
+  return text.split(/(\s+|\*\*|[.,!?;:—–])/).filter(t => t !== undefined);
+}
+
+function lcs(a, b) {
+  // Simple LCS-based diff — produces array of {type, text} ops
+  const m = a.length, n = b.length;
+  // For performance cap at 300 tokens each
+  if (m > 300 || n > 300) {
+    // Fall back to paragraph-level diff
+    return paragraphDiff(a.join(''), b.join(''));
+  }
+  const dp = Array.from({length:m+1}, ()=>new Array(n+1).fill(0));
+  for(let i=m-1;i>=0;i--) for(let j=n-1;j>=0;j--)
+    dp[i][j] = a[i]===b[j] ? dp[i+1][j+1]+1 : Math.max(dp[i+1][j],dp[i][j+1]);
+
+  const ops = []; let i=0,j=0;
+  while(i<m||j<n){
+    if(i<m&&j<n&&a[i]===b[j]){ops.push({type:'equal',text:a[i]});i++;j++;}
+    else if(j<n&&(i>=m||dp[i][j+1]>=dp[i+1][j])){ops.push({type:'insert',text:b[j]});j++;}
+    else{ops.push({type:'delete',text:a[i]});i++;}
+  }
+  return ops;
+}
+
+function paragraphDiff(oldText, newText) {
+  const oldParts = oldText.split('\n\n');
+  const newParts = newText.split('\n\n');
+  const ops = [];
+  const maxLen = Math.max(oldParts.length, newParts.length);
+  for(let i=0;i<maxLen;i++){
+    const o = oldParts[i], n = newParts[i];
+    if(o===n) ops.push({type:'equal',text:(o||'')+'\n\n'});
+    else {
+      if(o) ops.push({type:'delete',text:o+'\n\n'});
+      if(n) ops.push({type:'insert',text:n+'\n\n'});
+    }
+  }
+  return ops;
+}
+
+function renderCulturalNotes(text) {
+  if (!text) return '<p style="color:#9A8A6A;font-style:italic">No cultural notes added yet.</p>';
+  let html = text
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/(^|\n)(\d+\. .+)/g, (m, pre, item) => pre + '<li>' + item.replace(/^\d+\. /, '') + '</li>')
+    .replace(/(<li>.*?<\/li>\n?)+/gs, match => '<ol>' + match + '</ol>')
+    .split('\n\n').map(p => {
+      p = p.trim();
+      if (!p) return '';
+      if (p.startsWith('<ol>') || p.startsWith('<li>')) return p;
+      return '<p>' + p.replace(/\n/g, '<br>') + '</p>';
+    }).join('');
+  return html;
+}
+
 function renderChecklistItems(canEdit){
   if(!workingData.checklist_template.length)return'<div style="padding:12px;color:var(--muted);font-size:13px">No items yet.</div>';
   return workingData.checklist_template.map((item,i)=>`
@@ -435,7 +920,9 @@ function refreshLists(){
 }
 function renderVersionsTab(){
   if(!allVersions.length)return'<div class="empty">No versions yet.</div>';
-  return allVersions.map(v=>`
+  const approved = allVersions.find(v=>v.is_current && v.status==='approved');
+  const draft = allVersions.find(v=>v.status==='draft'||v.status==='in_review');
+  const list = allVersions.map(v=>`
     <div class="version-item ${v.is_current?'current':''}">
       <div style="display:flex;align-items:center;gap:8px">
         <span style="font-weight:600">Version ${v.version_number}</span>
@@ -447,6 +934,24 @@ function renderVersionsTab(){
         ${v.id!==currentVersion?.id?`<button class="btn btn-outline btn-sm" onclick="loadVersion('${v.id}')">View</button>`:'<span style="font-size:12px;color:var(--muted)">viewing</span>'}
       </div>
     </div>`).join('');
+
+  const diffSection = (draft && approved && draft.id !== approved.id) ? `
+    <div style="margin-top:28px">
+      <div class="section-title" style="margin-bottom:12px">Changes in draft (v${draft.version_number}) vs approved (v${approved.version_number})</div>
+      <div class="diff-legend">
+        <span><div class="diff-dot-add"></div> Added</span>
+        <span><div class="diff-dot-del"></div> Removed</span>
+      </div>
+      <div style="margin-bottom:20px">
+        <div class="section-sub" style="margin-bottom:8px">Cultural notes</div>
+        <div class="diff-wrap">${diffText(approved.cultural_notes||'', draft.cultural_notes||'')}</div>
+      </div>
+    </div>` : (draft && !approved ? `
+    <div style="margin-top:28px;padding:12px;background:#FFF8E0;border-radius:6px;font-size:13px;color:var(--muted)">
+      This is the first version — no approved version to compare against.
+    </div>` : '');
+
+  return list + diffSection;
 }
 async function loadVersion(versionId){
   try{currentVersion=await api('/versions/'+versionId);initWorkingData();activeTab='content';renderMain();}
