@@ -930,7 +930,8 @@
 
   <!-- Q7: Ceremony selection -->
   <div class="screen" id="q7">
-    <div style="width:100%;max-width:900px;margin:0 auto;padding:0 4px">
+    <div style="height:100%;overflow-y:auto;overflow-x:hidden;padding:32px 24px 80px;box-sizing:border-box;">
+    <div style="width:100%;max-width:900px;margin:0 auto">
       <div class="ql">Your ceremony plan</div>
       <div class="qt" id="q7-title">Choose your ceremonies</div>
       <div class="qs" id="q7-sub">Select the ceremonies you want. We've made an intelligent start based on your traditions.</div>
@@ -956,10 +957,11 @@
         </div>
       </div>
     </div>
+    </div>
   </div>
 
   <!-- Q7: Ceremony selection -->
-  <div class="screen" id="q7" style="overflow-y:auto;overflow-x:hidden;align-items:flex-start;justify-content:flex-start;padding-top:32px;display:block;">
+  <div class="screen" id="q7" style="overflow:hidden;">
     <div style="width:100%;max-width:900px;margin:0 auto">
       <div class="ql">Step 7 of 8</div>
       <div class="qt" id="q7-title">Choose your ceremonies</div>
@@ -970,11 +972,13 @@
         <button class="cta" onclick="goToConfirmation()">Review my plan →</button>
       </div>
     </div>
+    </div>
   </div>
 
   <!-- Q8: Confirmation -->
-  <div class="screen" id="q8" style="overflow-y:auto;overflow-x:hidden;align-items:flex-start;justify-content:flex-start;padding-top:32px;display:block;">
-    <div style="width:100%;max-width:720px;margin:0 auto;padding-bottom:60px">
+  <div class="screen" id="q8" style="overflow:hidden;">
+    <div style="height:100%;overflow-y:auto;overflow-x:hidden;padding:32px 24px 80px;box-sizing:border-box;">
+    <div style="width:100%;max-width:720px;margin:0 auto">
       <div class="ql">Your wedding plan</div>
       <div class="qt" id="q8-title">Here's what you've chosen</div>
       <div class="qs" id="q8-sub"></div>
@@ -1836,133 +1840,126 @@ function showCeremonySelection(ceremonies) {
   planCeremonies = ceremonies;
   const n1 = S.name1 || 'Partner one';
   const n2 = S.name2 || 'Partner two';
-
-  // Determine traditions and their assignments
   const trad1 = S.traditions[0];
   const trad2 = S.traditions[1] || null;
-  // Who owns which tradition
-  const name1TradSlugs = [];
-  const name2TradSlugs = [];
-  if (trad2) {
-    // Interfaith — use Q4b assignment
-    Object.entries(S.traditionAssignment).forEach(function(e) {
-      if (e[1] === 'name1') name1TradSlugs.push(e[0]);
-      else name2TradSlugs.push(e[0]);
-    });
-    if (!name1TradSlugs.length) { name1TradSlugs.push(trad1); name2TradSlugs.push(trad2); }
-  } else {
-    // Single tradition — both assigned to same tradition
-    name1TradSlugs.push(trad1);
-    name2TradSlugs.push(trad1);
-  }
+  const n1Role = S.role1; // bride or groom
+  const n2Role = S.role2;
 
-  // Group ceremonies by tradition slug
   function getTradSlug(item) {
-    return item._sourceTradition || item.tradition || item.source || 'universal';
+    return item._sourceTradition || item.tradition || item.source || '';
   }
 
-  // Build tradition blocks
-  const tradBlocks = [];
+  // Build one block per tradition
   const allTradSlugs = trad2 ? [trad1, trad2] : [trad1];
+  ceremonySelections = {};
 
-  allTradSlugs.forEach(function(tradSlug) {
-    const tradInfo = TRADS.find(function(t){return t.slug===tradSlug;}) || {label:tradSlug};
-    const tradLabel = tradInfo.label;
+  const tradBlocks = allTradSlugs.map(function(tradSlug) {
+    const tradInfo = TRADS.find(function(t){ return t.slug === tradSlug; }) || {label: tradSlug};
 
-    // Who is name1 in this tradition?
-    const n1Role = S.role1; // bride or groom
-    const n2Role = S.role2;
-
-    // Filter ceremonies belonging to this tradition
-    const tradCeremonies = ceremonies.filter(function(item, idx) {
+    // For single tradition: all ceremonies belong to this block
+    // For interfaith: only ceremonies whose source matches this tradition
+    const tradCeremonies = ceremonies.filter(function(item) {
       const src = getTradSlug(item);
-      if (trad2) {
-        // Interfaith — match by source tradition
-        return src === tradSlug || src === 'universal';
-      }
-      return true; // Single tradition — all ceremonies
+      if (!trad2) return true; // single — all ceremonies
+      return src === tradSlug; // interfaith — only this tradition's ceremonies
     });
 
-    // Split by side field
-    const side1Items = []; // Name 1's (matches their role)
-    const side2Items = []; // Name 2's
-    const bothItems = [];
+    // Split by side field vs n1Role/n2Role
+    const side1 = []; // Name 1's ceremonies
+    const side2 = []; // Name 2's ceremonies
+    const both  = []; // Common — for both
 
-    tradCeremonies.forEach(function(item, i) {
+    tradCeremonies.forEach(function(item) {
       const globalIdx = ceremonies.indexOf(item);
       const side = item.side || 'both';
-      if (side === 'both' || side === 'universal') {
-        bothItems.push({item:item, idx:globalIdx});
+      if (side === 'both') {
+        both.push({item: item, idx: globalIdx});
       } else if (side === n1Role) {
-        side1Items.push({item:item, idx:globalIdx});
+        side1.push({item: item, idx: globalIdx});
       } else if (side === n2Role) {
-        side2Items.push({item:item, idx:globalIdx});
+        side2.push({item: item, idx: globalIdx});
       } else {
-        bothItems.push({item:item, idx:globalIdx});
+        both.push({item: item, idx: globalIdx}); // fallback
       }
     });
 
-    // Only add block if it has ceremonies
-    if (side1Items.length || side2Items.length || bothItems.length) {
-      tradBlocks.push({
-        tradSlug: tradSlug,
-        tradLabel: tradLabel,
-        side1: side1Items,
-        side2: side2Items,
-        both: bothItems,
-        isSingleTrad: !trad2,
-      });
-    }
+    // Initialise all as selected
+    ceremonySelections[tradSlug] = {side1: {}, side2: {}, both: {}};
+    side1.forEach(function(ci){ ceremonySelections[tradSlug].side1[ci.idx] = true; });
+    side2.forEach(function(ci){ ceremonySelections[tradSlug].side2[ci.idx] = true; });
+    both.forEach(function(ci){ ceremonySelections[tradSlug].both[ci.idx] = true; });
 
-    // Initialise selections (all selected by default)
-    if (!ceremonySelections[tradSlug]) {
-      ceremonySelections[tradSlug] = { side1: {}, side2: {}, both: {} };
-      side1Items.forEach(function(ci){ ceremonySelections[tradSlug].side1[ci.idx] = true; });
-      side2Items.forEach(function(ci){ ceremonySelections[tradSlug].side2[ci.idx] = true; });
-      bothItems.forEach(function(ci){ ceremonySelections[tradSlug].both[ci.idx] = true; });
-    }
+    return {tradSlug: tradSlug, tradLabel: tradInfo.label, side1: side1, side2: side2, both: both};
   });
 
-  // Build HTML
-  const container = document.getElementById('cs-container');
-  if (!container) return;
+  // Also collect universal ceremonies (no tradition source) for interfaith
+  var universalItems = [];
+  if (trad2) {
+    ceremonies.forEach(function(item) {
+      var src = getTradSlug(item);
+      if (!src || src === 'universal') {
+        var globalIdx = ceremonies.indexOf(item);
+        if (!ceremonySelections['universal']) {
+          ceremonySelections['universal'] = {side1:{}, side2:{}, both:{}};
+        }
+        ceremonySelections['universal'].both[globalIdx] = true;
+        universalItems.push({item: item, idx: globalIdx});
+      }
+    });
+    if (universalItems.length) {
+      tradBlocks.push({
+        tradSlug: 'universal',
+        tradLabel: 'For both of you',
+        side1: [],
+        side2: [],
+        both: universalItems,
+        isUniversal: true
+      });
+    }
+  }
 
-  container.innerHTML = tradBlocks.map(function(block) {
-    const tradHeader = trad2
-      ? '<div class="cs-tradition-label">' + block.tradLabel + ' ceremonies</div>'
-      : '';
+  function csItemHtml(ci, tradSlug, group) {
+    var sel = (ceremonySelections[tradSlug] && ceremonySelections[tradSlug][group][ci.idx]) !== false;
+    var name = ci.item.name || ci.item.event || '';
+    var timing = ci.item.timing || '';
+    return '<div class="cs-item ' + (sel ? 'selected' : 'deselected') +
+      '" data-slug="' + tradSlug + '" data-group="' + group + '" data-idx="' + ci.idx + '" onclick="toggleCs(this)">' +
+      '<div class="cs-check"><span class="cs-check-tick">&#10003;</span></div>' +
+      '<div><div class="cs-item-name">' + name + '</div>' +
+      (timing ? '<div class="cs-item-timing">' + timing + '</div>' : '') +
+      '</div></div>';
+  }
 
-    function csItem(ci, group) {
-      const sel = ceremonySelections[block.tradSlug][group][ci.idx] !== false;
-      const name = ci.item.name || ci.item.event || '';
-      const timing = ci.item.timing || '';
-      return '<div class="cs-item ' + (sel ? 'selected' : 'deselected') + '" data-slug="' + block.tradSlug + '" data-group="' + group + '" data-idx="' + ci.idx + '" onclick="toggleCs(this)">' +
-        '<div class="cs-check"><span class="cs-check-tick">&#10003;</span></div>' +
-        '<div><div class="cs-item-name">' + name + '</div>' +
-        (timing ? '<div class="cs-item-timing">' + timing + '</div>' : '') +
+  var html = tradBlocks.map(function(block) {
+    // Universal block — show as single column grid
+    if (block.isUniversal) {
+      return '<div class="cs-tradition-block">' +
+        '<div class="cs-tradition-label">Common ceremonies — for both of you</div>' +
+        '<div class="cs-shared-grid">' +
+        block.both.map(function(ci){ return csItemHtml(ci, 'universal', 'both'); }).join('') +
         '</div></div>';
     }
 
-    const col1Html = block.side1.map(function(ci){return csItem(ci,'side1');}).join('');
-    const col2Html = block.side2.map(function(ci){return csItem(ci,'side2');}).join('');
-    const bothHtml = block.both.map(function(ci){return csItem(ci,'both');}).join('');
+    var side1Html = block.side1.map(function(ci){ return csItemHtml(ci, block.tradSlug, 'side1'); }).join('');
+    var side2Html = block.side2.map(function(ci){ return csItemHtml(ci, block.tradSlug, 'side2'); }).join('');
+    var bothHtml  = block.both.map(function(ci){ return csItemHtml(ci, block.tradSlug, 'both'); }).join('');
+
+    var noItems = '<div style="font-size:12px;color:var(--muted);font-style:italic;padding:8px 0">None</div>';
 
     return '<div class="cs-tradition-block">' +
-      tradHeader +
+      '<div class="cs-tradition-label">' + block.tradLabel + '</div>' +
       '<div class="cs-cols">' +
-        '<div>' +
-          '<div class="cs-col-header">' + n1 + '\'s ceremonies</div>' +
-          (col1Html || '<div style="font-size:12px;color:var(--muted);font-style:italic;padding:8px 0">None specific</div>') +
-        '</div>' +
-        '<div>' +
-          '<div class="cs-col-header">' + n2 + '\'s ceremonies</div>' +
-          (col2Html || '<div style="font-size:12px;color:var(--muted);font-style:italic;padding:8px 0">None specific</div>') +
-        '</div>' +
+        '<div><div class="cs-col-header">' + pos(n1) + ' ceremonies</div>' + (side1Html || noItems) + '</div>' +
+        '<div><div class="cs-col-header">' + pos(n2) + ' ceremonies</div>' + (side2Html || noItems) + '</div>' +
       '</div>' +
-      (bothHtml ? '<div class="cs-shared-label">For both of you</div><div class="cs-shared-grid">' + bothHtml + '</div>' : '') +
+      (bothHtml ? '<div class="cs-shared-label">Common — for both of you</div><div class="cs-shared-grid">' + bothHtml + '</div>' : '') +
     '</div>';
   }).join('');
+
+  var container = document.getElementById('cs-container');
+  if (container) container.innerHTML = html;
 }
+
 
 function toggleCs(el) {
   var tradSlug = el.dataset.slug;
