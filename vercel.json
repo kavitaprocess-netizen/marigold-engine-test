@@ -1,13 +1,35 @@
 {
   "version": 2,
   "builds": [
-    { "src": "server.js", "use": "@vercel/node" }
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "advisor-review/questionnaire.html",
+      "use": "@vercel/static"
+    }
   ],
   "routes": [
-    { "src": "/", "dest": "/server.js" },
-    { "src": "/questionnaire", "dest": "/server.js" },
-    { "src": "/advisor", "dest": "/server.js" },
-    { "src": "/brand.css", "dest": "/server.js" },
-    { "src": "/api/(.*)", "dest": "/server.js" }
+    {
+      "src": "/questionnaire",
+      "dest": "/advisor-review/questionnaire.html"
+    },
+    {
+      "src": "/advisor",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/brand.css",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/",
+      "dest": "/server.js"
+    }
   ]
 }
