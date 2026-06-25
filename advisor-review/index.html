@@ -87,7 +87,11 @@
   .rich-editor-content ol { margin: 6px 0 12px 20px; }
   .rich-editor-content li { margin-bottom: 6px; }
   /* Rendered view */
-  .cultural-notes-rendered { font-size: 13px; line-height: 1.7; color: #3C3010; }
+  .cultural-notes-rendered { font-size: 13px; line-height: 1.8; color: #3C3010; }
+  .cultural-notes-rendered p { margin-bottom: 10px; }
+  .cultural-notes-rendered p.notes-heading { font-weight: 700; color: #2C2408; margin-top: 16px; margin-bottom: 6px; }
+  .cultural-notes-rendered .notes-list { margin: 6px 0 14px 20px; }
+  .cultural-notes-rendered .notes-list li { margin-bottom: 8px; line-height: 1.6; }
   .cultural-notes-rendered p { margin-bottom: 12px; }
   .cultural-notes-rendered strong { font-weight: 700; color: #2C2408; }
   .cultural-notes-rendered ol { margin: 8px 0 16px 20px; }
@@ -283,10 +287,19 @@ function renderContentTab(v,canEdit){
     </div>
     <div class="section">
       <div class="section-title">Cultural notes</div>
-      <div class="section-sub">Key vendor and planner briefing notes. Bold headings (**text**) and numbered lists are rendered when viewing.</div>
       <div class="field">
         ${canEdit
-          ? `<textarea rows="10" oninput="workingData.cultural_notes=this.value">${workingData.cultural_notes}</textarea>`
+          ? `<div class="rich-editor-wrap">
+              <div class="rich-editor-toolbar">
+                <button onclick="execCmd('bold')" title="Bold"><b>B</b></button>
+                <button onclick="execCmd('insertOrderedList')" title="Numbered list">1. List</button>
+                <button onclick="execCmd('insertUnorderedList')" title="Bullet list">&#8226; List</button>
+                <button onclick="execCmd('removeFormat')" title="Clear">Clear</button>
+              </div>
+              <div class="rich-editor-content" id="cultural-notes-editor" contenteditable="true"
+                oninput="syncCulturalNotes()"
+                onpaste="handlePaste(event)">${htmlToEditor(workingData.cultural_notes)}</div>
+            </div>`
           : `<div class="cultural-notes-rendered">${renderCulturalNotes(workingData.cultural_notes)}</div>`
         }
       </div>
@@ -469,18 +482,57 @@ function paragraphDiff(oldText, newText) {
 
 function renderCulturalNotes(text) {
   if (!text) return '<p style="color:#9A8A6A;font-style:italic">No cultural notes added yet.</p>';
-  let html = text
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/(^|\n)(\d+\. .+)/g, (m, pre, item) => pre + '<li>' + item.replace(/^\d+\. /, '') + '</li>')
-    .replace(/(<li>.*?<\/li>\n?)+/gs, match => '<ol>' + match + '</ol>')
-    .split('\n\n').map(p => {
-      p = p.trim();
-      if (!p) return '';
-      if (p.startsWith('<ol>') || p.startsWith('<li>')) return p;
-      return '<p>' + p.replace(/\n/g, '<br>') + '</p>';
-    }).join('');
-  return html;
+
+  // Normalise: treat single newlines as paragraph breaks too
+  // (database stores content with \n not \n\n in most cases)
+  let t = text.trim();
+
+  // Escape HTML first
+  t = t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  // Bold: **text**
+  t = t.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+
+  // Split into lines
+  const lines = t.split(/\n/);
+  let html = '';
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i].trim();
+
+    if (!line) { i++; continue; }
+
+    // Numbered list item
+    if (/^\d+\.\s/.test(line)) {
+      html += '<ol class="notes-list">';
+      while (i < lines.length && /^\d+\.\s/.test(lines[i].trim())) {
+        const item = lines[i].trim().replace(/^\d+\.\s/, '');
+        html += `<li>${item}</li>`;
+        i++;
+      }
+      html += '</ol>';
+      continue;
+    }
+
+    // Bold-only line = heading
+    if (/^<strong>.+<\/strong>:?$/.test(line) || /^\*\*.+\*\*:?$/.test(line)) {
+      html += `<p class="notes-heading">${line}</p>`;
+      i++;
+      continue;
+    }
+
+    // Regular paragraph — collect consecutive non-list lines
+    let para = line;
+    i++;
+    while (i < lines.length && lines[i].trim() && !/^\d+\.\s/.test(lines[i].trim())) {
+      para += ' ' + lines[i].trim();
+      i++;
+    }
+    html += `<p>${para}</p>`;
+  }
+
+  return html || '<p style="color:#9A8A6A;font-style:italic">No cultural notes added yet.</p>';
 }
 
 function renderChecklistItems(canEdit){

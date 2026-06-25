@@ -365,28 +365,16 @@ const QUESTIONNAIRE_HTML = `<!DOCTYPE html>
   .cta:hover { background: var(--gk); }
   .cta:disabled { opacity: 0.4; cursor: not-allowed; }
   .btn-back {
-    position: fixed;
-    bottom: 28px;
-    left: 24px;
     background: none;
     border: none;
     color: var(--muted);
-    font-size: 13px;
+    font-size: 12px;
     font-family: 'Playfair Display', Georgia, serif;
     font-style: italic;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 12px;
-    border-radius: 100px;
-    transition: all 0.15s;
-    opacity: 0;
-    pointer-events: none;
-  }
-  .btn-back.visible {
-    opacity: 1;
-    pointer-events: all;
+    padding: 4px 0;
+    letter-spacing: 0.3px;
+    transition: color 0.15s;
   }
   .btn-back:hover { color: var(--deep); }
   .back-link {
@@ -762,6 +750,7 @@ const QUESTIONNAIRE_HTML = `<!DOCTYPE html>
       <div class="qs">Approximate is absolutely fine — you can always refine this later.</div>
       <input type="date" class="fi" id="wedding-date" style="max-width:280px">
       <div class="cta-row">
+        <button class="btn-back" onclick="goBack()">← back</button>
         <button class="cta" onclick="goNext(2)">Continue</button>
         <button class="back-link" onclick="goNext(2, true)">Not sure yet</button>
       </div>
@@ -776,6 +765,7 @@ const QUESTIONNAIRE_HTML = `<!DOCTYPE html>
       <div class="qs">City and state or country is enough — we use this for vendor recommendations.</div>
       <input type="text" class="fi" id="location" placeholder="e.g. New Jersey, US" style="max-width:380px">
       <div class="cta-row">
+        <button class="btn-back" onclick="goBack()">← back</button>
         <button class="cta" onclick="goNext(3)">Continue</button>
         <button class="back-link" onclick="goNext(3, true)">Not decided yet</button>
       </div>
@@ -793,6 +783,7 @@ const QUESTIONNAIRE_HTML = `<!DOCTYPE html>
       <div class="trad-note" id="trad-note">0 selected — select 1 or 2</div>
       <div class="err" id="err-q4">Please select at least one tradition.</div>
       <div class="cta-row">
+        <button class="btn-back" onclick="goBack()">← back</button>
         <button class="cta" onclick="goNext(4)">Continue</button>
       </div>
     </div>
@@ -808,6 +799,7 @@ const QUESTIONNAIRE_HTML = `<!DOCTYPE html>
       <input type="range" id="budget-slider" min="10000" max="500000" step="5000" value="50000" oninput="updateBudget()">
       <div class="budget-labels"><span>$10k</span><span>$500k+</span></div>
       <div class="cta-row">
+        <button class="btn-back" onclick="goBack()">← back</button>
         <button class="cta" onclick="goNext(5)">Continue</button>
         <button class="back-link" onclick="goNext(5, true)">Not sure yet</button>
       </div>
@@ -827,6 +819,7 @@ const QUESTIONNAIRE_HTML = `<!DOCTYPE html>
       </div>
       <div style="font-size:13px;color:var(--muted);font-style:italic">guests across all events</div>
       <div class="cta-row">
+        <button class="btn-back" onclick="goBack()">← back</button>
         <button class="cta" onclick="goNext(6)">Build my plan</button>
         <button class="back-link" onclick="goNext(6, true)">Not sure yet</button>
       </div>
@@ -880,8 +873,6 @@ const QUESTIONNAIRE_HTML = `<!DOCTYPE html>
 
 </div>
 
-<!-- Back button — fixed position, visible on Q2+ -->
-<button class="btn-back" id="btn-back" onclick="goBack()">← back</button>
 
 <script>
 // ── State ──
@@ -1041,9 +1032,6 @@ function doTransition(from, to) {
 function updateProgress() {
   document.getElementById('progress-fill').style.width = ((currentQ-1)/TOTAL_Q*100)+'%';
   document.getElementById('step-indicator').textContent = \`\${currentQ} of \${TOTAL_Q}\`;
-  // Show back button from Q2 onwards
-  const backBtn = document.getElementById('btn-back');
-  if (backBtn) backBtn.classList.toggle('visible', currentQ > 1);
 }
 
 function goBack() {
@@ -1562,7 +1550,11 @@ const ADVISOR_HTML = `<!DOCTYPE html>
   .rich-editor-content ol { margin: 6px 0 12px 20px; }
   .rich-editor-content li { margin-bottom: 6px; }
   /* Rendered view */
-  .cultural-notes-rendered { font-size: 13px; line-height: 1.7; color: #3C3010; }
+  .cultural-notes-rendered { font-size: 13px; line-height: 1.8; color: #3C3010; }
+  .cultural-notes-rendered p { margin-bottom: 10px; }
+  .cultural-notes-rendered p.notes-heading { font-weight: 700; color: #2C2408; margin-top: 16px; margin-bottom: 6px; }
+  .cultural-notes-rendered .notes-list { margin: 6px 0 14px 20px; }
+  .cultural-notes-rendered .notes-list li { margin-bottom: 8px; line-height: 1.6; }
   .cultural-notes-rendered p { margin-bottom: 12px; }
   .cultural-notes-rendered strong { font-weight: 700; color: #2C2408; }
   .cultural-notes-rendered ol { margin: 8px 0 16px 20px; }
@@ -1758,10 +1750,19 @@ function renderContentTab(v,canEdit){
     </div>
     <div class="section">
       <div class="section-title">Cultural notes</div>
-      <div class="section-sub">Key vendor and planner briefing notes. Bold headings (**text**) and numbered lists are rendered when viewing.</div>
       <div class="field">
         \${canEdit
-          ? \`<textarea rows="10" oninput="workingData.cultural_notes=this.value">\${workingData.cultural_notes}</textarea>\`
+          ? \`<div class="rich-editor-wrap">
+              <div class="rich-editor-toolbar">
+                <button onclick="execCmd('bold')" title="Bold"><b>B</b></button>
+                <button onclick="execCmd('insertOrderedList')" title="Numbered list">1. List</button>
+                <button onclick="execCmd('insertUnorderedList')" title="Bullet list">&#8226; List</button>
+                <button onclick="execCmd('removeFormat')" title="Clear">Clear</button>
+              </div>
+              <div class="rich-editor-content" id="cultural-notes-editor" contenteditable="true"
+                oninput="syncCulturalNotes()"
+                onpaste="handlePaste(event)">\${htmlToEditor(workingData.cultural_notes)}</div>
+            </div>\`
           : \`<div class="cultural-notes-rendered">\${renderCulturalNotes(workingData.cultural_notes)}</div>\`
         }
       </div>
@@ -1944,18 +1945,57 @@ function paragraphDiff(oldText, newText) {
 
 function renderCulturalNotes(text) {
   if (!text) return '<p style="color:#9A8A6A;font-style:italic">No cultural notes added yet.</p>';
-  let html = text
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>')
-    .replace(/(^|\\n)(\\d+\\. .+)/g, (m, pre, item) => pre + '<li>' + item.replace(/^\\d+\\. /, '') + '</li>')
-    .replace(/(<li>.*?<\\/li>\\n?)+/gs, match => '<ol>' + match + '</ol>')
-    .split('\\n\\n').map(p => {
-      p = p.trim();
-      if (!p) return '';
-      if (p.startsWith('<ol>') || p.startsWith('<li>')) return p;
-      return '<p>' + p.replace(/\\n/g, '<br>') + '</p>';
-    }).join('');
-  return html;
+
+  // Normalise: treat single newlines as paragraph breaks too
+  // (database stores content with \\n not \\n\\n in most cases)
+  let t = text.trim();
+
+  // Escape HTML first
+  t = t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  // Bold: **text**
+  t = t.replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>');
+
+  // Split into lines
+  const lines = t.split(/\\n/);
+  let html = '';
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i].trim();
+
+    if (!line) { i++; continue; }
+
+    // Numbered list item
+    if (/^\\d+\\.\\s/.test(line)) {
+      html += '<ol class="notes-list">';
+      while (i < lines.length && /^\\d+\\.\\s/.test(lines[i].trim())) {
+        const item = lines[i].trim().replace(/^\\d+\\.\\s/, '');
+        html += \`<li>\${item}</li>\`;
+        i++;
+      }
+      html += '</ol>';
+      continue;
+    }
+
+    // Bold-only line = heading
+    if (/^<strong>.+<\\/strong>:?$/.test(line) || /^\\*\\*.+\\*\\*:?$/.test(line)) {
+      html += \`<p class="notes-heading">\${line}</p>\`;
+      i++;
+      continue;
+    }
+
+    // Regular paragraph — collect consecutive non-list lines
+    let para = line;
+    i++;
+    while (i < lines.length && lines[i].trim() && !/^\\d+\\.\\s/.test(lines[i].trim())) {
+      para += ' ' + lines[i].trim();
+      i++;
+    }
+    html += \`<p>\${para}</p>\`;
+  }
+
+  return html || '<p style="color:#9A8A6A;font-style:italic">No cultural notes added yet.</p>';
 }
 
 function renderChecklistItems(canEdit){

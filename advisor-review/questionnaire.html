@@ -263,28 +263,16 @@
   .cta:hover { background: var(--gk); }
   .cta:disabled { opacity: 0.4; cursor: not-allowed; }
   .btn-back {
-    position: fixed;
-    bottom: 28px;
-    left: 24px;
     background: none;
     border: none;
     color: var(--muted);
-    font-size: 13px;
+    font-size: 12px;
     font-family: 'Playfair Display', Georgia, serif;
     font-style: italic;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 12px;
-    border-radius: 100px;
-    transition: all 0.15s;
-    opacity: 0;
-    pointer-events: none;
-  }
-  .btn-back.visible {
-    opacity: 1;
-    pointer-events: all;
+    padding: 4px 0;
+    letter-spacing: 0.3px;
+    transition: color 0.15s;
   }
   .btn-back:hover { color: var(--deep); }
   .back-link {
@@ -660,6 +648,7 @@
       <div class="qs">Approximate is absolutely fine — you can always refine this later.</div>
       <input type="date" class="fi" id="wedding-date" style="max-width:280px">
       <div class="cta-row">
+        <button class="btn-back" onclick="goBack()">← back</button>
         <button class="cta" onclick="goNext(2)">Continue</button>
         <button class="back-link" onclick="goNext(2, true)">Not sure yet</button>
       </div>
@@ -674,6 +663,7 @@
       <div class="qs">City and state or country is enough — we use this for vendor recommendations.</div>
       <input type="text" class="fi" id="location" placeholder="e.g. New Jersey, US" style="max-width:380px">
       <div class="cta-row">
+        <button class="btn-back" onclick="goBack()">← back</button>
         <button class="cta" onclick="goNext(3)">Continue</button>
         <button class="back-link" onclick="goNext(3, true)">Not decided yet</button>
       </div>
@@ -691,6 +681,7 @@
       <div class="trad-note" id="trad-note">0 selected — select 1 or 2</div>
       <div class="err" id="err-q4">Please select at least one tradition.</div>
       <div class="cta-row">
+        <button class="btn-back" onclick="goBack()">← back</button>
         <button class="cta" onclick="goNext(4)">Continue</button>
       </div>
     </div>
@@ -706,6 +697,7 @@
       <input type="range" id="budget-slider" min="10000" max="500000" step="5000" value="50000" oninput="updateBudget()">
       <div class="budget-labels"><span>$10k</span><span>$500k+</span></div>
       <div class="cta-row">
+        <button class="btn-back" onclick="goBack()">← back</button>
         <button class="cta" onclick="goNext(5)">Continue</button>
         <button class="back-link" onclick="goNext(5, true)">Not sure yet</button>
       </div>
@@ -725,6 +717,7 @@
       </div>
       <div style="font-size:13px;color:var(--muted);font-style:italic">guests across all events</div>
       <div class="cta-row">
+        <button class="btn-back" onclick="goBack()">← back</button>
         <button class="cta" onclick="goNext(6)">Build my plan</button>
         <button class="back-link" onclick="goNext(6, true)">Not sure yet</button>
       </div>
@@ -778,8 +771,6 @@
 
 </div>
 
-<!-- Back button — fixed position, visible on Q2+ -->
-<button class="btn-back" id="btn-back" onclick="goBack()">← back</button>
 
 <script>
 // ── State ──
@@ -939,9 +930,6 @@ function doTransition(from, to) {
 function updateProgress() {
   document.getElementById('progress-fill').style.width = ((currentQ-1)/TOTAL_Q*100)+'%';
   document.getElementById('step-indicator').textContent = `${currentQ} of ${TOTAL_Q}`;
-  // Show back button from Q2 onwards
-  const backBtn = document.getElementById('btn-back');
-  if (backBtn) backBtn.classList.toggle('visible', currentQ > 1);
 }
 
 function goBack() {
