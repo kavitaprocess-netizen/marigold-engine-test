@@ -4,9 +4,7 @@
 // ============================================================================
 const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
-const { calculateBudget } = require('./engine/budgetCalculator');
-const { mergeTraditions } = require('./engine/interfaithMerge');
-const UNIVERSAL_CHECKLIST = require('./engine/universalChecklist.json');
+const { generatePlan } = require('./engine/index');
 
 const app = express();
 app.use(express.json());
@@ -2051,32 +2049,27 @@ app.post('/api/generate-plan', async (req, res) => {
     return res.status(400).json({ error: 'maximum 2 traditions supported' });
 
   try {
-    const { data: traditions, error } = await supabase
-      .from('live_taxonomy')
-      .select('*')
-      .in('slug', slugs);
-    if (error) throw error;
-    if (!traditions || traditions.length === 0)
-      return res.status(404).json({ error: `No approved traditions found for: ${slugs.join(', ')}` });
+    const result = await generatePlan({
+      traditionSlugs: slugs,
+      totalBudget: parseInt(budget) || 50000,
+      jurisdiction: jurisdiction || 'US',
+    });
 
-    const foundSlugs = traditions.map(t => t.slug);
-    const missingSlugs = slugs.filter(s => !foundSlugs.includes(s));
-    if (missingSlugs.length > 0)
-      return res.status(404).json({ error: `Not yet seeded/approved: ${missingSlugs.join(', ')}`, found: foundSlugs });
+    if (!result.success) {
+      return res.status(404).json({ error: 'Some traditions not yet available', details: result });
+    }
 
-    const merged = mergeTraditions(traditions);
-    const budgetNum = parseInt(budget) || 50000;
-    const budgetAllocation = calculateBudget(merged, budgetNum);
-
+    // Normalise field names for the questionnaire UI
     res.json({
       success: true,
       plan: {
-        traditions: traditions.map(t => ({ slug: t.slug, name: t.name, region: t.region })),
-        budget: budgetAllocation,
-        checklist: merged.checklist || [],
-        ceremonySequence: merged.ceremonySequence || [],
-        vendorCategories: merged.vendorCategories || [],
-        conflicts: merged.conflicts || [],
+        traditions: result.traditions,
+        checklist: result.checklist || [],
+        ceremonySequence: result.ceremony_sequence || [],
+        vendorCategories: result.vendors || [],
+        budget: result.budget || [],
+        conflicts: result.conflicts || [],
+        culturalNotes: result.cultural_notes || '',
         jurisdiction: jurisdiction || 'US',
         generatedAt: new Date().toISOString(),
       }

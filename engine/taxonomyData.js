@@ -10,7 +10,7 @@ const { createClient } = require('@supabase/supabase-js');
 // Same handling pattern as the Anthropic API key in the existing demo's server.js.
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_SECRET_KEY
+  process.env.SUPABASE_SERVICE_KEY
 );
 
 /**
@@ -29,7 +29,17 @@ async function loadTradition(slug) {
   if (error) {
     throw new Error(`Failed to load tradition "${slug}": ${error.message}`);
   }
-  return data; // null if not found / not yet approved
+  if (!data) return null;
+  // Ensure all fields have safe defaults so the engine never crashes on missing data
+  return {
+    ...data,
+    checklist_template: data.checklist_template || [],
+    ceremony_sequence: data.ceremony_sequence || [],
+    vendor_categories: data.vendor_categories || [],
+    budget_allocation: data.budget_allocation || [],
+    cultural_notes: data.cultural_notes || '',
+    sources: data.sources || '',
+  };
 }
 
 /**
