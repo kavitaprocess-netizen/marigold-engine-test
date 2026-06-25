@@ -280,8 +280,8 @@ const ADVISOR_HTML = `<!DOCTYPE html>
 <div class="layout">
   <aside class="sidebar">
     <div class="sidebar-header">
-      <a href="/" style="display:flex;align-items:center;gap:8px;text-decoration:none;margin-bottom:16px;">
-        <svg width="20" height="20" viewBox="0 0 34 34" xmlns="http://www.w3.org/2000/svg">
+      <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;margin-bottom:16px;">
+        <svg width="32" height="32" viewBox="0 0 34 34" xmlns="http://www.w3.org/2000/svg">
           <g fill="#E0B030" stroke="#C8941A" stroke-width="0.4">
             <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(0 17 17)"/>
             <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(51.4 17 17)"/>
@@ -498,6 +498,25 @@ function renderContentTab(v,canEdit){
       <div class="section-sub">How the total wedding budget is typically split, shown as percentage ranges.</div>
       <div class="item-list" id="budget-list">\${renderBudgetItems(canEdit)}</div>
       \${canEdit?\`<div class="add-item-btn" onclick="addBudgetItem()">+ Add budget category</div>\`:''}
+    </div>
+    <div class="section">
+      <div class="section-title">Same-sex &amp; LGBTQ+ adaptation notes</div>
+      <div class="section-sub">How does this tradition adapt for same-sex couples? Which ceremonies change, which are gender-neutral, what terminology differs?</div>
+      <div class="field">
+        \${canEdit
+          ? \`<div class="rich-editor-wrap">
+              <div class="rich-editor-toolbar">
+                <button onclick="execCmd('bold')"><b>B</b></button>
+                <button onclick="execCmd('insertOrderedList')">1. List</button>
+                <button onclick="execCmd('removeFormat')">Clear</button>
+              </div>
+              <div class="rich-editor-content" contenteditable="true"
+                oninput="workingData.lgbtq_notes=editorToText(this)"
+                onpaste="handlePaste(event)">\${htmlToEditor(workingData.lgbtq_notes||'')}</div>
+            </div>\`
+          : renderCulturalNotes(workingData.lgbtq_notes || '')
+        }
+      </div>
     </div>
     <div class="section">
       <div class="section-title">Sources &amp; verification notes</div>
