@@ -537,11 +537,134 @@
   }
   .ceremony-include input { accent-color: var(--gd); }
 
+  /* ── Ceremony selection page ── */
+  .ceremony-selection-wrap { width:100%; max-width:860px; margin:0 auto; }
+  .cs-tradition-block { margin-bottom:40px; }
+  .cs-tradition-label { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:16px; padding-bottom:10px; border-bottom:1px solid var(--bdr); font-style:italic; }
+  .cs-cols { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+  @media(max-width:580px){ .cs-cols { grid-template-columns:1fr; } }
+  .cs-col-header { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--deep); margin-bottom:10px; font-style:italic; font-weight:500; }
+  .cs-item { display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border:1px solid var(--bdr); border-radius:8px; margin-bottom:8px; cursor:pointer; transition:all 0.15s; background:white; }
+  .cs-item:hover { border-color:var(--gd); }
+  .cs-item.selected { border-color:var(--gk); background:#FFFAEA; }
+  .cs-item.deselected { opacity:0.4; }
+  .cs-check { width:18px; height:18px; border:1.5px solid var(--bdr); border-radius:4px; flex-shrink:0; margin-top:2px; display:flex; align-items:center; justify-content:center; transition:all 0.15s; }
+  .cs-item.selected .cs-check { background:var(--deep); border-color:var(--deep); }
+  .cs-check-tick { color:white; font-size:11px; display:none; }
+  .cs-item.selected .cs-check-tick { display:block; }
+  .cs-item-name { font-size:13px; color:var(--tx); font-style:italic; line-height:1.4; }
+  .cs-item-timing { font-size:11px; color:var(--muted); font-style:italic; margin-top:2px; }
+  .cs-shared-label { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin:20px 0 10px; font-style:italic; display:flex; align-items:center; gap:8px; }
+  .cs-shared-label::after { content:''; flex:1; height:1px; background:var(--bdr); }
+  .cs-shared-cols { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+  @media(max-width:580px){ .cs-shared-cols { grid-template-columns:1fr; } }
+
+  /* ── Confirmation page ── */
+  .conf-wrap { width:100%; max-width:720px; margin:0 auto; }
+  .conf-block { margin-bottom:32px; }
+  .conf-trad-header { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--bdr); font-style:italic; }
+  .conf-cols { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:12px; }
+  @media(max-width:580px){ .conf-cols { grid-template-columns:1fr; } }
+  .conf-col-header { font-size:11px; color:var(--deep); font-style:italic; font-weight:500; margin-bottom:8px; }
+  .conf-item { font-size:13px; color:var(--tx); font-style:italic; padding:6px 0; border-bottom:1px solid var(--warm); line-height:1.4; }
+  .conf-item:last-child { border-bottom:none; }
+  .conf-item-timing { font-size:11px; color:var(--muted); }
+  .conf-shared-header { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin:16px 0 10px; font-style:italic; }
+  .conf-budget { background:var(--warm); border-radius:10px; padding:20px 24px; margin-top:28px; }
+  .conf-budget-total { font-size:28px; font-style:italic; color:var(--deep); margin-bottom:4px; }
+  .conf-budget-sub { font-size:12px; color:var(--muted); font-style:italic; margin-bottom:16px; }
+  .conf-budget-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .conf-budget-cat { font-size:12px; color:var(--tx); width:150px; flex-shrink:0; font-style:italic; }
+  .conf-budget-track { flex:1; background:var(--bdr); border-radius:2px; height:5px; }
+  .conf-budget-fill { height:100%; background:var(--gd); border-radius:2px; }
+  .conf-budget-amt { font-size:12px; color:var(--muted); min-width:65px; text-align:right; font-style:italic; }
+
+  /* ── Ceremony selection page ── */
+  .cs-tradition-block { margin-bottom:40px; }
+  .cs-tradition-label { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:16px; padding-bottom:10px; border-bottom:1px solid var(--bdr); font-style:italic; }
+  .cs-cols { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+  @media(max-width:580px){ .cs-cols { grid-template-columns:1fr; } }
+  .cs-col-header { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--deep); margin-bottom:10px; font-style:italic; font-weight:500; }
+  .cs-item { display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border:1px solid var(--bdr); border-radius:8px; margin-bottom:8px; cursor:pointer; transition:all 0.15s; background:white; }
+  .cs-item:hover { border-color:var(--gd); }
+  .cs-item.selected { border-color:var(--gk); background:#FFFAEA; }
+  .cs-item.deselected { opacity:0.4; }
+  .cs-check { width:18px; height:18px; border:1.5px solid var(--bdr); border-radius:4px; flex-shrink:0; margin-top:2px; display:flex; align-items:center; justify-content:center; transition:all 0.15s; }
+  .cs-item.selected .cs-check { background:var(--deep); border-color:var(--deep); }
+  .cs-check-tick { color:white; font-size:11px; display:none; }
+  .cs-item.selected .cs-check-tick { display:block; }
+  .cs-item-name { font-size:13px; color:var(--tx); font-style:italic; line-height:1.4; }
+  .cs-item-timing { font-size:11px; color:var(--muted); font-style:italic; margin-top:2px; }
+  .cs-shared-label { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin:20px 0 10px; font-style:italic; display:flex; align-items:center; gap:8px; }
+  .cs-shared-label::after { content:''; flex:1; height:1px; background:var(--bdr); }
+  .cs-shared-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  @media(max-width:580px){ .cs-shared-grid { grid-template-columns:1fr; } }
+  /* ── Confirmation page ── */
+  .conf-block { margin-bottom:32px; }
+  .conf-trad-header { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--bdr); font-style:italic; }
+  .conf-cols { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:12px; }
+  @media(max-width:580px){ .conf-cols { grid-template-columns:1fr; } }
+  .conf-col-header { font-size:11px; color:var(--deep); font-style:italic; font-weight:500; margin-bottom:8px; }
+  .conf-item { font-size:13px; color:var(--tx); font-style:italic; padding:6px 0; border-bottom:1px solid var(--warm); line-height:1.4; }
+  .conf-item:last-child { border-bottom:none; }
+  .conf-item-timing { font-size:11px; color:var(--muted); }
+  .conf-shared-header { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin:16px 0 10px; font-style:italic; }
+  .conf-budget { background:var(--warm); border-radius:10px; padding:20px 24px; margin-top:28px; }
+  .conf-budget-total { font-size:28px; font-style:italic; color:var(--deep); margin-bottom:4px; letter-spacing:-1px; }
+  .conf-budget-sub { font-size:12px; color:var(--muted); font-style:italic; margin-bottom:16px; }
+  .conf-budget-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .conf-budget-cat { font-size:12px; color:var(--tx); width:150px; flex-shrink:0; font-style:italic; }
+  .conf-budget-track { flex:1; background:var(--bdr); border-radius:2px; height:5px; }
+  .conf-budget-fill { height:100%; background:var(--gd); border-radius:2px; }
+  .conf-budget-amt { font-size:12px; color:var(--muted); min-width:65px; text-align:right; font-style:italic; }
+
   /* ── Two-column layout (ceremonies + checklist) ── */
   .ceremony-cols, .checklist-cols { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px; }
   @media(max-width:600px){ .ceremony-cols, .checklist-cols { grid-template-columns:1fr; } }
   .ceremony-col-header { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--bdr); font-style:italic; }
   .ceremony-shared-header { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin:20px 0 12px; padding-bottom:8px; border-bottom:1px solid var(--bdr); font-style:italic; }
+
+  /* ── Ceremony selection page ── */
+  .ceremony-selection-wrap { width:100%; max-width:860px; margin:0 auto; }
+  .cs-tradition-block { margin-bottom:40px; }
+  .cs-tradition-label { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:16px; padding-bottom:10px; border-bottom:1px solid var(--bdr); font-style:italic; }
+  .cs-cols { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+  @media(max-width:580px){ .cs-cols { grid-template-columns:1fr; } }
+  .cs-col-header { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--deep); margin-bottom:10px; font-style:italic; font-weight:500; }
+  .cs-item { display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border:1px solid var(--bdr); border-radius:8px; margin-bottom:8px; cursor:pointer; transition:all 0.15s; background:white; }
+  .cs-item:hover { border-color:var(--gd); }
+  .cs-item.selected { border-color:var(--gk); background:#FFFAEA; }
+  .cs-item.deselected { opacity:0.4; }
+  .cs-check { width:18px; height:18px; border:1.5px solid var(--bdr); border-radius:4px; flex-shrink:0; margin-top:2px; display:flex; align-items:center; justify-content:center; transition:all 0.15s; }
+  .cs-item.selected .cs-check { background:var(--deep); border-color:var(--deep); }
+  .cs-check-tick { color:white; font-size:11px; display:none; }
+  .cs-item.selected .cs-check-tick { display:block; }
+  .cs-item-name { font-size:13px; color:var(--tx); font-style:italic; line-height:1.4; }
+  .cs-item-timing { font-size:11px; color:var(--muted); font-style:italic; margin-top:2px; }
+  .cs-shared-label { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin:20px 0 10px; font-style:italic; display:flex; align-items:center; gap:8px; }
+  .cs-shared-label::after { content:''; flex:1; height:1px; background:var(--bdr); }
+  .cs-shared-cols { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+  @media(max-width:580px){ .cs-shared-cols { grid-template-columns:1fr; } }
+
+  /* ── Confirmation page ── */
+  .conf-wrap { width:100%; max-width:720px; margin:0 auto; }
+  .conf-block { margin-bottom:32px; }
+  .conf-trad-header { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--bdr); font-style:italic; }
+  .conf-cols { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:12px; }
+  @media(max-width:580px){ .conf-cols { grid-template-columns:1fr; } }
+  .conf-col-header { font-size:11px; color:var(--deep); font-style:italic; font-weight:500; margin-bottom:8px; }
+  .conf-item { font-size:13px; color:var(--tx); font-style:italic; padding:6px 0; border-bottom:1px solid var(--warm); line-height:1.4; }
+  .conf-item:last-child { border-bottom:none; }
+  .conf-item-timing { font-size:11px; color:var(--muted); }
+  .conf-shared-header { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin:16px 0 10px; font-style:italic; }
+  .conf-budget { background:var(--warm); border-radius:10px; padding:20px 24px; margin-top:28px; }
+  .conf-budget-total { font-size:28px; font-style:italic; color:var(--deep); margin-bottom:4px; }
+  .conf-budget-sub { font-size:12px; color:var(--muted); font-style:italic; margin-bottom:16px; }
+  .conf-budget-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .conf-budget-cat { font-size:12px; color:var(--tx); width:150px; flex-shrink:0; font-style:italic; }
+  .conf-budget-track { flex:1; background:var(--bdr); border-radius:2px; height:5px; }
+  .conf-budget-fill { height:100%; background:var(--gd); border-radius:2px; }
+  .conf-budget-amt { font-size:12px; color:var(--muted); min-width:65px; text-align:right; font-style:italic; }
 
   /* ── Two-column layout (ceremonies + checklist) ── */
   .ceremony-cols, .checklist-cols { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px; }
@@ -799,6 +922,64 @@
         <button class="btn-back" onclick="goBack()">← back</button>
         <button class="cta" onclick="goNext(6)">Build my plan</button>
         <button class="back-link" onclick="goNext(6, true)">Not sure yet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q7: Ceremony selection -->
+  <div class="screen" id="q7">
+    <div style="width:100%;max-width:900px;margin:0 auto;padding:0 4px">
+      <div class="ql">Your ceremony plan</div>
+      <div class="qt" id="q7-title">Choose your ceremonies</div>
+      <div class="qs" id="q7-sub">Select the ceremonies you want. We've made an intelligent start based on your traditions.</div>
+      <div id="cs-container" style="margin-top:24px"></div>
+      <div class="cta-row" style="margin-top:28px">
+        <button class="btn-back" onclick="goBack()">← back</button>
+        <button class="cta" onclick="goToConfirmation()">Review my plan →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q8: Confirmation -->
+  <div class="screen" id="q8">
+    <div style="overflow-y:auto;max-height:calc(100vh - 120px);padding-bottom:20px">
+      <div class="conf-wrap">
+        <div class="ql">Your wedding plan</div>
+        <div class="qt" id="q8-title">Here's what you've chosen</div>
+        <div class="qs" id="q8-sub"></div>
+        <div id="conf-container" style="margin-top:28px"></div>
+        <div class="cta-row" style="margin-top:32px">
+          <button class="btn-back" onclick="goBackFromConf()">← adjust selections</button>
+          <button class="cta" onclick="buildFinalPlan()">Build my full plan →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q7: Ceremony selection -->
+  <div class="screen" id="q7" style="overflow-y:auto;align-items:flex-start;justify-content:flex-start;padding-top:32px">
+    <div style="width:100%;max-width:900px;margin:0 auto">
+      <div class="ql">Step 7 of 8</div>
+      <div class="qt" id="q7-title">Choose your ceremonies</div>
+      <div class="qs" id="q7-sub">We've assigned ceremonies based on your traditions. Adjust any that aren't right — then review your plan.</div>
+      <div id="cs-container" style="margin-top:24px"></div>
+      <div class="cta-row" style="margin-top:28px;padding-bottom:40px">
+        <button class="btn-back" onclick="goBack()">← back</button>
+        <button class="cta" onclick="goToConfirmation()">Review my plan →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q8: Confirmation -->
+  <div class="screen" id="q8" style="overflow-y:auto;align-items:flex-start;justify-content:flex-start;padding-top:32px">
+    <div style="width:100%;max-width:720px;margin:0 auto;padding-bottom:60px">
+      <div class="ql">Your wedding plan</div>
+      <div class="qt" id="q8-title">Here's what you've chosen</div>
+      <div class="qs" id="q8-sub"></div>
+      <div id="conf-container" style="margin-top:28px"></div>
+      <div class="cta-row" style="margin-top:32px">
+        <button class="btn-back" onclick="goBackFromConf()">← adjust selections</button>
+        <button class="cta" onclick="buildFinalPlan()">Build my full plan →</button>
       </div>
     </div>
   </div>
@@ -1135,13 +1316,28 @@ function doTransition(from, to) {
   setTimeout(()=>{ a.classList.remove('exit-left'); b.classList.add('active'); }, 260);
 }
 
+const TOTAL_STEPS = 8;
 function updateProgress() {
-  document.getElementById('progress-fill').style.width = ((currentQ-1)/TOTAL_Q*100)+'%';
-  document.getElementById('step-indicator').textContent = `${currentQ} of ${TOTAL_Q}`;
+  const step = currentQ === '4b' ? 4.5 : (currentQ === 7 ? 7 : currentQ === 8 ? 8 : currentQ);
+  document.getElementById('progress-fill').style.width = (step/TOTAL_STEPS*100)+'%';
+  const label = currentQ === '4b' ? '4b of 8' : currentQ + ' of ' + TOTAL_STEPS;
+  document.getElementById('step-indicator').textContent = label;
 }
 
 function goBack() {
   if (currentQ === 1 || currentQ === '1') return;
+  if (currentQ === 7) {
+    // Go back to Q6
+    const q7 = document.getElementById('q7');
+    const q6 = document.getElementById('q6');
+    q7.style.transition = 'opacity 0.25s, transform 0.25s';
+    q7.style.opacity = '0'; q7.style.transform = 'translateX(50px)';
+    setTimeout(function() {
+      q7.classList.remove('active'); q7.style.transition=''; q7.style.opacity=''; q7.style.transform='';
+      q6.classList.add('active');
+    }, 260);
+    currentQ = 6; updateProgress(); return;
+  }
   // Determine previous screen
   let prevId, prevQ;
   if (currentQ === '4b') { prevId = 'q4'; prevQ = 4; }
@@ -1203,7 +1399,20 @@ async function submitPlan() {
     const data = await res.json();
     clearInterval(iv);
     if (!data.success) { showErr(data.error||'Something went wrong generating your plan.'); return; }
-    S.plan=data.plan; showResults();
+    S.plan=data.plan;
+    // Go to ceremony selection (Q7) instead of results directly
+    planCeremonies = S.plan.ceremonySequence || S.plan.ceremonies || [];
+    ceremonySelections = {}; // reset selections
+    const ls = document.getElementById('loading-screen');
+    ls.classList.add('exit-left'); ls.classList.remove('active');
+    setTimeout(function() {
+      ls.classList.remove('exit-left');
+      showCeremonySelection(planCeremonies);
+      const q7 = document.getElementById('q7');
+      q7.classList.add('active');
+      currentQ = 7;
+      updateProgress();
+    }, 260);
   } catch(e) {
     clearInterval(iv);
     if (e.name === 'AbortError') {
@@ -1611,6 +1820,294 @@ function renderBudget(budgetData) {
         <div class="budget-amt">${amt.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0})}</div>
       </div>`;
     }).join('')}`;
+}
+
+// ── Ceremony selection state ──
+// ceremonySelections: { tradSlug: { side1: [indices], side2: [indices], both: [indices] } }
+let ceremonySelections = {};
+let planCeremonies = []; // raw from engine
+
+function showCeremonySelection(ceremonies) {
+  planCeremonies = ceremonies;
+  const n1 = S.name1 || 'Partner one';
+  const n2 = S.name2 || 'Partner two';
+
+  // Determine traditions and their assignments
+  const trad1 = S.traditions[0];
+  const trad2 = S.traditions[1] || null;
+  // Who owns which tradition
+  const name1TradSlugs = [];
+  const name2TradSlugs = [];
+  if (trad2) {
+    // Interfaith — use Q4b assignment
+    Object.entries(S.traditionAssignment).forEach(function(e) {
+      if (e[1] === 'name1') name1TradSlugs.push(e[0]);
+      else name2TradSlugs.push(e[0]);
+    });
+    if (!name1TradSlugs.length) { name1TradSlugs.push(trad1); name2TradSlugs.push(trad2); }
+  } else {
+    // Single tradition — both assigned to same tradition
+    name1TradSlugs.push(trad1);
+    name2TradSlugs.push(trad1);
+  }
+
+  // Group ceremonies by tradition slug
+  function getTradSlug(item) {
+    return item._sourceTradition || item.tradition || item.source || 'universal';
+  }
+
+  // Build tradition blocks
+  const tradBlocks = [];
+  const allTradSlugs = trad2 ? [trad1, trad2] : [trad1];
+
+  allTradSlugs.forEach(function(tradSlug) {
+    const tradInfo = TRADS.find(function(t){return t.slug===tradSlug;}) || {label:tradSlug};
+    const tradLabel = tradInfo.label;
+
+    // Who is name1 in this tradition?
+    const n1Role = S.role1; // bride or groom
+    const n2Role = S.role2;
+
+    // Filter ceremonies belonging to this tradition
+    const tradCeremonies = ceremonies.filter(function(item, idx) {
+      const src = getTradSlug(item);
+      if (trad2) {
+        // Interfaith — match by source tradition
+        return src === tradSlug || src === 'universal';
+      }
+      return true; // Single tradition — all ceremonies
+    });
+
+    // Split by side field
+    const side1Items = []; // Name 1's (matches their role)
+    const side2Items = []; // Name 2's
+    const bothItems = [];
+
+    tradCeremonies.forEach(function(item, i) {
+      const globalIdx = ceremonies.indexOf(item);
+      const side = item.side || 'both';
+      if (side === 'both' || side === 'universal') {
+        bothItems.push({item:item, idx:globalIdx});
+      } else if (side === n1Role) {
+        side1Items.push({item:item, idx:globalIdx});
+      } else if (side === n2Role) {
+        side2Items.push({item:item, idx:globalIdx});
+      } else {
+        bothItems.push({item:item, idx:globalIdx});
+      }
+    });
+
+    // Only add block if it has ceremonies
+    if (side1Items.length || side2Items.length || bothItems.length) {
+      tradBlocks.push({
+        tradSlug: tradSlug,
+        tradLabel: tradLabel,
+        side1: side1Items,
+        side2: side2Items,
+        both: bothItems,
+        isSingleTrad: !trad2,
+      });
+    }
+
+    // Initialise selections (all selected by default)
+    if (!ceremonySelections[tradSlug]) {
+      ceremonySelections[tradSlug] = { side1: {}, side2: {}, both: {} };
+      side1Items.forEach(function(ci){ ceremonySelections[tradSlug].side1[ci.idx] = true; });
+      side2Items.forEach(function(ci){ ceremonySelections[tradSlug].side2[ci.idx] = true; });
+      bothItems.forEach(function(ci){ ceremonySelections[tradSlug].both[ci.idx] = true; });
+    }
+  });
+
+  // Build HTML
+  const container = document.getElementById('cs-container');
+  if (!container) return;
+
+  container.innerHTML = tradBlocks.map(function(block) {
+    const tradHeader = trad2
+      ? '<div class="cs-tradition-label">' + block.tradLabel + ' ceremonies</div>'
+      : '';
+
+    function csItem(ci, group) {
+      const sel = ceremonySelections[block.tradSlug][group][ci.idx] !== false;
+      const name = ci.item.name || ci.item.event || '';
+      const timing = ci.item.timing || '';
+      return '<div class="cs-item ' + (sel ? 'selected' : 'deselected') + '" onclick="toggleCs('' + block.tradSlug + '','' + group + '',' + ci.idx + ',this)">' +
+        '<div class="cs-check"><span class="cs-check-tick">&#10003;</span></div>' +
+        '<div><div class="cs-item-name">' + name + '</div>' +
+        (timing ? '<div class="cs-item-timing">' + timing + '</div>' : '') +
+        '</div></div>';
+    }
+
+    const col1Html = block.side1.map(function(ci){return csItem(ci,'side1');}).join('');
+    const col2Html = block.side2.map(function(ci){return csItem(ci,'side2');}).join('');
+    const bothHtml = block.both.map(function(ci){return csItem(ci,'both');}).join('');
+
+    return '<div class="cs-tradition-block">' +
+      tradHeader +
+      '<div class="cs-cols">' +
+        '<div>' +
+          '<div class="cs-col-header">' + n1 + ''s ceremonies</div>' +
+          (col1Html || '<div style="font-size:12px;color:var(--muted);font-style:italic;padding:8px 0">None specific</div>') +
+        '</div>' +
+        '<div>' +
+          '<div class="cs-col-header">' + n2 + ''s ceremonies</div>' +
+          (col2Html || '<div style="font-size:12px;color:var(--muted);font-style:italic;padding:8px 0">None specific</div>') +
+        '</div>' +
+      '</div>' +
+      (bothHtml ? '<div class="cs-shared-label">For both of you</div><div class="cs-shared-grid">' + bothHtml + '</div>' : '') +
+    '</div>';
+  }).join('');
+}
+
+function toggleCs(tradSlug, group, idx, el) {
+  const current = ceremonySelections[tradSlug][group][idx] !== false;
+  ceremonySelections[tradSlug][group][idx] = !current;
+  el.classList.toggle('selected', !current);
+  el.classList.toggle('deselected', current);
+  const tick = el.querySelector('.cs-check-tick');
+  if (tick) tick.style.display = !current ? 'block' : 'none';
+}
+
+function goToConfirmation() {
+  // Build confirmation view
+  buildConfirmation();
+  const q7 = document.getElementById('q7');
+  const q8 = document.getElementById('q8');
+  q7.classList.add('exit-left'); q7.classList.remove('active');
+  setTimeout(function() {
+    q7.classList.remove('exit-left');
+    q8.classList.add('active');
+  }, 260);
+  currentQ = 8;
+  updateProgress();
+}
+
+function goBackFromConf() {
+  const q8 = document.getElementById('q8');
+  const q7 = document.getElementById('q7');
+  q8.style.transition = 'opacity 0.25s, transform 0.25s';
+  q8.style.opacity = '0';
+  q8.style.transform = 'translateX(50px)';
+  setTimeout(function() {
+    q8.classList.remove('active');
+    q8.style.transition = '';
+    q8.style.opacity = '';
+    q8.style.transform = '';
+    q7.classList.add('active');
+  }, 260);
+  currentQ = 7;
+  updateProgress();
+}
+
+function getSelectedCeremonies() {
+  // Return array of selected ceremony objects
+  const selected = [];
+  const seen = new Set();
+  Object.values(ceremonySelections).forEach(function(groups) {
+    ['side1','side2','both'].forEach(function(group) {
+      Object.entries(groups[group]).forEach(function(e) {
+        const idx = parseInt(e[0]);
+        const isSelected = e[1] !== false;
+        if (isSelected && !seen.has(idx)) {
+          seen.add(idx);
+          if (planCeremonies[idx]) selected.push({item: planCeremonies[idx], idx: idx});
+        }
+      });
+    });
+  });
+  // Sort by original order
+  selected.sort(function(a,b){ return a.idx - b.idx; });
+  return selected.map(function(s){ return s.item; });
+}
+
+function buildConfirmation() {
+  const selected = getSelectedCeremonies();
+  const n1 = S.name1 || 'Partner one';
+  const n2 = S.name2 || 'Partner two';
+  const trad1 = S.traditions[0];
+  const trad2 = S.traditions[1] || null;
+
+  document.getElementById('q8-sub').textContent =
+    selected.length + ' ceremonies selected · ' +
+    S.budget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + ' budget · ' +
+    S.guests + ' guests';
+
+  const allTradSlugs = trad2 ? [trad1, trad2] : [trad1];
+  const n1Role = S.role1;
+  const n2Role = S.role2;
+
+  let html = '';
+
+  allTradSlugs.forEach(function(tradSlug) {
+    const tradInfo = TRADS.find(function(t){return t.slug===tradSlug;}) || {label:tradSlug};
+    const tradCerems = selected.filter(function(item) {
+      const src = item._sourceTradition || item.tradition || item.source || '';
+      return !trad2 || src === tradSlug || src === 'universal' || src === '';
+    });
+    if (!tradCerems.length) return;
+
+    const side1 = tradCerems.filter(function(i){ return (i.side||'both') === n1Role; });
+    const side2 = tradCerems.filter(function(i){ return (i.side||'both') === n2Role; });
+    const both = tradCerems.filter(function(i){ return !['bride','groom'].includes(i.side||'both'); });
+
+    function confItem(item) {
+      return '<div class="conf-item">' + (item.name||item.event||'') +
+        (item.timing ? '<span class="conf-item-timing"> &middot; ' + item.timing + '</span>' : '') +
+        '</div>';
+    }
+
+    html += '<div class="conf-block">' +
+      (trad2 ? '<div class="conf-trad-header">' + tradInfo.label + '</div>' : '') +
+      '<div class="conf-cols">' +
+        '<div><div class="conf-col-header">' + n1 + ''s ceremonies</div>' +
+          (side1.length ? side1.map(confItem).join('') : '<div class="conf-item" style="opacity:0.4">None selected</div>') +
+        '</div>' +
+        '<div><div class="conf-col-header">' + n2 + ''s ceremonies</div>' +
+          (side2.length ? side2.map(confItem).join('') : '<div class="conf-item" style="opacity:0.4">None selected</div>') +
+        '</div>' +
+      '</div>' +
+      (both.length ? '<div class="conf-shared-header">For both of you</div>' + both.map(confItem).join('') : '') +
+    '</div>';
+  });
+
+  // Budget adjusted by ceremony count
+  const totalCerems = planCeremonies.length || 1;
+  const selectedCount = selected.length;
+  const ratio = Math.max(0.5, Math.min(1, selectedCount / totalCerems));
+  const adjustedBudget = Math.round(S.budget * ratio);
+
+  html += '<div class="conf-budget">' +
+    '<div class="conf-budget-total">' + adjustedBudget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>' +
+    '<div class="conf-budget-sub">estimated budget · adjusted for ' + selectedCount + ' of ' + totalCerems + ' ceremonies</div>' +
+    (S.plan && S.plan.budget ? buildConfBudgetBars(S.plan.budget, adjustedBudget, ratio) : '') +
+  '</div>';
+
+  document.getElementById('conf-container').innerHTML = html;
+}
+
+function buildConfBudgetBars(budgetData, adjustedTotal, ratio) {
+  const items = Array.isArray(budgetData) ? budgetData : (budgetData.budget_lines || []);
+  if (!items.length) return '';
+  return items.slice(0,8).map(function(item) {
+    const cat = item.category || item.name || '';
+    const amt = Math.round((item.suggested_amount || (adjustedTotal * ((item.pct_low||0)+(item.pct_high||0))/2/100)) * ratio);
+    const pct = adjustedTotal > 0 ? amt/adjustedTotal*100 : 0;
+    return '<div class="conf-budget-row">' +
+      '<div class="conf-budget-cat">' + cat + '</div>' +
+      '<div class="conf-budget-track"><div class="conf-budget-fill" style="width:' + Math.min(pct*2,100) + '%"></div></div>' +
+      '<div class="conf-budget-amt">' + amt.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function buildFinalPlan() {
+  // Pass selected ceremonies to the results page
+  const selected = getSelectedCeremonies();
+  if (S.plan) {
+    S.plan.selectedCeremonies = selected;
+    S.plan.adjustedBudget = Math.round(S.budget * Math.max(0.5, selected.length / (planCeremonies.length||1)));
+  }
+  showResults();
 }
 
 // ── Keyboard ──
