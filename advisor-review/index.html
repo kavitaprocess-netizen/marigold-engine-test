@@ -155,8 +155,28 @@
 <div class="layout">
   <aside class="sidebar">
     <div class="sidebar-header">
-      <a href="/" style="display:flex;align-items:center;gap:6px;text-decoration:none;margin-bottom:10px;color:var(--muted);font-size:11px;font-style:italic">
-        ← back to marigold
+      <a href="/" style="display:flex;align-items:center;gap:8px;text-decoration:none;margin-bottom:16px;">
+        <svg width="20" height="20" viewBox="0 0 34 34" xmlns="http://www.w3.org/2000/svg">
+          <g fill="#E0B030" stroke="#C8941A" stroke-width="0.4">
+            <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(0 17 17)"/>
+            <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(51.4 17 17)"/>
+            <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(102.8 17 17)"/>
+            <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(154.2 17 17)"/>
+            <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(205.7 17 17)"/>
+            <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(257.1 17 17)"/>
+            <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(308.5 17 17)"/>
+          </g>
+          <g fill="#F7D44C" stroke="#E0B030" stroke-width="0.3">
+            <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(0 17 17)"/>
+            <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(60 17 17)"/>
+            <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(120 17 17)"/>
+            <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(180 17 17)"/>
+            <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(240 17 17)"/>
+            <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(300 17 17)"/>
+          </g>
+          <circle cx="17" cy="17" r="4.1" fill="#6B5318" stroke="#5A4512" stroke-width="0.3"/>
+        </svg>
+        <span style="font-size:13px;letter-spacing:3px;color:#3C3010;font-style:italic;font-family:'Playfair Display',Georgia,serif">marigold</span>
       </a>
       <h1>Marigold · Advisor Review</h1>
       <p id="sidebar-count">Loading…</p>
@@ -486,57 +506,73 @@ function paragraphDiff(oldText, newText) {
 function renderCulturalNotes(text) {
   if (!text) return '<p style="color:#9A8A6A;font-style:italic">No cultural notes added yet.</p>';
 
-  // Normalise: treat single newlines as paragraph breaks too
-  // (database stores content with \n not \n\n in most cases)
   let t = text.trim();
 
-  // Escape HTML first
+  // Step 1: Split on bold headings (**...**) — insert newlines before them
+  // so each bold heading starts a new block
+  t = t.replace(/(\*\*[^*]+\*\*)/g, '
+
+$1
+');
+
+  // Step 2: Split on numbered list items (1. 2. 3.) — insert newlines before each
+  t = t.replace(/(\s)(\d+\.\s)/g, '
+$2');
+
+  // Step 3: Split on sentence-ending patterns that signal a new topic
+  // e.g. period followed by capital letter and a keyword
+  t = t.replace(/\.\s+(Three things|The |A |An |For |In |If |This |When |What |Why |How )/g, '.
+
+$1');
+
+  // Step 4: Escape HTML
   t = t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-  // Bold: **text**
+  // Step 5: Apply bold
   t = t.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 
-  // Split into lines
-  const lines = t.split(/\n/);
+  // Step 6: Split into lines and render
+  const lines = t.split(/
+/).map(l => l.trim()).filter(l => l);
   let html = '';
   let i = 0;
 
   while (i < lines.length) {
-    const line = lines[i].trim();
+    const line = lines[i];
 
-    if (!line) { i++; continue; }
-
-    // Numbered list item
+    // Numbered list — collect consecutive items
     if (/^\d+\.\s/.test(line)) {
       html += '<ol class="notes-list">';
-      while (i < lines.length && /^\d+\.\s/.test(lines[i].trim())) {
-        const item = lines[i].trim().replace(/^\d+\.\s/, '');
-        html += `<li>${item}</li>`;
+      while (i < lines.length && /^\d+\.\s/.test(lines[i])) {
+        html += '<li>' + lines[i].replace(/^\d+\.\s/, '') + '</li>';
         i++;
       }
       html += '</ol>';
       continue;
     }
 
-    // Bold-only line = heading
-    if (/^<strong>.+<\/strong>:?$/.test(line) || /^\*\*.+\*\*:?$/.test(line)) {
-      html += `<p class="notes-heading">${line}</p>`;
+    // Bold heading line
+    if (line.startsWith('<strong>') && line.endsWith('</strong>') || line.startsWith('<strong>') && line.endsWith('</strong>:')) {
+      html += '<p class="notes-heading">' + line + '</p>';
       i++;
       continue;
     }
 
-    // Regular paragraph — collect consecutive non-list lines
+    // Regular paragraph — collect until empty line or heading
     let para = line;
     i++;
-    while (i < lines.length && lines[i].trim() && !/^\d+\.\s/.test(lines[i].trim())) {
-      para += ' ' + lines[i].trim();
+    while (i < lines.length) {
+      const next = lines[i];
+      if (!next || /^\d+\.\s/.test(next) || next.startsWith('<strong>')) break;
+      para += ' ' + next;
       i++;
     }
-    html += `<p>${para}</p>`;
+    html += '<p>' + para + '</p>';
   }
 
   return html || '<p style="color:#9A8A6A;font-style:italic">No cultural notes added yet.</p>';
 }
+
 
 function renderChecklistItems(canEdit){
   if(!workingData.checklist_template.length)return'<div style="padding:12px;color:var(--muted);font-size:13px">No items yet.</div>';

@@ -129,7 +129,7 @@ const QUESTIONNAIRE_HTML = `<!DOCTYPE html>
   #screens {
     position: fixed;
     inset: 0;
-    top: 57px;
+    top: 62px;
     overflow: hidden;
   }
 
@@ -377,6 +377,33 @@ const QUESTIONNAIRE_HTML = `<!DOCTYPE html>
     transition: color 0.15s;
   }
   .btn-back:hover { color: var(--deep); }
+  /* ── Role assignment ── */
+  .role-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:4px; }
+  @media(max-width:480px){.role-row{grid-template-columns:1fr;}}
+  .role-pair { display:flex; flex-direction:column; gap:8px; }
+  .role-name { font-size:12px; color:var(--muted); font-style:italic; }
+  .role-options { display:flex; gap:8px; }
+  .role-btn {
+    flex:1; padding:10px 0; border:1px solid var(--bdr); border-radius:100px;
+    font-size:13px; font-family:'Playfair Display',serif; font-style:italic;
+    color:var(--muted); background:white; cursor:pointer; transition:all 0.15s;
+  }
+  .role-btn:hover { border-color:var(--gd); color:var(--deep); }
+  .role-btn.on { border-color:var(--gk); background:var(--g); color:var(--deep); font-weight:500; }
+
+  /* ── Q4b tradition assignment ── */
+  .trad-assign-row { display:flex; align-items:center; justify-content:space-between; padding:14px 0; border-bottom:1px solid var(--warm); }
+  .trad-assign-row:last-child { border-bottom:none; }
+  .trad-assign-name { font-size:14px; font-style:italic; color:var(--deep); }
+  .trad-assign-btns { display:flex; gap:8px; }
+  .assign-btn {
+    padding:7px 16px; border:1px solid var(--bdr); border-radius:100px;
+    font-size:12px; font-family:'Playfair Display',serif; font-style:italic;
+    color:var(--muted); background:white; cursor:pointer; transition:all 0.15s;
+  }
+  .assign-btn:hover { border-color:var(--gd); color:var(--deep); }
+  .assign-btn.on { border-color:var(--gk); background:var(--g); color:var(--deep); }
+
   .back-link {
     background: none;
     border: none;
@@ -612,6 +639,19 @@ const QUESTIONNAIRE_HTML = `<!DOCTYPE html>
   }
   .ceremony-include input { accent-color: var(--gd); }
 
+  /* ── Two-column layout (ceremonies + checklist) ── */
+  .ceremony-cols, .checklist-cols { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px; }
+  @media(max-width:600px){ .ceremony-cols, .checklist-cols { grid-template-columns:1fr; } }
+  .ceremony-col-header { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--bdr); font-style:italic; }
+  .ceremony-shared-header { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin:20px 0 12px; padding-bottom:8px; border-bottom:1px solid var(--bdr); font-style:italic; }
+
+  /* ── Two-column layout (ceremonies + checklist) ── */
+  .ceremony-cols, .checklist-cols { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px; }
+  @media(max-width:600px){ .ceremony-cols, .checklist-cols { grid-template-columns:1fr; } }
+  .ceremony-col-header { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--bdr); font-style:italic; }
+  .ceremony-shared-header { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin:20px 0 12px; padding-bottom:8px; border-bottom:1px solid var(--bdr); font-style:italic; }
+
+  
   /* ── Budget ── */
   .budget-total-display {
     font-size: 32px;
@@ -652,7 +692,7 @@ const QUESTIONNAIRE_HTML = `<!DOCTYPE html>
 
 <div id="header">
   <a class="brand" href="/" title="Back to Marigold">
-    <svg class="flower-mark" width="26" height="26" viewBox="0 0 34 34" xmlns="http://www.w3.org/2000/svg">
+    <svg class="flower-mark" width="22" height="22" viewBox="0 0 34 34" xmlns="http://www.w3.org/2000/svg">
       <g fill="#E0B030" stroke="#C8941A" stroke-width="0.4">
         <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(0 17 17)"/>
         <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(25.7 17 17)"/>
@@ -719,20 +759,39 @@ const QUESTIONNAIRE_HTML = `<!DOCTYPE html>
 
 <div id="screens">
 
-  <!-- Q1: Names -->
+  <!-- Q1: Names + roles -->
   <div class="screen active" id="q1">
     <div class="q-wrap">
       <div class="ql">Let's begin</div>
       <div class="qt">What are your names?</div>
-      <div class="qs">We'll weave these through your plan — so it feels personal, not like a template.</div>
+      <div class="qs">We'll use these throughout your plan — and to personalise your ceremony plan.</div>
       <div class="name-row">
         <div class="field-group">
           <label class="field-label">Partner one</label>
-          <input type="text" class="fi" id="name1" placeholder="e.g. Priya" autocomplete="given-name" autofocus>
+          <input type="text" class="fi" id="name1" placeholder="e.g. Priya" autocomplete="given-name" autofocus oninput="updateRoleLabels()">
         </div>
         <div class="field-group">
           <label class="field-label">Partner two</label>
-          <input type="text" class="fi" id="name2" placeholder="e.g. James" autocomplete="given-name">
+          <input type="text" class="fi" id="name2" placeholder="e.g. James" autocomplete="given-name" oninput="updateRoleLabels()">
+        </div>
+      </div>
+      <div style="margin-top:24px">
+        <div class="ql" style="margin-bottom:12px">How do you refer to each other?</div>
+        <div class="role-row" id="role-row">
+          <div class="role-pair">
+            <div class="role-name" id="role-name1">Partner one</div>
+            <div class="role-options">
+              <button class="role-btn on" data-partner="1" data-role="bride" onclick="setRole(1,'bride',this)">Bride</button>
+              <button class="role-btn" data-partner="1" data-role="groom" onclick="setRole(1,'groom',this)">Groom</button>
+            </div>
+          </div>
+          <div class="role-pair">
+            <div class="role-name" id="role-name2">Partner two</div>
+            <div class="role-options">
+              <button class="role-btn" data-partner="2" data-role="bride" onclick="setRole(2,'bride',this)">Bride</button>
+              <button class="role-btn on" data-partner="2" data-role="groom" onclick="setRole(2,'groom',this)">Groom</button>
+            </div>
+          </div>
         </div>
       </div>
       <div class="err" id="err-q1">Please enter both names to continue.</div>
@@ -747,12 +806,15 @@ const QUESTIONNAIRE_HTML = `<!DOCTYPE html>
     <div class="q-wrap">
       <div class="ql">Your wedding</div>
       <div class="qt" id="q2-text">When is the wedding?</div>
-      <div class="qs">Approximate is absolutely fine — you can always refine this later.</div>
-      <input type="date" class="fi" id="wedding-date" style="max-width:280px">
+      <div class="qs">Pick a date or tick "not decided yet" — either works.</div>
+      <input type="date" class="fi" id="wedding-date" style="max-width:280px" onchange="onDateChange()">
+      <div style="margin-top:14px;display:flex;align-items:center;gap:8px">
+        <input type="checkbox" id="date-undecided" style="accent-color:var(--gd);width:16px;height:16px;cursor:pointer" onchange="onDateUndecided()">
+        <label for="date-undecided" style="font-size:13px;color:var(--muted);font-style:italic;cursor:pointer">Not decided yet</label>
+      </div>
       <div class="cta-row">
         <button class="btn-back" onclick="goBack()">← back</button>
-        <button class="cta" onclick="goNext(2)">Continue</button>
-        <button class="back-link" onclick="goNext(2, true)">Not sure yet</button>
+        <button class="cta" id="q2-continue" onclick="goNext(2)" disabled>Continue</button>
       </div>
     </div>
   </div>
@@ -762,12 +824,15 @@ const QUESTIONNAIRE_HTML = `<!DOCTYPE html>
     <div class="q-wrap">
       <div class="ql">Where</div>
       <div class="qt" id="q3-text">Where are you getting married?</div>
-      <div class="qs">City and state or country is enough — we use this for vendor recommendations.</div>
-      <input type="text" class="fi" id="location" placeholder="e.g. New Jersey, US" style="max-width:380px">
+      <div class="qs">City and state or country — or tick "not decided yet".</div>
+      <input type="text" class="fi" id="location" placeholder="e.g. New Jersey, US" style="max-width:380px" oninput="onLocationChange()">
+      <div style="margin-top:14px;display:flex;align-items:center;gap:8px">
+        <input type="checkbox" id="location-undecided" style="accent-color:var(--gd);width:16px;height:16px;cursor:pointer" onchange="onLocationUndecided()">
+        <label for="location-undecided" style="font-size:13px;color:var(--muted);font-style:italic;cursor:pointer">Not decided yet</label>
+      </div>
       <div class="cta-row">
         <button class="btn-back" onclick="goBack()">← back</button>
-        <button class="cta" onclick="goNext(3)">Continue</button>
-        <button class="back-link" onclick="goNext(3, true)">Not decided yet</button>
+        <button class="cta" id="q3-continue" onclick="goNext(3)" disabled>Continue</button>
       </div>
     </div>
   </div>
@@ -785,6 +850,20 @@ const QUESTIONNAIRE_HTML = `<!DOCTYPE html>
       <div class="cta-row">
         <button class="btn-back" onclick="goBack()">← back</button>
         <button class="cta" onclick="goNext(4)">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q4b: Tradition assignment (interfaith only — shown dynamically) -->
+  <div class="screen" id="q4b">
+    <div class="q-wrap">
+      <div class="ql">Your traditions</div>
+      <div class="qt" id="q4b-text">Which tradition belongs to whom?</div>
+      <div class="qs" id="q4b-sub">This helps us assign ceremonies to the right column in your plan.</div>
+      <div id="q4b-assignment" style="margin-top:8px"></div>
+      <div class="cta-row">
+        <button class="btn-back" onclick="goBack()">← back</button>
+        <button class="cta" onclick="goNext('4b')">Continue</button>
       </div>
     </div>
   </div>
@@ -876,10 +955,110 @@ const QUESTIONNAIRE_HTML = `<!DOCTYPE html>
 
 <script>
 // ── State ──
-const S = { name1:'', name2:'', date:'', location:'', traditions:[], budget:50000, guests:100, plan:null };
+const S = { name1:'', name2:'', role1:'bride', role2:'groom', dateSure:false, locationSure:false, date:'', location:'', traditions:[], traditionAssignment:{}, budget:50000, guests:100, plan:null };
 let guests = 100;
 let currentQ = 1;
 const TOTAL_Q = 6;
+
+// ── Role assignment ──
+function setRole(partner, role, btn) {
+  const key = 'role' + partner;
+  S[key] = role;
+  // Update button states for this partner
+  document.querySelectorAll('[data-partner="' + partner + '"]').forEach(function(b) {
+    b.classList.toggle('on', b.dataset.role === role);
+  });
+}
+
+function updateRoleLabels() {
+  const n1 = document.getElementById('name1').value.trim() || 'Partner one';
+  const n2 = document.getElementById('name2').value.trim() || 'Partner two';
+  const el1 = document.getElementById('role-name1');
+  const el2 = document.getElementById('role-name2');
+  if (el1) el1.textContent = n1 + ' is';
+  if (el2) el2.textContent = n2 + ' is';
+}
+
+// ── Date / location gating ──
+function onDateChange() {
+  const val = document.getElementById('wedding-date').value;
+  if (val) {
+    document.getElementById('date-undecided').checked = false;
+    S.dateSure = true;
+  }
+  updateQ2Continue();
+}
+
+function onDateUndecided() {
+  const checked = document.getElementById('date-undecided').checked;
+  if (checked) {
+    document.getElementById('wedding-date').value = '';
+    S.dateSure = false;
+  }
+  updateQ2Continue();
+}
+
+function updateQ2Continue() {
+  const hasDate = document.getElementById('wedding-date').value !== '';
+  const undecided = document.getElementById('date-undecided').checked;
+  const btn = document.getElementById('q2-continue');
+  if (btn) btn.disabled = !(hasDate || undecided);
+}
+
+function onLocationChange() {
+  const val = document.getElementById('location').value.trim();
+  if (val) document.getElementById('location-undecided').checked = false;
+  updateQ3Continue();
+}
+
+function onLocationUndecided() {
+  const checked = document.getElementById('location-undecided').checked;
+  if (checked) document.getElementById('location').value = '';
+  updateQ3Continue();
+}
+
+function updateQ3Continue() {
+  const hasLoc = document.getElementById('location').value.trim() !== '';
+  const undecided = document.getElementById('location-undecided').checked;
+  const btn = document.getElementById('q3-continue');
+  if (btn) btn.disabled = !(hasLoc || undecided);
+}
+
+// ── Q4b: Tradition assignment ──
+function buildQ4b() {
+  if (S.traditions.length < 2) return; // single tradition — skip Q4b
+  const n1 = S.name1 || 'Partner one';
+  const n2 = S.name2 || 'Partner two';
+  document.getElementById('q4b-text').innerHTML = 'Which tradition belongs to whom, <em>' + n1 + '</em> and <em>' + n2 + '</em>?';
+  
+  // Default: first tradition to name1, second to name2
+  if (!S.traditionAssignment[S.traditions[0]]) {
+    S.traditionAssignment[S.traditions[0]] = 'name1';
+    S.traditionAssignment[S.traditions[1]] = 'name2';
+  }
+
+  const container = document.getElementById('q4b-assignment');
+  container.innerHTML = S.traditions.map(function(slug) {
+    const trad = TRADS.find(function(t){return t.slug===slug;});
+    const label = trad ? trad.label : slug;
+    const assigned = S.traditionAssignment[slug] || 'name1';
+    return '<div class="trad-assign-row">' +
+      '<div class="trad-assign-name">' + label + '</div>' +
+      '<div class="trad-assign-btns">' +
+        '<button class="assign-btn ' + (assigned==='name1'?'on':'') + '" onclick="assignTrad('' + slug + '','name1',this)">' + n1 + '</button>' +
+        '<button class="assign-btn ' + (assigned==='name2'?'on':'') + '" onclick="assignTrad('' + slug + '','name2',this)">' + n2 + '</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function assignTrad(slug, partner, btn) {
+  S.traditionAssignment[slug] = partner;
+  // Update buttons for this tradition row
+  const row = btn.closest('.trad-assign-row');
+  row.querySelectorAll('.assign-btn').forEach(function(b) { b.classList.remove('on'); });
+  btn.classList.add('on');
+}
 
 // ── Traditions ──
 const TRADS = [
@@ -1003,16 +1182,45 @@ function goNext(from, skip=false) {
     const n2 = document.getElementById('name2').value.trim();
     if (!n1||!n2) { document.getElementById('err-q1').classList.add('show'); return; }
     document.getElementById('err-q1').classList.remove('show');
-    S.name1=n1; S.name2=n2; personalise();
+    S.name1=n1; S.name2=n2;
+    // role1/role2 already set by setRole() — defaults are bride/groom
+    personalise();
   }
   if (from===2) {
-    S.date = skip ? '' : document.getElementById('wedding-date').value;
-    S.dateSure = !skip && S.date !== '';
+    S.date = document.getElementById('wedding-date').value || '';
+    S.dateSure = S.date !== '';
   }
-  if (from===3 && !skip) S.location = document.getElementById('location').value.trim();
+  if (from===3) {
+    S.location = document.getElementById('location').value.trim() || '';
+  }
   if (from===4) {
     if (!S.traditions.length) { document.getElementById('err-q4').classList.add('show'); return; }
     document.getElementById('err-q4').classList.remove('show');
+    // If interfaith, show Q4b; otherwise skip to Q5
+    if (S.traditions.length >= 2) {
+      buildQ4b();
+      // Transition to q4b
+      const cur = document.getElementById('q' + currentQ);
+      const next = document.getElementById('q4b');
+      cur.classList.add('exit-left'); cur.classList.remove('active');
+      setTimeout(function() {
+        cur.classList.remove('exit-left');
+        next.classList.add('active');
+      }, 260);
+      currentQ = '4b';
+      updateProgress();
+      return;
+    }
+  }
+  if (from==='4b') {
+    // Go to Q5
+    const cur = document.getElementById('q4b');
+    const next = document.getElementById('q5');
+    cur.classList.add('exit-left'); cur.classList.remove('active');
+    setTimeout(function() { cur.classList.remove('exit-left'); next.classList.add('active'); }, 260);
+    currentQ = 5;
+    updateProgress();
+    return;
   }
   if (from===5 && !skip) S.budget = parseInt(document.getElementById('budget-slider').value);
   if (from===6) { S.guests=guests; submitPlan(); return; }
@@ -1035,22 +1243,30 @@ function updateProgress() {
 }
 
 function goBack() {
-  if (currentQ <= 1) return;
-  const prev = currentQ - 1;
-  const current = document.getElementById('q' + currentQ);
-  const prevEl = document.getElementById('q' + prev);
-  if (!current || !prevEl) return;
-  current.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
-  current.style.opacity = '0';
-  current.style.transform = 'translateX(50px)';
+  if (currentQ === 1 || currentQ === '1') return;
+  // Determine previous screen
+  let prevId, prevQ;
+  if (currentQ === '4b') { prevId = 'q4'; prevQ = 4; }
+  else if (currentQ === 5) {
+    if (S.traditions.length >= 2) { prevId = 'q4b'; prevQ = '4b'; }
+    else { prevId = 'q4'; prevQ = 4; }
+  }
+  else { prevQ = currentQ - 1; prevId = 'q' + prevQ; }
+
+  const cur = document.getElementById('q' + currentQ);
+  const prev = document.getElementById(prevId);
+  if (!cur || !prev) return;
+  cur.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+  cur.style.opacity = '0';
+  cur.style.transform = 'translateX(50px)';
   setTimeout(function() {
-    current.classList.remove('active');
-    current.style.transition = '';
-    current.style.opacity = '';
-    current.style.transform = '';
-    prevEl.classList.add('active');
+    cur.classList.remove('active');
+    cur.style.transition = '';
+    cur.style.opacity = '';
+    cur.style.transform = '';
+    prev.classList.add('active');
   }, 250);
-  currentQ = prev;
+  currentQ = prevQ;
   updateProgress();
 }
 
@@ -1200,21 +1416,85 @@ function milestoneToDate(milestone, weddingDate) {
 
 function renderChecklist(items) {
   const el = document.getElementById('tab-checklist');
-  if (!items.length) { el.innerHTML='<p style="color:var(--muted);font-style:italic;font-size:13px;padding:20px 0">No checklist items found.</p>'; return; }
-  const groups={};
-  items.forEach(item=>{ const m=item.milestone||item.timeframe||'General'; if(!groups[m])groups[m]=[]; groups[m].push(item); });
-  el.innerHTML = Object.entries(groups).map(([m,its])=>\`
-    <div class="out-ey">\${milestoneToDate(m, S.date)}</div>
-    \${its.map(item=>{
-      const label = item.label||item.task||item.description||'';
-      const trad = item.tradition||item.source;
-      const col = trad?tradColor(trad):null;
-      return \`<div class="checklist-item">
-        <div class="check-box" onclick="this.classList.toggle('checked')"></div>
-        <div class="check-label">\${label}\${col?\`<span class="trad-tag" style="background:\${col.bg};color:\${col.color};border-color:\${col.bg}">\${TRADS.find(t=>t.slug===trad)?.label?.split('·')[0]?.trim()||trad}</span>\`:''}</div>
-      </div>\`;
-    }).join('')}\`
-  ).join('');
+  if (!items.length) {
+    el.innerHTML='<p style="color:var(--muted);font-style:italic;font-size:13px;padding:20px 0">No checklist items found.</p>';
+    return;
+  }
+
+  const trad1 = S.traditions[0];
+  const trad2 = S.traditions[1];
+
+  function checkItem(item, i) {
+    const label = item.label||item.task||item.description||'';
+    const trad = item.tradition||item.source||item._sourceTradition||'';
+    const col = trad ? tradColor(trad) : null;
+    const tradName = col ? (TRADS.find(t=>t.slug===trad)||{label:trad}).label.split('·')[0].trim() : '';
+    return '<div class="checklist-item">' +
+      '<div class="check-box" onclick="this.classList.toggle('checked')"></div>' +
+      '<div class="check-label">' + label +
+        (col ? '<span class="trad-tag" style="background:' + col.bg + ';color:' + col.color + ';border-color:' + col.bg + '">' + tradName + '</span>' : '') +
+      '</div>' +
+    '</div>';
+  }
+
+  // Split items by tradition
+  const side1 = items.filter(function(i) {
+    const src = i.tradition||i.source||i._sourceTradition||'';
+    return src && src !== 'Universal' && src === trad1;
+  });
+  const side2 = items.filter(function(i) {
+    const src = i.tradition||i.source||i._sourceTradition||'';
+    return trad2 && src && src !== 'Universal' && src === trad2;
+  });
+  const shared = items.filter(function(i) {
+    const src = i.tradition||i.source||i._sourceTradition||'';
+    return !src || src === 'Universal' || src === 'both' || src === 'Interfaith' ||
+           (!side1.includes(i) && !side2.includes(i));
+  });
+
+  function groupByMilestone(list) {
+    const groups = {};
+    list.forEach(function(item) {
+      const m = item.milestone||item.timeframe||'General';
+      if (!groups[m]) groups[m] = [];
+      groups[m].push(item);
+    });
+    return groups;
+  }
+
+  function renderGroup(list) {
+    const groups = groupByMilestone(list);
+    return Object.entries(groups).map(function(entry) {
+      const m = entry[0], its = entry[1];
+      return '<div class="out-ey">' + milestoneToDate(m, S.date) + '</div>' +
+        its.map(checkItem).join('');
+    }).join('');
+  }
+
+  // If no meaningful split, show as grouped list
+  if (side1.length === 0 && side2.length === 0) {
+    el.innerHTML = renderGroup(items);
+    return;
+  }
+
+  const name1 = S.name1 || (TRADS.find(function(t){return t.slug===trad1;})||{label:'Partner 1'}).label.split('·')[0].trim();
+  const name2 = S.name2 || (trad2 ? (TRADS.find(function(t){return t.slug===trad2;})||{label:'Partner 2'}).label.split('·')[0].trim() : 'Partner 2');
+
+  el.innerHTML =
+    '<div class="checklist-cols">' +
+      '<div>' +
+        '<div class="ceremony-col-header">' + name1 + ''s checklist</div>' +
+        (side1.length ? renderGroup(side1) : '<p style="font-size:12px;color:var(--muted);font-style:italic;padding:8px 0">No specific items</p>') +
+      '</div>' +
+      (trad2 ? '<div>' +
+        '<div class="ceremony-col-header">' + name2 + ''s checklist</div>' +
+        (side2.length ? renderGroup(side2) : '<p style="font-size:12px;color:var(--muted);font-style:italic;padding:8px 0">No specific items</p>') +
+      '</div>' : '<div></div>') +
+    '</div>' +
+    (shared.length ?
+      '<div class="ceremony-shared-header">Shared tasks</div>' +
+      renderGroup(shared)
+    : '');
 }
 
 // ── Render ceremony vertical timeline ──
@@ -1295,46 +1575,44 @@ function renderCeremonies(items) {
   </p>\`;
 
   if (isSingle) {
-    // Single tradition — group by phase: pre-wedding / ceremony day / post-wedding
+    // Single tradition — two columns: bride's side / groom's side
+    // Split by role hints in ceremony name/notes or just alternate evenly
     const allItems = leftItems.concat(sharedItems);
-    const prewedding = allItems.filter(({item}) => {
-      const t = (item.timing||item.timeframe||'').toLowerCase();
-      return t.includes('month') || t.includes('week') || t.includes('before') || t.includes('days before') || t.includes('evening before');
+    const brideItems = [];
+    const groomItems = [];
+    const bothItems = [];
+
+    allItems.forEach(function(ci) {
+      const name = (ci.item.name || ci.item.event || '').toLowerCase();
+      const notes = (ci.item.notes || '').toLowerCase();
+      const text = name + ' ' + notes;
+      // Bride-side markers
+      if (/bride|chooda|mehndi|mehendi|maiyaan|kalire|bridal shower|despedida|hen|hair comb|veil|bride.*side/i.test(text)) {
+        brideItems.push(ci);
+      // Groom-side markers
+      } else if (/groom|baraat|sehrabandi|ghodi|bachelor|tisch|pre-wedding.*groom|groom.*side|khan mak/i.test(text)) {
+        groomItems.push(ci);
+      // Shared
+      } else {
+        bothItems.push(ci);
+      }
     });
-    const dayof = allItems.filter(({item}) => {
-      const t = (item.timing||item.timeframe||'').toLowerCase();
-      return t.includes('day of') || t.includes('ceremony') || t.includes('morning') || t.includes('afternoon') || t.includes('evening') || (!t.includes('month') && !t.includes('week') && !t.includes('before') && !t.includes('after'));
-    });
-    const postwedding = allItems.filter(({item}) => {
-      const t = (item.timing||item.timeframe||'').toLowerCase();
-      return t.includes('after') || t.includes('following') || t.includes('days after') || t.includes('week after');
-    });
-    // If phases are unclear, just show all as one timeline
-    if (prewedding.length === 0 && postwedding.length === 0) {
-      html += \`<div class="ceremony-timeline">\${allItems.map(cardHtml).join('')}</div>\`;
+
+    // If we couldn't split meaningfully, show as vertical timeline
+    if (brideItems.length === 0 && groomItems.length === 0) {
+      html += '<div class="ceremony-timeline">' + allItems.map(cardHtml).join('') + '</div>';
     } else {
-      html += \`
-      <style>
-        .ceremony-cols { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:28px; }
-        @media(max-width:600px){.ceremony-cols{grid-template-columns:1fr;}}
-        .ceremony-col-header { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--bdr); font-style:italic; }
-        .ceremony-shared-header { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--bdr); font-style:italic; display:flex; align-items:center; gap:8px; }
-        .ceremony-shared-header::after { content:''; flex:1; height:1px; background:var(--bdr); }
-      </style>
-      \${prewedding.length || dayof.length ? \`
-      <div class="ceremony-cols">
-        \${prewedding.length ? \`<div>
-          <div class="ceremony-col-header">Before the wedding</div>
-          <div class="ceremony-timeline">\${prewedding.map(cardHtml).join('')}</div>
-        </div>\` : '<div></div>'}
-        \${dayof.length ? \`<div>
-          <div class="ceremony-col-header">The wedding day</div>
-          <div class="ceremony-timeline">\${dayof.map(cardHtml).join('')}</div>
-        </div>\` : '<div></div>'}
-      </div>\` : ''}
-      \${postwedding.length ? \`
-      <div class="ceremony-shared-header">After the wedding</div>
-      <div class="ceremony-timeline">\${postwedding.map(cardHtml).join('')}</div>\` : ''}\`;
+      html += '<div class="ceremony-cols">' +
+        '<div>' +
+          '<div class="ceremony-col-header">' + (S.name1 || 'Bride') + ''s side</div>' +
+          '<div class="ceremony-timeline">' + (brideItems.length ? brideItems.map(cardHtml).join('') : '<p style="font-size:12px;color:var(--muted);font-style:italic;padding:12px 0">No specific ceremonies</p>') + '</div>' +
+        '</div>' +
+        '<div>' +
+          '<div class="ceremony-col-header">' + (S.name2 || 'Groom') + ''s side</div>' +
+          '<div class="ceremony-timeline">' + (groomItems.length ? groomItems.map(cardHtml).join('') : '<p style="font-size:12px;color:var(--muted);font-style:italic;padding:12px 0">No specific ceremonies</p>') + '</div>' +
+        '</div>' +
+      '</div>' +
+      (bothItems.length ? '<div class="ceremony-shared-header">Shared ceremonies</div><div class="ceremony-timeline">' + bothItems.map(cardHtml).join('') + '</div>' : '');
     }
   } else {
     // Two traditions — two columns + shared at bottom
@@ -1348,17 +1626,15 @@ function renderCeremonies(items) {
     </style>
     <div class="ceremony-cols">
       <div>
-        <div class="ceremony-col-header">\${trad1Name.split('·')[0].trim()}</div>
-        <div class="ceremony-timeline">\${leftItems.map(cardHtml).join('') || '<p style="font-size:12px;color:var(--muted);font-style:italic;padding:12px 0">No specific ceremonies</p>'}</div>
+        <div class="ceremony-col-header">\${S.name1 ? S.name1 + '\\'s ceremonies' : trad1Name.split('·')[0].trim()}</div>
+        <div class="ceremony-timeline">' + leftItems.map(cardHtml).join('') + (leftItems.length ? '' : '<p style="font-size:12px;color:var(--muted);font-style:italic;padding:12px 0">No specific ceremonies</p>') + '</div>
       </div>
       <div>
-        <div class="ceremony-col-header">\${trad2Name.split('·')[0].trim()}</div>
-        <div class="ceremony-timeline">\${rightItems.map(cardHtml).join('') || '<p style="font-size:12px;color:var(--muted);font-style:italic;padding:12px 0">No specific ceremonies</p>'}</div>
+        <div class="ceremony-col-header">\${S.name2 ? S.name2 + '\\'s ceremonies' : trad2Name.split('·')[0].trim()}</div>
+        <div class="ceremony-timeline">' + rightItems.map(cardHtml).join('') + (rightItems.length ? '' : '<p style="font-size:12px;color:var(--muted);font-style:italic;padding:12px 0">No specific ceremonies</p>') + '</div>
       </div>
     </div>
-    \${sharedItems.length ? \`
-    <div class="ceremony-shared-header">Shared ceremonies</div>
-    <div class="ceremony-timeline">\${sharedItems.map(cardHtml).join('')}</div>\` : ''}\`;
+    ' + (sharedItems.length ? '<div class="ceremony-shared-header">Shared ceremonies</div><div class="ceremony-timeline">' + sharedItems.map(cardHtml).join('') + '</div>' : '') + '\`;
   }
 
   html += \`<p style="font-size:11px;color:var(--muted);font-style:italic;margin-top:16px">
@@ -1616,8 +1892,28 @@ const ADVISOR_HTML = `<!DOCTYPE html>
 <div class="layout">
   <aside class="sidebar">
     <div class="sidebar-header">
-      <a href="/" style="display:flex;align-items:center;gap:6px;text-decoration:none;margin-bottom:10px;color:var(--muted);font-size:11px;font-style:italic">
-        ← back to marigold
+      <a href="/" style="display:flex;align-items:center;gap:8px;text-decoration:none;margin-bottom:16px;">
+        <svg width="20" height="20" viewBox="0 0 34 34" xmlns="http://www.w3.org/2000/svg">
+          <g fill="#E0B030" stroke="#C8941A" stroke-width="0.4">
+            <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(0 17 17)"/>
+            <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(51.4 17 17)"/>
+            <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(102.8 17 17)"/>
+            <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(154.2 17 17)"/>
+            <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(205.7 17 17)"/>
+            <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(257.1 17 17)"/>
+            <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(308.5 17 17)"/>
+          </g>
+          <g fill="#F7D44C" stroke="#E0B030" stroke-width="0.3">
+            <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(0 17 17)"/>
+            <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(60 17 17)"/>
+            <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(120 17 17)"/>
+            <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(180 17 17)"/>
+            <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(240 17 17)"/>
+            <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(300 17 17)"/>
+          </g>
+          <circle cx="17" cy="17" r="4.1" fill="#6B5318" stroke="#5A4512" stroke-width="0.3"/>
+        </svg>
+        <span style="font-size:13px;letter-spacing:3px;color:#3C3010;font-style:italic;font-family:'Playfair Display',Georgia,serif">marigold</span>
       </a>
       <h1>Marigold · Advisor Review</h1>
       <p id="sidebar-count">Loading…</p>
@@ -1947,57 +2243,73 @@ function paragraphDiff(oldText, newText) {
 function renderCulturalNotes(text) {
   if (!text) return '<p style="color:#9A8A6A;font-style:italic">No cultural notes added yet.</p>';
 
-  // Normalise: treat single newlines as paragraph breaks too
-  // (database stores content with \\n not \\n\\n in most cases)
   let t = text.trim();
 
-  // Escape HTML first
+  // Step 1: Split on bold headings (**...**) — insert newlines before them
+  // so each bold heading starts a new block
+  t = t.replace(/(\\*\\*[^*]+\\*\\*)/g, '
+
+$1
+');
+
+  // Step 2: Split on numbered list items (1. 2. 3.) — insert newlines before each
+  t = t.replace(/(\\s)(\\d+\\.\\s)/g, '
+$2');
+
+  // Step 3: Split on sentence-ending patterns that signal a new topic
+  // e.g. period followed by capital letter and a keyword
+  t = t.replace(/\\.\\s+(Three things|The |A |An |For |In |If |This |When |What |Why |How )/g, '.
+
+$1');
+
+  // Step 4: Escape HTML
   t = t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-  // Bold: **text**
+  // Step 5: Apply bold
   t = t.replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>');
 
-  // Split into lines
-  const lines = t.split(/\\n/);
+  // Step 6: Split into lines and render
+  const lines = t.split(/
+/).map(l => l.trim()).filter(l => l);
   let html = '';
   let i = 0;
 
   while (i < lines.length) {
-    const line = lines[i].trim();
+    const line = lines[i];
 
-    if (!line) { i++; continue; }
-
-    // Numbered list item
+    // Numbered list — collect consecutive items
     if (/^\\d+\\.\\s/.test(line)) {
       html += '<ol class="notes-list">';
-      while (i < lines.length && /^\\d+\\.\\s/.test(lines[i].trim())) {
-        const item = lines[i].trim().replace(/^\\d+\\.\\s/, '');
-        html += \`<li>\${item}</li>\`;
+      while (i < lines.length && /^\\d+\\.\\s/.test(lines[i])) {
+        html += '<li>' + lines[i].replace(/^\\d+\\.\\s/, '') + '</li>';
         i++;
       }
       html += '</ol>';
       continue;
     }
 
-    // Bold-only line = heading
-    if (/^<strong>.+<\\/strong>:?$/.test(line) || /^\\*\\*.+\\*\\*:?$/.test(line)) {
-      html += \`<p class="notes-heading">\${line}</p>\`;
+    // Bold heading line
+    if (line.startsWith('<strong>') && line.endsWith('</strong>') || line.startsWith('<strong>') && line.endsWith('</strong>:')) {
+      html += '<p class="notes-heading">' + line + '</p>';
       i++;
       continue;
     }
 
-    // Regular paragraph — collect consecutive non-list lines
+    // Regular paragraph — collect until empty line or heading
     let para = line;
     i++;
-    while (i < lines.length && lines[i].trim() && !/^\\d+\\.\\s/.test(lines[i].trim())) {
-      para += ' ' + lines[i].trim();
+    while (i < lines.length) {
+      const next = lines[i];
+      if (!next || /^\\d+\\.\\s/.test(next) || next.startsWith('<strong>')) break;
+      para += ' ' + next;
       i++;
     }
-    html += \`<p>\${para}</p>\`;
+    html += '<p>' + para + '</p>';
   }
 
   return html || '<p style="color:#9A8A6A;font-style:italic">No cultural notes added yet.</p>';
 }
+
 
 function renderChecklistItems(canEdit){
   if(!workingData.checklist_template.length)return'<div style="padding:12px;color:var(--muted);font-size:13px">No items yet.</div>';
