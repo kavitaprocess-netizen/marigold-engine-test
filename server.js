@@ -613,39 +613,23 @@ function renderCulturalNotes(text) {
 
   let t = text.trim();
 
-  // Step 1: Split on bold headings (**...**) — insert newlines before them
-  // so each bold heading starts a new block
-  t = t.replace(/(\\*\\*[^*]+\\*\\*)/g, '
+  // Split on bold headings (**...**) and numbered lists
+  t = t.replace(/(\\*\\*[^*]+\\*\\*)/g, '\\n\\n$1\\n');
+  t = t.replace(/(\\s)(\\d+\\.\\s)/g, '\\n$2');
+  t = t.replace(/\\.\\s+(Three things|The |A |An |For |In |If |This |When |What |Why |How )/g, '.\\n\\n$1');
 
-$1
-');
-
-  // Step 2: Split on numbered list items (1. 2. 3.) — insert newlines before each
-  t = t.replace(/(\\s)(\\d+\\.\\s)/g, '
-$2');
-
-  // Step 3: Split on sentence-ending patterns that signal a new topic
-  // e.g. period followed by capital letter and a keyword
-  t = t.replace(/\\.\\s+(Three things|The |A |An |For |In |If |This |When |What |Why |How )/g, '.
-
-$1');
-
-  // Step 4: Escape HTML
+  // Escape HTML
   t = t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-  // Step 5: Apply bold
+  // Apply bold
   t = t.replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>');
 
-  // Step 6: Split into lines and render
-  const lines = t.split(/
-/).map(l => l.trim()).filter(l => l);
+  const lines = t.split(/\\n/).map(l => l.trim()).filter(l => l);
   let html = '';
   let i = 0;
 
   while (i < lines.length) {
     const line = lines[i];
-
-    // Numbered list — collect consecutive items
     if (/^\\d+\\.\\s/.test(line)) {
       html += '<ol class="notes-list">';
       while (i < lines.length && /^\\d+\\.\\s/.test(lines[i])) {
@@ -655,15 +639,11 @@ $1');
       html += '</ol>';
       continue;
     }
-
-    // Bold heading line
-    if (line.startsWith('<strong>') && line.endsWith('</strong>') || line.startsWith('<strong>') && line.endsWith('</strong>:')) {
+    if (line.startsWith('<strong>') && (line.endsWith('</strong>') || line.endsWith('</strong>:'))) {
       html += '<p class="notes-heading">' + line + '</p>';
       i++;
       continue;
     }
-
-    // Regular paragraph — collect until empty line or heading
     let para = line;
     i++;
     while (i < lines.length) {
@@ -677,7 +657,6 @@ $1');
 
   return html || '<p style="color:#9A8A6A;font-style:italic">No cultural notes added yet.</p>';
 }
-
 
 function renderChecklistItems(canEdit){
   if(!workingData.checklist_template.length)return'<div style="padding:12px;color:var(--muted);font-size:13px">No items yet.</div>';

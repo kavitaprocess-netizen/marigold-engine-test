@@ -305,14 +305,14 @@
   /* ── Role custom dropdown ── */
   .role-sentences { display:flex; flex-direction:column; gap:16px; }
   .role-sentence { display:flex; align-items:baseline; gap:6px; flex-wrap:wrap; }
-  .role-sentence-name { font-size:19px; font-style:italic; color:var(--deep); font-family:'Playfair Display',Georgia,serif; }
-  .role-sentence-is { font-size:16px; color:var(--muted); font-style:italic; font-family:'Playfair Display',Georgia,serif; }
+  .role-sentence-name { font-size:15px; font-style:italic; color:var(--deep); font-family:'Playfair Display',Georgia,serif; }
+  .role-sentence-is { font-size:14px; color:var(--muted); font-style:italic; font-family:'Playfair Display',Georgia,serif; }
   .role-dropdown { position:relative; display:inline-block; }
-  .role-dd-value { font-size:19px; font-style:italic; font-family:'Playfair Display',Georgia,serif; color:var(--deep); border-bottom:1.5px solid var(--gd); padding:2px 4px; cursor:pointer; user-select:none; }
+  .role-dd-value { font-size:15px; font-style:italic; font-family:'Playfair Display',Georgia,serif; color:var(--deep); border-bottom:1.5px solid var(--gd); padding:2px 4px; cursor:pointer; user-select:none; }
   .role-dd-value:hover { color:var(--gk); }
   .role-dd-menu { display:none; position:absolute; top:calc(100% + 4px); left:0; background:white; border:1px solid var(--bdr); border-radius:8px; box-shadow:0 4px 16px rgba(60,48,16,0.08); z-index:50; min-width:100px; overflow:hidden; }
   .role-dd-menu.open { display:block; }
-  .role-dd-menu div { padding:10px 16px; font-size:16px; font-style:italic; font-family:'Playfair Display',Georgia,serif; color:var(--deep); cursor:pointer; }
+  .role-dd-menu div { padding:8px 14px; font-size:14px; font-style:italic; font-family:'Playfair Display',Georgia,serif; color:var(--deep); cursor:pointer; }
   .role-dd-menu div:hover { background:var(--warm); }
   .back-link {
     background: none;
@@ -815,7 +815,7 @@
             <span class="role-sentence-name" id="role-name1">Partner one</span>
             <span class="role-sentence-is"> is the </span>
             <span class="role-dropdown" id="role-dd1">
-              <span class="role-dd-value" id="role-val1" onclick="toggleRoleDD(1)">Select &#9662;</span>
+              <span class="role-dd-value" id="role-val1" onclick="toggleRoleDD(1)">Bride &#9662;</span>
               <div class="role-dd-menu" id="role-menu1">
                 <div onclick="pickRole(1,'bride')">Bride</div>
                 <div onclick="pickRole(1,'groom')">Groom</div>
@@ -826,7 +826,7 @@
             <span class="role-sentence-name" id="role-name2">Partner two</span>
             <span class="role-sentence-is"> is the </span>
             <span class="role-dropdown" id="role-dd2">
-              <span class="role-dd-value" id="role-val2" onclick="toggleRoleDD(2)">Select &#9662;</span>
+              <span class="role-dd-value" id="role-val2" onclick="toggleRoleDD(2)">Groom &#9662;</span>
               <div class="role-dd-menu" id="role-menu2">
                 <div onclick="pickRole(2,'bride')">Bride</div>
                 <div onclick="pickRole(2,'groom')">Groom</div>
@@ -947,37 +947,6 @@
   </div>
 
   <!-- Q7: Ceremony selection -->
-  <div class="screen" id="q7">
-    <div style="height:100%;overflow-y:auto;overflow-x:hidden;padding:32px 24px 80px;box-sizing:border-box;" id="q7-scroll">
-    <div style="width:100%;max-width:900px;margin:0 auto">
-      <div class="ql">Your ceremony plan</div>
-      <div class="qt" id="q7-title">Choose your ceremonies</div>
-      <div class="qs" id="q7-sub">Select the ceremonies you want. We've made an intelligent start based on your traditions.</div>
-      <div id="cs-container" style="margin-top:24px"></div>
-      <div class="cta-row" style="margin-top:28px">
-        <button class="btn-back" onclick="goBack()">← back</button>
-        <button class="cta" onclick="goToConfirmation()">Review my plan →</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Q8: Confirmation -->
-  <div class="screen" id="q8">
-    <div style="overflow-y:auto;max-height:calc(100vh - 120px);padding-bottom:20px">
-      <div class="conf-wrap">
-        <div class="ql">Your wedding plan</div>
-        <div class="qt" id="q8-title">Here's what you've chosen</div>
-        <div class="qs" id="q8-sub"></div>
-        <div id="conf-container" style="margin-top:28px"></div>
-        <div class="cta-row" style="margin-top:32px">
-          <button class="btn-back" onclick="goBackFromConf()">← adjust selections</button>
-          <button class="cta" onclick="buildFinalPlan()">Build my full plan →</button>
-        </div>
-      </div>
-    </div>
-    </div>
-  </div>
-
   <!-- Q7: Ceremony selection -->
   <div class="screen" id="q7" style="overflow:hidden;position:relative;">
   <div id="q7-fade" style="position:absolute;bottom:0;left:0;right:0;height:80px;background:linear-gradient(transparent,var(--cream));pointer-events:none;z-index:10;transition:opacity 0.3s;"></div>
@@ -1061,7 +1030,7 @@
 // ── State ──
 function pos(n) { return n + "’s"; } // possessive helper avoids quote escaping issues
 
-const S = { name1:'', name2:'', role1:'', role2:'', dateSure:false, locationSure:false, date:'', location:'', traditions:[], traditionAssignment:{}, budget:50000, guests:100, plan:null };
+const S = { name1:'', name2:'', role1:'bride', role2:'groom', dateSure:false, locationSure:false, date:'', location:'', traditions:[], traditionAssignment:{}, budget:50000, guests:100, plan:null };
 let guests = 100;
 let currentQ = 1;
 const TOTAL_Q = 6;
