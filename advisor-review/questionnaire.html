@@ -867,11 +867,9 @@
       <div class="ql">Your wedding</div>
       <div class="qt" id="q2-text">When is the wedding?</div>
       <div class="qs">Pick a date or tick "not decided yet" — either works.</div>
-      <input type="text" class="fi" id="wedding-date" 
-        placeholder="DD / MM / YYYY" 
-        style="max-width:280px;font-family:'Playfair Display',Georgia,serif;font-style:italic;" 
-        oninput="onDateTextInput(this.value)"
-        pattern="\d{2}/\d{2}/\d{4}">
+      <input type="date" class="fi" id="wedding-date" 
+        style="max-width:280px;font-family:'Playfair Display',Georgia,serif;font-style:italic;color:var(--deep);" 
+        onchange="onDateChange()">
       <div style="margin-top:14px;display:flex;align-items:center;gap:8px">
         <input type="checkbox" id="date-undecided" style="accent-color:var(--gd);width:16px;height:16px;cursor:pointer" onchange="onDateUndecided()">
         <label for="date-undecided" style="font-size:13px;color:var(--muted);font-style:italic;cursor:pointer">Not decided yet</label>
@@ -1324,7 +1322,7 @@ function goNext(from, skip=false) {
     personalise();
   }
   if (from===2) {
-    S.date = S.date || ''; // date set by onDateTextInput
+    S.date = document.getElementById('wedding-date').value || '';
     S.dateSure = S.date !== '';
   }
   if (from===3) {
@@ -1465,9 +1463,15 @@ async function submitPlan() {
     ls.classList.add('exit-left'); ls.classList.remove('active');
     setTimeout(function() {
       ls.classList.remove('exit-left');
-      showCeremonySelection(planCeremonies);
+      try {
+        showCeremonySelection(planCeremonies);
+      } catch(e) {
+        console.error('Q7 error:', e);
+        var cont = document.getElementById('cs-container');
+        if (cont) cont.innerHTML = '<p style="color:var(--muted);font-style:italic;padding:20px 0">Could not load ceremonies — ' + e.message + '</p>';
+      }
       const q7 = document.getElementById('q7');
-      q7.classList.add('active');
+      if (q7) q7.classList.add('active');
       currentQ = 7;
       updateProgress();
     }, 260);
@@ -1540,12 +1544,9 @@ function showResults() {
 }
 
 function populateResults() {
-  transitionTo('loading-screen', 'results-screen');
-  document.getElementById('progress-fill').style.width='100%';
-
   const p = S.plan;
   const names = S.name2?`${S.name1} & ${S.name2}`:S.name1;
-  const tradNames = S.traditions.map(s=>TRADS.find(t=>t.slug===s)?.label||s).join(' + ');
+  const tradNames = S.traditions.map(function(s){ var t=TRADS.find(function(t){return t.slug===s;}); return t?t.label:s; }).join(' + ');
 
   document.getElementById('results-title').innerHTML = `<em>${names}</em> — your wedding plan`;
   const dateStr = S.date
@@ -1561,7 +1562,7 @@ function populateResults() {
     document.getElementById('conflicts-wrap').prepend(dateNote);
   }
 
-  if (p.conflicts?.length) {
+  if (p.conflicts && p.conflicts.length) {
     document.getElementById('conflicts-wrap').innerHTML = p.conflicts.map(c=>
       `<div class="conflict-banner">Note — ${c.description||c.message||JSON.stringify(c)}</div>`
     ).join('');
@@ -1912,6 +1913,15 @@ let planCeremonies = []; // raw from engine
 
 function showCeremonySelection(ceremonies) {
   planCeremonies = ceremonies;
+  var container = document.getElementById('cs-container');
+  if (!ceremonies || !ceremonies.length) {
+    if (container) container.innerHTML = '<p style="color:var(--muted);font-style:italic;padding:20px 0">No ceremonies found for this tradition yet.</p>';
+    return;
+  }
+  if (!S.traditions || !S.traditions.length) {
+    if (container) container.innerHTML = '<p style="color:var(--muted);font-style:italic;padding:20px 0">Please select a tradition first.</p>';
+    return;
+  }
   const n1 = S.name1 || 'Partner one';
   const n2 = S.name2 || 'Partner two';
   const trad1 = S.traditions[0];
@@ -2030,11 +2040,9 @@ function showCeremonySelection(ceremonies) {
     '</div>';
   }).join('');
 
-  var container = document.getElementById('cs-container');
-  if (container) container.innerHTML = html;
+  var cont2 = document.getElementById('cs-container');
+  if (cont2) cont2.innerHTML = html || '<p style="color:var(--muted);font-style:italic;padding:20px 0">No ceremonies to display.</p>';
 }
-
-
 function toggleCs(el) {
   var tradSlug = el.dataset.slug;
   var group = el.dataset.group;
