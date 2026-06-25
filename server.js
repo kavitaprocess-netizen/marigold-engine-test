@@ -303,7 +303,29 @@ const ADVISOR_HTML = `<!DOCTYPE html>
         </svg>
         <span style="font-size:13px;letter-spacing:3px;color:#3C3010;font-style:italic;font-family:'Playfair Display',Georgia,serif">marigold</span>
       </a>
-      <h1>Marigold · Advisor Review</h1>
+      <h1 style="display:flex;align-items:center;gap:6px">
+        <svg width="14" height="14" viewBox="0 0 34 34" xmlns="http://www.w3.org/2000/svg">
+          <g fill="#E0B030" stroke="#C8941A" stroke-width="0.5">
+            <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(0 17 17)"/>
+            <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(51.4 17 17)"/>
+            <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(102.8 17 17)"/>
+            <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(154.2 17 17)"/>
+            <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(205.7 17 17)"/>
+            <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(257.1 17 17)"/>
+            <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(308.5 17 17)"/>
+          </g>
+          <g fill="#F7D44C" stroke="#E0B030" stroke-width="0.3">
+            <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(0 17 17)"/>
+            <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(60 17 17)"/>
+            <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(120 17 17)"/>
+            <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(180 17 17)"/>
+            <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(240 17 17)"/>
+            <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(300 17 17)"/>
+          </g>
+          <circle cx="17" cy="17" r="4.1" fill="#6B5318"/>
+        </svg>
+        marigold · advisor review
+      </h1>
       <p id="sidebar-count">Loading…</p>
     </div>
     <div id="tradition-list"></div>
