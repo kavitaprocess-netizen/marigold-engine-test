@@ -1023,8 +1023,8 @@ function goNext(from, skip=false) {
 }
 
 function doTransition(from, to) {
-  const a = document.getElementById(\`q\${from}\`);
-  const b = document.getElementById(\`q\${to}\`);
+  const a = document.getElementById('q' + from);
+  const b = document.getElementById('q' + to);
   a.classList.add('exit-left'); a.classList.remove('active');
   setTimeout(()=>{ a.classList.remove('exit-left'); b.classList.add('active'); }, 260);
 }
@@ -1037,14 +1037,13 @@ function updateProgress() {
 function goBack() {
   if (currentQ <= 1) return;
   const prev = currentQ - 1;
-  const current = document.getElementById(\`q\${currentQ}\`);
-  const prevEl = document.getElementById(\`q\${prev}\`);
+  const current = document.getElementById('q' + currentQ);
+  const prevEl = document.getElementById('q' + prev);
   if (!current || !prevEl) return;
-  // Reverse transition — slide current right, bring prev back from left
   current.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
   current.style.opacity = '0';
   current.style.transform = 'translateX(50px)';
-  setTimeout(() => {
+  setTimeout(function() {
     current.classList.remove('active');
     current.style.transition = '';
     current.style.opacity = '';
@@ -1370,7 +1369,6 @@ function renderCeremonies(items) {
 }
 
 // old single-tradition renderCeremonies replaced above
-function OLD_renderCeremonies_placeholder() {
 window.toggleCard = function(i) {
   document.getElementById(\`cc-\${i}\`)?.classList.toggle('open');
 };
@@ -1618,6 +1616,9 @@ const ADVISOR_HTML = `<!DOCTYPE html>
 <div class="layout">
   <aside class="sidebar">
     <div class="sidebar-header">
+      <a href="/" style="display:flex;align-items:center;gap:6px;text-decoration:none;margin-bottom:10px;color:var(--muted);font-size:11px;font-style:italic">
+        ← back to marigold
+      </a>
       <h1>Marigold · Advisor Review</h1>
       <p id="sidebar-count">Loading…</p>
     </div>
