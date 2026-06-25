@@ -599,7 +599,6 @@
   </a>
   <div id="header-right">
     <span id="step-indicator"></span>
-    <a href="/advisor" class="nav-pill">Advisor review</a>
   </div>
 </div>
 
@@ -885,7 +884,10 @@ function goNext(from, skip=false) {
     document.getElementById('err-q1').classList.remove('show');
     S.name1=n1; S.name2=n2; personalise();
   }
-  if (from===2 && !skip) S.date = document.getElementById('wedding-date').value;
+  if (from===2) {
+    S.date = skip ? '' : document.getElementById('wedding-date').value;
+    S.dateSure = !skip && S.date !== '';
+  }
   if (from===3 && !skip) S.location = document.getElementById('location').value.trim();
   if (from===4) {
     if (!S.traditions.length) { document.getElementById('err-q4').classList.add('show'); return; }
@@ -934,23 +936,33 @@ async function submitPlan() {
   },1800);
 
   try {
-    const res = await fetch('https://marigold-engine-test.vercel.app/api/generate-plan',{
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+    const res = await fetch('/api/generate-plan',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({slugs:S.traditions, budget:S.budget, jurisdiction:S.location||'US'}),
+      signal: controller.signal,
     });
+    clearTimeout(timeout);
     const data = await res.json();
     clearInterval(iv);
-    if (!data.success) { showErr(data.error||'Something went wrong.'); return; }
+    if (!data.success) { showErr(data.error||'Something went wrong generating your plan.'); return; }
     S.plan=data.plan; showResults();
   } catch(e) {
-    clearInterval(iv); showErr('Could not connect to the plan engine. Please try again.');
+    clearInterval(iv);
+    if (e.name === 'AbortError') {
+      showErr('The plan is taking longer than expected. Please try again.');
+    } else {
+      showErr('Could not generate your plan. Please check your connection and try again.');
+    }
   }
 }
 
 function showErr(msg) {
   document.getElementById('loading-text').textContent='Something went wrong';
-  document.getElementById('loading-sub').textContent=msg;
+  document.getElementById('loading-sub').innerHTML = msg +
+    '<br><br><button class="cta" onclick="location.reload()" style="margin-top:8px;font-size:11px;padding:8px 20px">Start again</button>';
 }
 
 // ── Results ──
@@ -965,7 +977,18 @@ function showResults() {
   const tradNames = S.traditions.map(s=>TRADS.find(t=>t.slug===s)?.label||s).join(' + ');
 
   document.getElementById('results-title').innerHTML = `<em>${names}</em> — your wedding plan`;
-  document.getElementById('results-subtitle').textContent = `${tradNames} · ${S.budget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0})} · ${S.guests} guests`;
+  const dateStr = S.date
+    ? new Date(S.date).toLocaleDateString('en-US',{month:'long',year:'numeric'})
+    : 'Date to be confirmed';
+  document.getElementById('results-subtitle').textContent = `${tradNames} · ${S.budget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0})} · ${S.guests} guests · ${dateStr}`;
+
+  // Date not confirmed banner
+  if (!S.dateSure) {
+    const dateNote = document.createElement('div');
+    dateNote.className = 'conflict-banner';
+    dateNote.innerHTML = '<em>Wedding date not yet confirmed</em> — checklist milestones are shown relative to your wedding date. Add your date any time to get calendar-specific guidance.';
+    document.getElementById('conflicts-wrap').prepend(dateNote);
+  }
 
   if (p.conflicts?.length) {
     document.getElementById('conflicts-wrap').innerHTML = p.conflicts.map(c=>
@@ -986,13 +1009,37 @@ function switchTab(name, btn) {
 }
 
 // ── Render checklist ──
+function milestoneToDate(milestone, weddingDate) {
+  if (!weddingDate) return milestone;
+  const d = new Date(weddingDate);
+  if (isNaN(d)) return milestone;
+  const ml = milestone.toLowerCase();
+  const monthMap = {
+    '18 months': 18, '12 months': 12, '10 months': 10,
+    '8 months': 8, '6 months': 6, '4 months': 4,
+    '3 months': 3, '2 months': 2, '1 month': 1,
+  };
+  for (const [key, months] of Object.entries(monthMap)) {
+    if (ml.includes(key.toLowerCase())) {
+      const target = new Date(d);
+      target.setMonth(target.getMonth() - months);
+      const label = target.toLocaleDateString('en-US', {month:'short', year:'numeric'});
+      return `${label} <span style="font-style:italic;opacity:0.6;font-size:10px">(${milestone})</span>`;
+    }
+  }
+  if (ml.includes('day of') || ml.includes('day-of')) {
+    return d.toLocaleDateString('en-US', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+  }
+  return milestone;
+}
+
 function renderChecklist(items) {
   const el = document.getElementById('tab-checklist');
   if (!items.length) { el.innerHTML='<p style="color:var(--muted);font-style:italic;font-size:13px;padding:20px 0">No checklist items found.</p>'; return; }
   const groups={};
   items.forEach(item=>{ const m=item.milestone||item.timeframe||'General'; if(!groups[m])groups[m]=[]; groups[m].push(item); });
   el.innerHTML = Object.entries(groups).map(([m,its])=>`
-    <div class="out-ey">${m}</div>
+    <div class="out-ey">${milestoneToDate(m, S.date)}</div>
     ${its.map(item=>{
       const label = item.label||item.task||item.description||'';
       const trad = item.tradition||item.source;

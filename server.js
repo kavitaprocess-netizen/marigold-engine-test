@@ -703,7 +703,6 @@ const QUESTIONNAIRE_HTML = `<!DOCTYPE html>
   </a>
   <div id="header-right">
     <span id="step-indicator"></span>
-    <a href="/advisor" class="nav-pill">Advisor review</a>
   </div>
 </div>
 
@@ -989,7 +988,10 @@ function goNext(from, skip=false) {
     document.getElementById('err-q1').classList.remove('show');
     S.name1=n1; S.name2=n2; personalise();
   }
-  if (from===2 && !skip) S.date = document.getElementById('wedding-date').value;
+  if (from===2) {
+    S.date = skip ? '' : document.getElementById('wedding-date').value;
+    S.dateSure = !skip && S.date !== '';
+  }
   if (from===3 && !skip) S.location = document.getElementById('location').value.trim();
   if (from===4) {
     if (!S.traditions.length) { document.getElementById('err-q4').classList.add('show'); return; }
@@ -1038,23 +1040,33 @@ async function submitPlan() {
   },1800);
 
   try {
-    const res = await fetch('https://marigold-engine-test.vercel.app/api/generate-plan',{
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+    const res = await fetch('/api/generate-plan',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({slugs:S.traditions, budget:S.budget, jurisdiction:S.location||'US'}),
+      signal: controller.signal,
     });
+    clearTimeout(timeout);
     const data = await res.json();
     clearInterval(iv);
-    if (!data.success) { showErr(data.error||'Something went wrong.'); return; }
+    if (!data.success) { showErr(data.error||'Something went wrong generating your plan.'); return; }
     S.plan=data.plan; showResults();
   } catch(e) {
-    clearInterval(iv); showErr('Could not connect to the plan engine. Please try again.');
+    clearInterval(iv);
+    if (e.name === 'AbortError') {
+      showErr('The plan is taking longer than expected. Please try again.');
+    } else {
+      showErr('Could not generate your plan. Please check your connection and try again.');
+    }
   }
 }
 
 function showErr(msg) {
   document.getElementById('loading-text').textContent='Something went wrong';
-  document.getElementById('loading-sub').textContent=msg;
+  document.getElementById('loading-sub').innerHTML = msg +
+    '<br><br><button class="cta" onclick="location.reload()" style="margin-top:8px;font-size:11px;padding:8px 20px">Start again</button>';
 }
 
 // ── Results ──
@@ -1069,7 +1081,18 @@ function showResults() {
   const tradNames = S.traditions.map(s=>TRADS.find(t=>t.slug===s)?.label||s).join(' + ');
 
   document.getElementById('results-title').innerHTML = \`<em>\${names}</em> — your wedding plan\`;
-  document.getElementById('results-subtitle').textContent = \`\${tradNames} · \${S.budget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0})} · \${S.guests} guests\`;
+  const dateStr = S.date
+    ? new Date(S.date).toLocaleDateString('en-US',{month:'long',year:'numeric'})
+    : 'Date to be confirmed';
+  document.getElementById('results-subtitle').textContent = \`\${tradNames} · \${S.budget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0})} · \${S.guests} guests · \${dateStr}\`;
+
+  // Date not confirmed banner
+  if (!S.dateSure) {
+    const dateNote = document.createElement('div');
+    dateNote.className = 'conflict-banner';
+    dateNote.innerHTML = '<em>Wedding date not yet confirmed</em> — checklist milestones are shown relative to your wedding date. Add your date any time to get calendar-specific guidance.';
+    document.getElementById('conflicts-wrap').prepend(dateNote);
+  }
 
   if (p.conflicts?.length) {
     document.getElementById('conflicts-wrap').innerHTML = p.conflicts.map(c=>
@@ -1090,13 +1113,37 @@ function switchTab(name, btn) {
 }
 
 // ── Render checklist ──
+function milestoneToDate(milestone, weddingDate) {
+  if (!weddingDate) return milestone;
+  const d = new Date(weddingDate);
+  if (isNaN(d)) return milestone;
+  const ml = milestone.toLowerCase();
+  const monthMap = {
+    '18 months': 18, '12 months': 12, '10 months': 10,
+    '8 months': 8, '6 months': 6, '4 months': 4,
+    '3 months': 3, '2 months': 2, '1 month': 1,
+  };
+  for (const [key, months] of Object.entries(monthMap)) {
+    if (ml.includes(key.toLowerCase())) {
+      const target = new Date(d);
+      target.setMonth(target.getMonth() - months);
+      const label = target.toLocaleDateString('en-US', {month:'short', year:'numeric'});
+      return \`\${label} <span style="font-style:italic;opacity:0.6;font-size:10px">(\${milestone})</span>\`;
+    }
+  }
+  if (ml.includes('day of') || ml.includes('day-of')) {
+    return d.toLocaleDateString('en-US', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+  }
+  return milestone;
+}
+
 function renderChecklist(items) {
   const el = document.getElementById('tab-checklist');
   if (!items.length) { el.innerHTML='<p style="color:var(--muted);font-style:italic;font-size:13px;padding:20px 0">No checklist items found.</p>'; return; }
   const groups={};
   items.forEach(item=>{ const m=item.milestone||item.timeframe||'General'; if(!groups[m])groups[m]=[]; groups[m].push(item); });
   el.innerHTML = Object.entries(groups).map(([m,its])=>\`
-    <div class="out-ey">\${m}</div>
+    <div class="out-ey">\${milestoneToDate(m, S.date)}</div>
     \${its.map(item=>{
       const label = item.label||item.task||item.description||'';
       const trad = item.tradition||item.source;
@@ -1215,306 +1262,6 @@ document.getElementById('wedding-date').min = today;
 // ── Advisor review interface ──
 const ADVISOR_HTML = `<!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Marigold — Cultural Advisor Review</title>
-<style>
-  :root {
-    --bg: #FDFAF0; --surface: #FFFFFF; --border: #E0D4B0; --text: #2A2010;
-    --muted: #9A8A6A; --gold: #C8A820; --gold-dark: #9A7E10; --gold-light: #FDF8E8;
-    --deep: #3C3010; --warm: #F5F0E8; --red: #C0392B; --red-light: #FDECEA;
-    --green: #1E7C4E; --green-light: #E8F5EE; --orange: #D4550A; --orange-light: #FDF0E8;
-    --radius: 6px; --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
-  .layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
-  .sidebar { background: var(--surface); border-right: 1px solid var(--border); position: sticky; top: 0; height: 100vh; overflow-y: auto; }
-  .main { padding: 32px; max-width: 860px; }
-  .sidebar-header { padding: 18px 20px 14px; border-bottom: 1px solid var(--border); }
-  .sidebar-header h1 { font-size: 14px; font-weight: 700; color: var(--deep); }
-  .sidebar-header p { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .tradition-item { display: flex; align-items: center; justify-content: space-between; padding: 9px 20px; cursor: pointer; border-left: 3px solid transparent; }
-  .tradition-item:hover { background: var(--warm); }
-  .tradition-item.active { background: var(--gold-light); border-left-color: var(--gold); }
-  .t-name { font-size: 13px; font-weight: 500; }
-  .t-status { font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 10px; }
-  .s-approved { background: var(--green-light); color: var(--green); }
-  .s-draft { background: var(--gold-light); color: var(--gold-dark); }
-  .s-in_review { background: var(--orange-light); color: var(--orange); }
-  .action-bar { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; align-items: flex-start; }
-  .action-group { display: flex; flex-direction: column; gap: 3px; }
-  .action-hint { font-size: 11px; color: var(--muted); }
-  .btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 14px; border-radius: var(--radius); font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid transparent; white-space: nowrap; }
-  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
-  .btn-primary { background: var(--deep); color: white; }
-  .btn-gold { background: var(--gold); color: var(--deep); border-color: var(--gold); font-weight: 600; }
-  .btn-gold:hover:not(:disabled) { background: var(--gold-dark); color: white; }
-  .btn-success { background: var(--green); color: white; }
-  .btn-warning { background: var(--orange); color: white; }
-  .btn-outline { background: white; color: var(--text); border-color: var(--border); }
-  .btn-outline:hover:not(:disabled) { background: var(--warm); }
-  .btn-danger { background: var(--red); color: white; }
-  .btn-sm { padding: 5px 10px; font-size: 12px; }
-  .page-title { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 4px; color: var(--deep); }
-  .page-meta { font-size: 13px; color: var(--muted); margin-bottom: 24px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .badge { display: inline-flex; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
-  .badge-approved { background: var(--green-light); color: var(--green); }
-  .badge-draft { background: var(--gold-light); color: var(--gold-dark); }
-  .badge-in_review { background: var(--orange-light); color: var(--orange); }
-  .badge-retired { background: var(--border); color: var(--muted); }
-  .banner { padding: 12px 16px; border-radius: var(--radius); margin-bottom: 20px; display: flex; align-items: flex-start; gap: 10px; border-left: 4px solid; }
-  .banner-editing { background: var(--gold-light); border-color: var(--gold); }
-  .banner-locked { background: var(--warm); border-color: var(--border); }
-  .banner-title { font-size: 13px; font-weight: 600; }
-  .banner-editing .banner-title { color: var(--gold-dark); }
-  .banner-locked .banner-title { color: var(--muted); }
-  .banner-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
-  .tab { padding: 8px 16px; font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; color: var(--muted); }
-  .tab.active { color: var(--deep); border-bottom-color: var(--gold); }
-  .section { margin-bottom: 28px; }
-  .section-title { font-size: 12px; font-weight: 700; color: var(--deep); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
-  .section-sub { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
-  /* Diff / tracked changes */
-  .diff-wrap { font-size: 13px; line-height: 1.8; }
-  .diff-wrap p { margin-bottom: 10px; }
-  .diff-wrap strong { font-weight: 700; }
-  .diff-wrap ol { margin: 6px 0 12px 20px; }
-  .diff-wrap li { margin-bottom: 6px; }
-  ins.diff-add { background: #D4EDDA; color: #155724; text-decoration: none; border-radius: 2px; padding: 0 2px; }
-  del.diff-del { background: #F8D7DA; color: #721C24; text-decoration: line-through; border-radius: 2px; padding: 0 2px; }
-  .diff-legend { display: flex; gap: 16px; margin-bottom: 12px; font-size: 11px; font-family: -apple-system, sans-serif; }
-  .diff-legend span { display: flex; align-items: center; gap: 4px; }
-  .diff-dot-add { width: 10px; height: 10px; border-radius: 2px; background: #D4EDDA; border: 1px solid #28a745; }
-  .diff-dot-del { width: 10px; height: 10px; border-radius: 2px; background: #F8D7DA; border: 1px solid #dc3545; }
-  .diff-no-change { color: var(--muted); font-size: 12px; font-style: italic; padding: 12px 0; }
-  /* Rich text editor */
-  .rich-editor-wrap { border: 1.5px solid var(--border); border-radius: 6px; overflow: hidden; }
-  .rich-editor-toolbar { display: flex; gap: 4px; padding: 6px 8px; background: #FDFAF0; border-bottom: 1px solid var(--border); }
-  .rich-editor-toolbar button { padding: 3px 8px; border: 1px solid var(--border); border-radius: 4px; background: white; font-size: 12px; cursor: pointer; color: var(--deep); font-family: Georgia, serif; }
-  .rich-editor-toolbar button:hover { background: #F7D44C; border-color: #C8A820; }
-  .rich-editor-toolbar button.active { background: #F7D44C; border-color: #C8A820; font-weight: 700; }
-  .rich-editor-content { min-height: 160px; padding: 12px; font-size: 13px; line-height: 1.7; color: var(--deep); outline: none; background: white; }
-  .rich-editor-content:focus { background: #FFFDF8; }
-  .rich-editor-content strong { font-weight: 700; }
-  .rich-editor-content ol { margin: 6px 0 12px 20px; }
-  .rich-editor-content li { margin-bottom: 6px; }
-  /* Rendered view */
-  .cultural-notes-rendered { font-size: 13px; line-height: 1.7; color: #3C3010; }
-  .cultural-notes-rendered p { margin-bottom: 12px; }
-  .cultural-notes-rendered strong { font-weight: 700; color: #2C2408; }
-  .cultural-notes-rendered ol { margin: 8px 0 16px 20px; }
-  .cultural-notes-rendered li { margin-bottom: 10px; line-height: 1.6; }
-  .field-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-  .field { margin-bottom: 12px; }
-  .field label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 5px; }
-  .field input, .field textarea, .field select { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius); font-family: var(--font); font-size: 13px; background: white; color: var(--text); }
-  .field input:focus, .field textarea:focus { outline: none; border-color: var(--gold); }
-  .field textarea { resize: vertical; }
-  .item-list { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 8px; }
-  .item-row { border-bottom: 1px solid var(--border); }
-  .item-row:last-child { border-bottom: none; }
-  .item-row-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; cursor: pointer; background: var(--surface); }
-  .item-row-header:hover { background: var(--warm); }
-  .item-row-label { font-size: 13px; font-weight: 500; flex: 1; padding-right: 8px; }
-  .item-row-meta { font-size: 11px; color: var(--muted); margin-right: 8px; white-space: nowrap; }
-  .item-row-body { padding: 14px; background: var(--bg); border-top: 1px solid var(--border); display: none; }
-  .item-row-body.open { display: block; }
-  .item-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .item-fields.three { grid-template-columns: 1fr 1fr 1fr; }
-  .item-fields .full { grid-column: 1 / -1; }
-  .item-field label { display: block; font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 4px; }
-  .item-field input, .item-field textarea, .item-field select { width: 100%; padding: 6px 8px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 12px; font-family: var(--font); background: white; color: var(--text); }
-  .item-field input:focus, .item-field textarea:focus { outline: none; border-color: var(--gold); }
-  .item-field textarea { min-height: 60px; resize: vertical; }
-  .item-actions { display: flex; justify-content: flex-end; gap: 6px; margin-top: 10px; }
-  .add-item-btn { width: 100%; padding: 10px; text-align: center; font-size: 13px; color: var(--gold-dark); font-weight: 500; cursor: pointer; background: var(--gold-light); border: 1px dashed var(--gold); border-radius: var(--radius); margin-top: 4px; }
-  .add-item-btn:hover { background: var(--warm); }
-  .save-bar { position: sticky; bottom: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 14px 0; margin-top: 32px; display: flex; gap: 8px; align-items: center; }
-  .save-bar-hint { font-size: 12px; color: var(--muted); margin-left: auto; }
-  .version-item { padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
-  .version-item.current { border-color: var(--gold); background: var(--gold-light); }
-  .audit-item { padding: 12px 0; border-bottom: 1px solid var(--border); display: flex; gap: 12px; }
-  .audit-item:last-child { border-bottom: none; }
-  .audit-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); margin-top: 5px; flex-shrink: 0; }
-  .audit-dot.approved { background: var(--green); }
-  .audit-dot.created { background: var(--gold); }
-  .audit-dot.submitted_for_review { background: var(--orange); }
-  .audit-dot.rejected { background: var(--red); }
-  .audit-action { font-size: 12px; font-weight: 600; }
-  .audit-meta { font-size: 11px; color: var(--muted); }
-  .audit-notes { font-size: 12px; margin-top: 2px; font-style: italic; }
-  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--deep); color: white; padding: 12px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 500; z-index: 1000; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
-  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 200; display: flex; align-items: center; justify-content: center; }
-  .modal-box { background: white; border-radius: var(--radius); padding: 28px; width: 420px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); }
-  .modal-title { font-size: 15px; font-weight: 700; color: var(--deep); margin-bottom: 8px; }
-  .modal-body { font-size: 13px; color: var(--muted); margin-bottom: 20px; line-height: 1.6; }
-  .modal-input { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; font-family: var(--font); margin-bottom: 16px; }
-  .modal-input:focus { outline: none; border-color: var(--gold); }
-  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
-  .toast.visible { opacity: 1; }
-  .toast.error { background: var(--red); }
-  .toast.success { background: var(--green); }
-  .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
-  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.6s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-</style>
-</head>
-<body>
-<div class="layout">
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <h1>Marigold · Advisor Review</h1>
-      <p id="sidebar-count">Loading…</p>
-    </div>
-    <div id="tradition-list"></div>
-  </aside>
-  <main class="main" id="main-content">
-    <div class="empty">
-      <div style="font-size:32px;margin-bottom:12px">📋</div>
-      <p>Select a tradition from the sidebar to begin reviewing.</p>
-    </div>
-  </main>
-</div>
-<div class="toast" id="toast"></div>
-<div id="custom-modal" class="modal-backdrop" style="display:none">
-  <div class="modal-box">
-    <div class="modal-title" id="modal-title"></div>
-    <div class="modal-body" id="modal-body"></div>
-    <input type="text" class="modal-input" id="modal-input" style="display:none" placeholder="">
-    <div class="modal-actions" id="modal-actions"></div>
-  </div>
-</div>
-<script>
-const API='/api/advisor';
-let traditions=[],currentTradition=null,currentVersion=null,allVersions=[],activeTab='content',workingData={};
-window.onload=()=>loadTraditions();
-async function api(path,method='GET',body=null){
-  const opts={method,headers:{'Content-Type':'application/json'}};
-  if(body)opts.body=JSON.stringify(body);
-  const res=await fetch(API+path,opts);
-  if(!res.ok){const err=await res.json().catch(()=>({error:res.statusText}));throw new Error(err.error||res.statusText);}
-  return res.json();
-}
-async function loadTraditions(){
-  try{traditions=await api('/traditions');renderSidebar();}
-  catch(e){toast('Failed to load: '+e.message,'error');}
-}
-function renderSidebar(){
-  document.getElementById('sidebar-count').textContent=traditions.length+' traditions';
-  const sorted=[...traditions].sort((a,b)=>a.name.localeCompare(b.name));
-  document.getElementById('tradition-list').innerHTML=sorted.map(t=>{
-    const versions=t.tradition_versions||[];
-    const current=versions.find(v=>v.is_current);
-    const latest=[...versions].sort((a,b)=>b.version_number-a.version_number)[0];
-    const sv=current||latest;
-    const status=sv?.status||'no versions';
-    return \`<div class="tradition-item \${currentTradition?.id===t.id?'active':''}" onclick="selectTradition('\${t.id}')">
-      <span class="t-name">\${t.name}</span>
-      <span class="t-status s-\${status.replace('_','-')}">\${status.replace('_',' ')}</span>
-    </div>\`;
-  }).join('');
-}
-async function selectTradition(id){
-  currentTradition=traditions.find(t=>t.id===id);
-  renderSidebar();
-  document.getElementById('main-content').innerHTML='<div class="empty"><div class="spinner"></div></div>';
-  try{
-    allVersions=await api('/traditions/'+id+'/versions');
-    // Default to the approved current version — not just the most recent,
-    // which could be a draft from a previous session
-    const approvedCurrent = allVersions.find(v => v.is_current && v.status === 'approved');
-    currentVersion = approvedCurrent || allVersions[0] || null;
-    initWorkingData();activeTab='content';renderMain();
-  }catch(e){toast('Failed to load: '+e.message,'error');}
-}
-function initWorkingData(){
-  if(!currentVersion){workingData={};return;}
-  workingData={
-    avg_budget_low:currentVersion.avg_budget_low||'',
-    avg_budget_high:currentVersion.avg_budget_high||'',
-    budget_currency:currentVersion.budget_currency||'USD',
-    typical_event_count:currentVersion.typical_event_count||'',
-    cultural_notes:currentVersion.cultural_notes||'',
-    sources:currentVersion.sources||'',
-    review_notes:currentVersion.review_notes||'',
-    checklist_template:JSON.parse(JSON.stringify(currentVersion.checklist_template||[])),
-    ceremony_sequence:JSON.parse(JSON.stringify(currentVersion.ceremony_sequence||[])),
-    vendor_categories:JSON.parse(JSON.stringify(currentVersion.vendor_categories||[])),
-    budget_allocation:JSON.parse(JSON.stringify(currentVersion.budget_allocation||[])),
-  };
-}
-function renderMain(){
-  const v=currentVersion;
-  const canSubmit=v?.status==='draft';
-  const canApprove=v?.status==='in_review';
-  const canEdit=v?.status==='draft'||v?.status==='in_review';
-  document.getElementById('main-content').innerHTML=\`
-    <div class="page-title">\${currentTradition.name}</div>
-    <div class="page-meta">
-      <span>\${currentTradition.slug}</span><span>·</span><span>\${currentTradition.region||'—'}</span><span>·</span>
-      \${v?\`<span class="badge badge-\${v.status}">\${v.status.replace('_',' ')}</span><span style="color:var(--muted)">v\${v.version_number}</span>\`:'<span class="badge badge-draft">no content yet</span>'}
-    </div>
-    <div class="action-bar">
-      <div class="action-group">
-        <button class="btn btn-gold" onclick="createEditingCopy()">✏️ Create editing copy</button>
-        <span class="action-hint">Makes a copy to edit — live content stays unchanged</span>
-      </div>
-      \${canEdit?\`<button class="btn btn-outline" onclick="cancelEditing()">✕ Cancel editing</button>\`:''}
-      <button class="btn btn-warning" onclick="submitForReview()" \${canSubmit?'':'disabled'}>📤 Submit for review</button>
-      <button class="btn btn-success" onclick="approveVersion()" \${canApprove?'':'disabled'}>✅ Approve</button>
-      <button class="btn btn-outline" onclick="rejectVersion()" \${canApprove?'':'disabled'}>❌ Reject</button>
-    </div>
-    <div class="tabs">
-      <div class="tab \${activeTab==='content'?'active':''}" onclick="switchTab('content')">Content</div>
-      <div class="tab \${activeTab==='versions'?'active':''}" onclick="switchTab('versions')">Version history</div>
-      <div class="tab \${activeTab==='audit'?'active':''}" onclick="switchTab('audit')">Audit trail</div>
-    </div>
-    <div id="tab-content">
-      \${activeTab==='content'?renderContentTab(v,canEdit):''}
-      \${activeTab==='versions'?renderVersionsTab():''}
-      \${activeTab==='audit'?'<div class="empty"><div class="spinner"></div></div>':''}
-    </div>\`;
-  if(activeTab==='audit')loadAuditTrail();
-}
-function switchTab(tab){activeTab=tab;renderMain();}
-function renderContentTab(v,canEdit){
-  if(!v)return\`<div class="empty"><div style="font-size:32px;margin-bottom:12px">📭</div><p>No content yet. Content is seeded by developers, then you review and approve it here.</p></div>\`;
-  const dis=canEdit?'':'disabled';
-  const banner=canEdit
-    ?\`<div class="banner banner-editing"><span style="font-size:18px">✏️</span><div><div class="banner-title">Editing copy — version \${v.version_number}</div><div class="banner-sub">The live approved version is untouched. Your changes only go live once you approve this copy.</div></div></div>\`
-    :\`<div class="banner banner-locked"><span style="font-size:18px">🔒</span><div><div class="banner-title">Live approved version (v\${v.version_number}) — read only</div><div class="banner-sub">Click "Create editing copy" to make an editable copy.</div></div></div>\`;
-  return banner+\`
-    <div class="section">
-      <div class="section-title">Overview</div>
-      <div class="field-group">
-        <div class="field"><label>Average budget — low ($)</label><input type="number" value="\${workingData.avg_budget_low}" \${dis} oninput="workingData.avg_budget_low=this.value"></div>
-        <div class="field"><label>Average budget — high ($)</label><input type="number" value="\${workingData.avg_budget_high}" \${dis} oninput="workingData.avg_budget_high=this.value"></div>
-        <div class="field"><label>Currency</label><input type="text" value="\${workingData.budget_currency}" \${dis} oninput="workingData.budget_currency=this.value"></div>
-        <div class="field"><label>Typical number of events</label><input type="number" value="\${workingData.typical_event_count}" \${dis} oninput="workingData.typical_event_count=this.value"></div>
-      </div>
-    </div>
-    <div class="section">
-      <div class="section-title">Cultural notes</div>
-      <div class="section-sub">Key vendor and planner briefing notes. Use <strong>bold</strong> for headings and numbered lists for the "three things" format.</div>
-      <div class="field">
-        \${canEdit ? \`
-          <div class="rich-editor-wrap">
-            <div class="rich-editor-toolbar">
-              <button onclick="execCmd('bold')" title="Bold"><b>B</b></button>
-              <button onclick="execCmd('insertOrderedList')" title="Numbered list">1. List</button>
-              <button onclick="execCmd('insertUnorderedList')" title="Bullet list">• List</button>
-              <button onclick="execCmd('removeFormat')" title="Clear formatting">Clear</button>
-            </div>
-            <div class="rich-editor-content" id="cultural-notes-editor" contenteditable="true"
-              oninput="syncCulturalNotes()"
-              onpaste="handlePaste(event)">\${htmlToEditor(workingData.cultural_notes)}</div>
-          </div>
-          <div style="font-size:11px;color:var(--muted);margin-top:6px">Changes will appear highlighted in the version history diff view.</div>
-        \` : \`<div class="cultural-notes-rendered">\${renderCulturalNotes(workingData.cultural_notes)}</div>\`}
-      </div>tml lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
