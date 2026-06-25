@@ -302,6 +302,18 @@
   .assign-btn:hover { border-color:var(--gd); color:var(--deep); }
   .assign-btn.on { border-color:var(--gk); background:var(--g); color:var(--deep); }
 
+  /* ── Role custom dropdown ── */
+  .role-sentences { display:flex; flex-direction:column; gap:16px; }
+  .role-sentence { display:flex; align-items:baseline; gap:6px; flex-wrap:wrap; }
+  .role-sentence-name { font-size:19px; font-style:italic; color:var(--deep); font-family:'Playfair Display',Georgia,serif; }
+  .role-sentence-is { font-size:16px; color:var(--muted); font-style:italic; font-family:'Playfair Display',Georgia,serif; }
+  .role-dropdown { position:relative; display:inline-block; }
+  .role-dd-value { font-size:19px; font-style:italic; font-family:'Playfair Display',Georgia,serif; color:var(--deep); border-bottom:1.5px solid var(--gd); padding:2px 4px; cursor:pointer; user-select:none; }
+  .role-dd-value:hover { color:var(--gk); }
+  .role-dd-menu { display:none; position:absolute; top:calc(100% + 4px); left:0; background:white; border:1px solid var(--bdr); border-radius:8px; box-shadow:0 4px 16px rgba(60,48,16,0.08); z-index:50; min-width:100px; overflow:hidden; }
+  .role-dd-menu.open { display:block; }
+  .role-dd-menu div { padding:10px 16px; font-size:16px; font-style:italic; font-family:'Playfair Display',Georgia,serif; color:var(--deep); cursor:pointer; }
+  .role-dd-menu div:hover { background:var(--warm); }
   .back-link {
     background: none;
     border: none;
@@ -802,20 +814,24 @@
           <div class="role-sentence">
             <span class="role-sentence-name" id="role-name1">Partner one</span>
             <span class="role-sentence-is"> is the </span>
-            <select class="role-select" id="role-select1" onchange="setRoleFromSelect(1,this.value)">
-              <option value="" disabled selected>Select</option>
-              <option value="bride">Bride</option>
-              <option value="groom">Groom</option>
-            </select>
+            <span class="role-dropdown" id="role-dd1">
+              <span class="role-dd-value" id="role-val1" onclick="toggleRoleDD(1)">Select &#9662;</span>
+              <div class="role-dd-menu" id="role-menu1">
+                <div onclick="pickRole(1,'bride')">Bride</div>
+                <div onclick="pickRole(1,'groom')">Groom</div>
+              </div>
+            </span>
           </div>
           <div class="role-sentence">
             <span class="role-sentence-name" id="role-name2">Partner two</span>
             <span class="role-sentence-is"> is the </span>
-            <select class="role-select" id="role-select2" onchange="setRoleFromSelect(2,this.value)">
-              <option value="" disabled selected>Select</option>
-              <option value="bride">Bride</option>
-              <option value="groom">Groom</option>
-            </select>
+            <span class="role-dropdown" id="role-dd2">
+              <span class="role-dd-value" id="role-val2" onclick="toggleRoleDD(2)">Select &#9662;</span>
+              <div class="role-dd-menu" id="role-menu2">
+                <div onclick="pickRole(2,'bride')">Bride</div>
+                <div onclick="pickRole(2,'groom')">Groom</div>
+              </div>
+            </span>
           </div>
         </div>
       </div>
@@ -1051,14 +1067,29 @@ let currentQ = 1;
 const TOTAL_Q = 6;
 
 // ── Role assignment ──
-function setRole(partner, role, btn) {
-  const key = 'role' + partner;
-  S[key] = role;
-  // Update button states for this partner
-  document.querySelectorAll('[data-partner="' + partner + '"]').forEach(function(b) {
-    b.classList.toggle('on', b.dataset.role === role);
-  });
+function pickRole(partner, role) {
+  S['role' + partner] = role;
+  var val = document.getElementById('role-val' + partner);
+  if (val) val.innerHTML = (role === 'bride' ? 'Bride' : 'Groom') + ' &#9662;';
+  var menu = document.getElementById('role-menu' + partner);
+  if (menu) menu.classList.remove('open');
 }
+
+function toggleRoleDD(partner) {
+  var menu = document.getElementById('role-menu' + partner);
+  if (!menu) return;
+  var other = document.getElementById('role-menu' + (partner === 1 ? 2 : 1));
+  if (other) other.classList.remove('open');
+  menu.classList.toggle('open');
+}
+
+function setRole(partner, role) { pickRole(partner, role); }
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.role-dropdown')) {
+    document.querySelectorAll('.role-dd-menu').forEach(function(m){ m.classList.remove('open'); });
+  }
+});
 
 function updateRoleLabels() {
   var n1 = document.getElementById('name1').value.trim() || 'Partner one';
@@ -1153,41 +1184,41 @@ function assignTrad(btn) {
 
 // ── Traditions ──
 const TRADS = [
+  {slug:'sri-lankan-buddhist',label:'Buddhist · Sri Lankan',region:'Buddhist'},
+  {slug:'thai-buddhist',label:'Buddhist · Thai',region:'Buddhist'},
+  {slug:'chinese-taiwanese',label:'Chinese / Taiwanese',region:'East Asian'},
+  {slug:'catholic',label:'Christian · Catholic',region:'Christian'},
+  {slug:'filipino-catholic',label:'Christian · Filipino Catholic',region:'Southeast Asian'},
+  {slug:'greek-orthodox',label:'Christian · Greek Orthodox',region:'Christian'},
+  {slug:'latin-american-catholic',label:'Christian · Latin American Catholic',region:'Latin American'},
+  {slug:'mexican-catholic',label:'Christian · Mexican Catholic',region:'Latin American'},
+  {slug:'christian-western',label:'Christian · Western',region:'Christian'},
+  {slug:'cuban',label:'Cuban',region:'Caribbean'},
   {slug:'andhra-telugu',label:'Hindu · Andhra / Telugu',region:'South Asian'},
   {slug:'arya-samaj',label:'Hindu · Arya Samaj',region:'South Asian'},
   {slug:'assamese-hindu',label:'Hindu · Assamese',region:'South Asian'},
   {slug:'bengali-hindu',label:'Hindu · Bengali',region:'South Asian'},
   {slug:'bihari-hindu',label:'Hindu · Bihari',region:'South Asian'},
-  {slug:'catholic',label:'Christian · Catholic',region:'Christian'},
-  {slug:'chinese-taiwanese',label:'Chinese / Taiwanese',region:'East Asian'},
-  {slug:'christian-western',label:'Christian · Western',region:'Christian'},
-  {slug:'cuban',label:'Cuban',region:'Caribbean'},
-  {slug:'dawoodi-bohra',label:'Muslim · Dawoodi Bohra',region:'Muslim'},
-  {slug:'filipino-catholic',label:'Christian · Filipino Catholic',region:'Southeast Asian'},
-  {slug:'greek-orthodox',label:'Christian · Greek Orthodox',region:'Christian'},
   {slug:'gujarati',label:'Hindu · Gujarati',region:'South Asian'},
-  {slug:'hausa-muslim',label:'Muslim · West African (Hausa)',region:'Muslim'},
-  {slug:'jain-shwetambar',label:'Jain · Shwetambar',region:'South Asian'},
-  {slug:'jewish-reform-conservative',label:'Jewish · Reform / Conservative',region:'Jewish'},
   {slug:'kashmiri-pandit',label:'Hindu · Kashmiri Pandit',region:'South Asian'},
   {slug:'kerala-nair',label:'Hindu · Kerala / Nair',region:'South Asian'},
-  {slug:'khasi',label:'Khasi',region:'South Asian'},
-  {slug:'korean',label:'Korean',region:'East Asian'},
-  {slug:'latin-american-catholic',label:'Christian · Latin American Catholic',region:'Latin American'},
   {slug:'manipuri-vaishnavite',label:'Hindu · Manipuri (Vaishnavite)',region:'South Asian'},
   {slug:'marathi',label:'Hindu · Marathi',region:'South Asian'},
-  {slug:'mexican-catholic',label:'Christian · Mexican Catholic',region:'Latin American'},
-  {slug:'muslim-nikah',label:'Muslim · Nikah',region:'Muslim'},
   {slug:'north-indian-punjabi',label:'Hindu · North Indian / Punjabi',region:'South Asian'},
   {slug:'odia-hindu',label:'Hindu · Odia',region:'South Asian'},
   {slug:'rajasthani-marwari',label:'Hindu · Rajasthani (Marwari)',region:'South Asian'},
   {slug:'rajasthani-rajput',label:'Hindu · Rajasthani (Rajput)',region:'South Asian'},
-  {slug:'sikh',label:'Sikh',region:'South Asian'},
-  {slug:'sri-lankan-buddhist',label:'Buddhist · Sri Lankan',region:'Buddhist'},
   {slug:'tamil-hindu',label:'Hindu · Tamil',region:'South Asian'},
-  {slug:'thai-buddhist',label:'Buddhist · Thai',region:'Buddhist'},
   {slug:'vedic-general',label:'Hindu · Vedic (General)',region:'South Asian'},
+  {slug:'jain-shwetambar',label:'Jain · Shwetambar',region:'South Asian'},
+  {slug:'jewish-reform-conservative',label:'Jewish · Reform / Conservative',region:'Jewish'},
+  {slug:'khasi',label:'Khasi',region:'South Asian'},
+  {slug:'korean',label:'Korean',region:'East Asian'},
+  {slug:'dawoodi-bohra',label:'Muslim · Dawoodi Bohra',region:'Muslim'},
+  {slug:'muslim-nikah',label:'Muslim · Nikah',region:'Muslim'},
+  {slug:'hausa-muslim',label:'Muslim · West African (Hausa)',region:'Muslim'},
   {slug:'yoruba-nigerian',label:'Nigerian · Yoruba',region:'West African'},
+  {slug:'sikh',label:'Sikh',region:'South Asian'},
 ];
 
 const REGION_COLORS = {
