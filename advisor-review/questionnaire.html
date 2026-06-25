@@ -1457,7 +1457,14 @@ async function submitPlan() {
     if (!data.success) { showErr(data.error||'Something went wrong generating your plan.'); return; }
     S.plan=data.plan;
     // Go to ceremony selection (Q7) instead of results directly
+    console.log('Plan received:', JSON.stringify({
+      traditions: S.plan.traditions,
+      ceremonyCount: (S.plan.ceremonySequence||[]).length,
+      firstCeremony: (S.plan.ceremonySequence||[])[0],
+      keys: Object.keys(S.plan)
+    }));
     planCeremonies = S.plan.ceremonySequence || S.plan.ceremonies || [];
+    console.log('planCeremonies length:', planCeremonies.length);
     ceremonySelections = {}; // reset selections
     const ls = document.getElementById('loading-screen');
     ls.classList.add('exit-left'); ls.classList.remove('active');
