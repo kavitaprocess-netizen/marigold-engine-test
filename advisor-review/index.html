@@ -87,7 +87,14 @@
   .rich-editor-content ol { margin: 6px 0 12px 20px; }
   .rich-editor-content li { margin-bottom: 6px; }
   /* Rendered view */
-  .cultural-notes-rendered { font-size: 13px; line-height: 1.8; color: #3C3010; }
+  .cultural-notes-rendered {
+    font-size: 13px; line-height: 1.8; color: #3C3010;
+    background: var(--gold-pale, #FDFAF0);
+    border: 1px solid var(--border, #E0D4B0);
+    border-left: 3px solid var(--gold, #C8A820);
+    border-radius: 0 6px 6px 0;
+    padding: 14px 16px;
+  }
   .cultural-notes-rendered p { margin-bottom: 10px; }
   .cultural-notes-rendered p.notes-heading { font-weight: 700; color: #2C2408; margin-top: 16px; margin-bottom: 6px; }
   .cultural-notes-rendered .notes-list { margin: 6px 0 14px 20px; }
@@ -135,7 +142,20 @@
   .audit-action { font-size: 12px; font-weight: 600; }
   .audit-meta { font-size: 11px; color: var(--muted); }
   .audit-notes { font-size: 12px; margin-top: 2px; font-style: italic; }
-  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--deep); color: white; padding: 12px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 500; z-index: 1000; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+  .toast {
+    position:fixed;bottom:20px;right:20px;
+    display:flex;align-items:center;gap:8px;
+    padding:10px 16px;border-radius:8px;
+    background:var(--deep,#3C3010);color:#fff;
+    font-size:13px;font-style:italic;
+    font-family:'Playfair Display',Georgia,serif;
+    opacity:0;pointer-events:none;
+    transition:opacity 0.3s;z-index:999;
+  }
+  .toast.visible{opacity:1;}
+  .toast.error{background:#c0392b;}
+  .toast.success{background:#1e7c4e;}
+  .toast-flower{font-size:14px;}
   .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 200; display: flex; align-items: center; justify-content: center; }
   .modal-box { background: white; border-radius: var(--radius); padding: 28px; width: 420px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); }
   .modal-title { font-size: 15px; font-weight: 700; color: var(--deep); margin-bottom: 8px; }
@@ -250,6 +270,7 @@ function initWorkingData(){
     budget_currency:currentVersion.budget_currency||'USD',
     typical_event_count:currentVersion.typical_event_count||'',
     cultural_notes:currentVersion.cultural_notes||'',
+    lgbtq_notes:currentVersion.lgbtq_notes||'',
     sources:currentVersion.sources||'',
     review_notes:currentVersion.review_notes||'',
     checklist_template:JSON.parse(JSON.stringify(currentVersion.checklist_template||[])),
@@ -504,54 +525,63 @@ function paragraphDiff(oldText, newText) {
 }
 
 function renderCulturalNotes(text) {
-  if (!text) return '<p style="color:#9A8A6A;font-style:italic">No cultural notes added yet.</p>';
+  if (!text) return '<p style="color:#9A8A6A;font-style:italic;padding:8px 0">No cultural notes added yet.</p>';
 
-  let t = text.trim();
-
-  // Split on bold headings (**...**) and numbered lists
-  t = t.replace(/(\*\*[^*]+\*\*)/g, '\n\n$1\n');
-  t = t.replace(/(\s)(\d+\.\s)/g, '\n$2');
-  t = t.replace(/\.\s+(Three things|The |A |An |For |In |If |This |When |What |Why |How )/g, '.\n\n$1');
-
-  // Escape HTML
-  t = t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-  // Apply bold
-  t = t.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-
-  const lines = t.split(/\n/).map(l => l.trim()).filter(l => l);
+  const t = text.trim();
   let html = '';
+  
+  // Split text into chunks by double newlines first, then single newlines
+  // Handle the case where text is one long string with \n separators
+  const rawLines = t.split(/\n/).map(l => l.trim());
+  
   let i = 0;
-
-  while (i < lines.length) {
-    const line = lines[i];
+  while (i < rawLines.length) {
+    const line = rawLines[i];
+    if (!line) { i++; continue; }
+    
+    // Numbered list item
     if (/^\d+\.\s/.test(line)) {
       html += '<ol class="notes-list">';
-      while (i < lines.length && /^\d+\.\s/.test(lines[i])) {
-        html += '<li>' + lines[i].replace(/^\d+\.\s/, '') + '</li>';
+      while (i < rawLines.length && /^\d+\.\s/.test(rawLines[i].trim()) && rawLines[i].trim()) {
+        const item = rawLines[i].trim().replace(/^\d+\.\s/, '');
+        html += '<li>' + applyBold(escHtml(item)) + '</li>';
         i++;
       }
       html += '</ol>';
       continue;
     }
-    if (line.startsWith('<strong>') && (line.endsWith('</strong>') || line.endsWith('</strong>:'))) {
-      html += '<p class="notes-heading">' + line + '</p>';
+    
+    // Bold heading — line that is mostly or entirely bold
+    const escaped = escHtml(line);
+    if (/^\*\*[^*]+\*\*[:\s]*$/.test(line)) {
+      html += '<p class="notes-heading">' + applyBold(escaped) + '</p>';
       i++;
       continue;
     }
-    let para = line;
+    
+    // Regular paragraph — accumulate until blank line or new section
+    let para = escaped;
     i++;
-    while (i < lines.length) {
-      const next = lines[i];
-      if (!next || /^\d+\.\s/.test(next) || next.startsWith('<strong>')) break;
-      para += ' ' + next;
+    while (i < rawLines.length && rawLines[i].trim() && 
+           !/^\d+\.\s/.test(rawLines[i]) && 
+           !/^\*\*[^*]+\*\*[:\s]*$/.test(rawLines[i])) {
+      para += ' ' + escHtml(rawLines[i].trim());
       i++;
     }
-    html += '<p>' + para + '</p>';
+    html += '<p>' + applyBold(para) + '</p>';
   }
-
+  
   return html || '<p style="color:#9A8A6A;font-style:italic">No cultural notes added yet.</p>';
 }
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function applyBold(s) {
+  return s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+}
+
 
 function renderChecklistItems(canEdit){
   if(!workingData.checklist_template.length)return'<div style="padding:12px;color:var(--muted);font-size:13px">No items yet.</div>';
@@ -762,6 +792,7 @@ async function saveEdits(){
     budget_currency:workingData.budget_currency||'USD',
     typical_event_count:parseInt(workingData.typical_event_count)||null,
     cultural_notes:workingData.cultural_notes,
+        lgbtq_notes:workingData.lgbtq_notes,
     sources:workingData.sources,
     review_notes:workingData.review_notes,
     checklist_template:workingData.checklist_template,
@@ -793,7 +824,9 @@ async function rejectVersion(){
   catch(e){toast('Failed: '+e.message,'error');}
 }
 function toast(msg,type='default'){
-  const el=document.getElementById('toast');el.textContent=msg;
+  const el=document.getElementById('toast');
+  const msgEl=document.getElementById('toast-msg');
+  if(msgEl) msgEl.textContent=msg; else el.textContent=msg;
   el.className='toast visible'+(type==='error'?' error':type==='success'?' success':'');
   setTimeout(()=>el.className='toast',3000);
 }

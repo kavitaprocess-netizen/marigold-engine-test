@@ -118,7 +118,15 @@
   }
   .fi:focus { border-bottom-color: var(--deep); }
   .fi::placeholder { color: var(--bdr); }
-  input[type="date"].fi { font-style: normal; font-size: 15px; font-family: 'Playfair Display', Georgia, serif; color: var(--deep); }
+  input[type="date"].fi, input[type="date"] {
+    font-style: normal;
+    font-size: 15px;
+    font-family: 'Playfair Display', Georgia, serif;
+    color: var(--deep);
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  input[type="date"]::-webkit-date-and-time-value { font-family: 'Playfair Display', Georgia, serif; }
 
   /* ── Option pills ── */
   .options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
@@ -948,7 +956,7 @@
 
   <!-- Q7: Ceremony selection -->
   <!-- Q7: Ceremony selection -->
-  <div class="screen" id="q7" style="overflow:hidden;position:relative;">
+  <div class="screen" id="q7" style="overflow:hidden;position:relative;display:block!important;">
   <div id="q7-fade" style="position:absolute;bottom:0;left:0;right:0;height:80px;background:linear-gradient(transparent,var(--cream));pointer-events:none;z-index:10;transition:opacity 0.3s;"></div>
     <div id="q7-scroll" style="height:100%;overflow-y:auto;overflow-x:hidden;padding:32px 24px 100px;box-sizing:border-box;">
     <div style="width:100%;max-width:900px;margin:0 auto">
