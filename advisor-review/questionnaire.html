@@ -798,20 +798,22 @@
       </div>
       <div style="margin-top:28px">
         <div class="ql" style="margin-bottom:16px">How do you refer to each other?</div>
-        <div class="role-row" id="role-row">
-          <div class="role-pair">
-            <div class="role-name"><span id="role-name1">Partner one</span> is</div>
-            <div class="role-options">
-              <button class="role-btn on" data-partner="1" data-role="bride" onclick="setRole(1,'bride',this)">Bride</button>
-              <button class="role-btn" data-partner="1" data-role="groom" onclick="setRole(1,'groom',this)">Groom</button>
-            </div>
+        <div class="role-sentences">
+          <div class="role-sentence">
+            <span class="role-sentence-name" id="role-name1">Partner one</span>
+            <span class="role-sentence-is"> is the </span>
+            <select class="role-select" id="role-select1" onchange="setRoleFromSelect(1,this.value)">
+              <option value="bride">Bride</option>
+              <option value="groom" selected>Groom</option>
+            </select>
           </div>
-          <div class="role-pair">
-            <div class="role-name"><span id="role-name2">Partner two</span> is</div>
-            <div class="role-options">
-              <button class="role-btn" data-partner="2" data-role="bride" onclick="setRole(2,'bride',this)">Bride</button>
-              <button class="role-btn on" data-partner="2" data-role="groom" onclick="setRole(2,'groom',this)">Groom</button>
-            </div>
+          <div class="role-sentence">
+            <span class="role-sentence-name" id="role-name2">Partner two</span>
+            <span class="role-sentence-is"> is the </span>
+            <select class="role-select" id="role-select2" onchange="setRoleFromSelect(2,this.value)">
+              <option value="bride" selected>Bride</option>
+              <option value="groom">Groom</option>
+            </select>
           </div>
         </div>
       </div>
@@ -957,7 +959,7 @@
   </div>
 
   <!-- Q7: Ceremony selection -->
-  <div class="screen" id="q7" style="overflow-y:auto;align-items:flex-start;justify-content:flex-start;padding-top:32px">
+  <div class="screen" id="q7" style="overflow-y:auto;overflow-x:hidden;align-items:flex-start;justify-content:flex-start;padding-top:32px;display:block;">
     <div style="width:100%;max-width:900px;margin:0 auto">
       <div class="ql">Step 7 of 8</div>
       <div class="qt" id="q7-title">Choose your ceremonies</div>
@@ -971,7 +973,7 @@
   </div>
 
   <!-- Q8: Confirmation -->
-  <div class="screen" id="q8" style="overflow-y:auto;align-items:flex-start;justify-content:flex-start;padding-top:32px">
+  <div class="screen" id="q8" style="overflow-y:auto;overflow-x:hidden;align-items:flex-start;justify-content:flex-start;padding-top:32px;display:block;">
     <div style="width:100%;max-width:720px;margin:0 auto;padding-bottom:60px">
       <div class="ql">Your wedding plan</div>
       <div class="qt" id="q8-title">Here's what you've chosen</div>
@@ -1052,12 +1054,12 @@ function setRole(partner, role, btn) {
 }
 
 function updateRoleLabels() {
-  const n1 = document.getElementById('name1').value.trim() || 'Partner one';
-  const n2 = document.getElementById('name2').value.trim() || 'Partner two';
-  const el1 = document.getElementById('role-name1');
-  const el2 = document.getElementById('role-name2');
-  if (el1) el1.textContent = n1 + ' is';
-  if (el2) el2.textContent = n2 + ' is';
+  var n1 = document.getElementById('name1').value.trim() || 'Partner one';
+  var n2 = document.getElementById('name2').value.trim() || 'Partner two';
+  var el1 = document.getElementById('role-name1');
+  var el2 = document.getElementById('role-name2');
+  if (el1) el1.textContent = n1;
+  if (el2) el2.textContent = n2;
 }
 
 // ── Date / location gating ──
