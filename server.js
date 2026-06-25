@@ -364,6 +364,31 @@ const QUESTIONNAIRE_HTML = `<!DOCTYPE html>
   }
   .cta:hover { background: var(--gk); }
   .cta:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-back {
+    position: fixed;
+    bottom: 28px;
+    left: 24px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 13px;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-style: italic;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 100px;
+    transition: all 0.15s;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .btn-back.visible {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .btn-back:hover { color: var(--deep); }
   .back-link {
     background: none;
     border: none;
@@ -855,6 +880,9 @@ const QUESTIONNAIRE_HTML = `<!DOCTYPE html>
 
 </div>
 
+<!-- Back button — fixed position, visible on Q2+ -->
+<button class="btn-back" id="btn-back" onclick="goBack()">← back</button>
+
 <script>
 // ── State ──
 const S = { name1:'', name2:'', date:'', location:'', traditions:[], budget:50000, guests:100, plan:null };
@@ -1013,6 +1041,30 @@ function doTransition(from, to) {
 function updateProgress() {
   document.getElementById('progress-fill').style.width = ((currentQ-1)/TOTAL_Q*100)+'%';
   document.getElementById('step-indicator').textContent = \`\${currentQ} of \${TOTAL_Q}\`;
+  // Show back button from Q2 onwards
+  const backBtn = document.getElementById('btn-back');
+  if (backBtn) backBtn.classList.toggle('visible', currentQ > 1);
+}
+
+function goBack() {
+  if (currentQ <= 1) return;
+  const prev = currentQ - 1;
+  const current = document.getElementById(\`q\${currentQ}\`);
+  const prevEl = document.getElementById(\`q\${prev}\`);
+  if (!current || !prevEl) return;
+  // Reverse transition — slide current right, bring prev back from left
+  current.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+  current.style.opacity = '0';
+  current.style.transform = 'translateX(50px)';
+  setTimeout(() => {
+    current.classList.remove('active');
+    current.style.transition = '';
+    current.style.opacity = '';
+    current.style.transform = '';
+    prevEl.classList.add('active');
+  }, 250);
+  currentQ = prev;
+  updateProgress();
 }
 
 // ── Submit ──
@@ -1062,9 +1114,33 @@ async function submitPlan() {
 }
 
 function showErr(msg) {
-  document.getElementById('loading-text').textContent='Something went wrong';
-  document.getElementById('loading-sub').innerHTML = msg +
-    '<br><br><button class="cta" onclick="location.reload()" style="margin-top:8px;font-size:11px;padding:8px 20px">Start again</button>';
+  const loadingEl = document.getElementById('loading-screen');
+  loadingEl.innerHTML = \`
+    <div style="display:flex;flex-direction:column;align-items:center;gap:16px;max-width:380px;text-align:center;padding:0 24px">
+      <svg width="28" height="28" viewBox="0 0 34 34" xmlns="http://www.w3.org/2000/svg" style="opacity:0.6">
+  <g fill="#E0B030" stroke="#C8941A" stroke-width="0.4">
+    <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(0 17 17)"/>
+    <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(51.4 17 17)"/>
+    <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(102.8 17 17)"/>
+    <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(154.2 17 17)"/>
+    <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(205.7 17 17)"/>
+    <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(257.1 17 17)"/>
+    <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(308.5 17 17)"/>
+  </g>
+  <g fill="#F7D44C" stroke="#E0B030" stroke-width="0.3">
+    <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(0 17 17)"/>
+    <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(60 17 17)"/>
+    <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(120 17 17)"/>
+    <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(180 17 17)"/>
+    <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(240 17 17)"/>
+    <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(300 17 17)"/>
+  </g>
+  <circle cx="17" cy="17" r="4.1" fill="#6B5318" stroke="#5A4512" stroke-width="0.3"/>
+</svg>
+      <div style="font-size:16px;font-style:italic;color:var(--deep)">Something went wrong</div>
+      <div style="font-size:13px;color:var(--muted);font-style:italic;line-height:1.6">\${msg}</div>
+      <button class="cta" onclick="location.reload()" style="margin-top:8px">Start again</button>
+    </div>\`;
 }
 
 // ── Results ──
@@ -1157,56 +1233,156 @@ function renderChecklist(items) {
 // ── Render ceremony vertical timeline ──
 function renderCeremonies(items) {
   const el = document.getElementById('tab-ceremonies');
-  if (!items.length) { el.innerHTML='<p style="color:var(--muted);font-style:italic;font-size:13px;padding:20px 0">No ceremony sequence found.</p>'; return; }
+  if (!items.length) {
+    el.innerHTML='<p style="color:var(--muted);font-style:italic;font-size:13px;padding:20px 0">No ceremony sequence found.</p>';
+    return;
+  }
 
   if (!window.selectedCeremonies) window.selectedCeremonies = new Set(items.map((_,i)=>i));
 
-  el.innerHTML = \`
-    <p style="font-size:12px;color:var(--muted);font-style:italic;margin-bottom:20px">
-      Click any ceremony to expand details. Uncheck ceremonies you don't want included.
-    </p>
-    <div class="ceremony-timeline">
-      \${items.map((item,i)=>{
-        const name = item.name||item.event||item.ceremony||'';
-        const timing = item.timing||item.timeframe||'';
-        const duration = item.duration||'';
-        const size = item.typical_size||item.guestSize||'';
-        const loc = item.location_type||item.locationType||'';
-        const notes = item.notes||'';
-        const trad = item.tradition||item.source||'';
-        const col = tradColor(trad);
-        const tradLabel = trad?(TRADS.find(t=>t.slug===trad)?.label||trad):'';
-        const selected = window.selectedCeremonies.has(i);
+  // Split ceremonies by tradition
+  const trad1 = S.traditions[0];
+  const trad2 = S.traditions[1];
+  const trad1Name = TRADS.find(t=>t.slug===trad1)?.label || trad1 || '';
+  const trad2Name = trad2 ? (TRADS.find(t=>t.slug===trad2)?.label || trad2) : '';
 
-        return \`<div class="ceremony-card" id="cc-\${i}" onclick="toggleCard(\${i})" style="opacity:\${selected?1:0.4}">
-          <div class="ceremony-dot" style="background:\${col.color};border-color:var(--cream)"></div>
-          <div class="ceremony-header">
-            <div class="ceremony-meta-wrap">
-              \${tradLabel?\`<div class="ceremony-trad-tag" style="background:\${col.bg};color:\${col.color}">\${tradLabel.split('·')[0].trim()}</div>\`:''}
-              <div class="ceremony-name">\${name}</div>
-              <div class="ceremony-timing">\${timing}\${duration?' · '+duration:''}</div>
-            </div>
-            <div class="ceremony-toggle">›</div>
-          </div>
-          <div class="ceremony-body" onclick="event.stopPropagation()">
-            <div style="margin-bottom:10px">
-              \${size?\`<div class="ceremony-detail-row"><span class="ceremony-detail-label">Guest size</span><span class="ceremony-detail-val">\${size}</span></div>\`:''}
-              \${loc?\`<div class="ceremony-detail-row"><span class="ceremony-detail-label">Location</span><span class="ceremony-detail-val">\${loc}</span></div>\`:''}
-            </div>
-            \${notes?\`<div class="ceremony-notes">\${notes}</div>\`:''}
-            <div class="ceremony-include">
-              <input type="checkbox" \${selected?'checked':''} onchange="toggleCeremony(\${i},event)">
-              Include this ceremony in my plan
-            </div>
-          </div>
-        </div>\`;
-      }).join('')}
+  // Categorise each ceremony
+  const leftItems = [];   // tradition 1
+  const rightItems = [];  // tradition 2
+  const sharedItems = []; // universal / interfaith / both
+
+  items.forEach((item, i) => {
+    const src = item._sourceTradition || item.tradition || item.source || '';
+    const slug = item.tradition || item.source || '';
+    if (src === 'Universal' || src === 'both' || src === 'Interfaith' || (!slug && !src)) {
+      sharedItems.push({item, i});
+    } else if (slug === trad1 || src === trad1Name || (trad1 && src.toLowerCase().includes(trad1.split('-')[0]))) {
+      leftItems.push({item, i});
+    } else if (trad2 && (slug === trad2 || src === trad2Name || src.toLowerCase().includes(trad2.split('-')[0]))) {
+      rightItems.push({item, i});
+    } else {
+      // fallback — odd items go left if only one tradition
+      trad2 ? sharedItems.push({item, i}) : leftItems.push({item, i});
+    }
+  });
+
+  function cardHtml({item, i}) {
+    const name = item.name||item.event||item.ceremony||'';
+    const timing = item.timing||item.timeframe||'';
+    const duration = item.duration||'';
+    const size = item.typical_size||item.guestSize||'';
+    const loc = item.location_type||item.locationType||'';
+    const notes = item.notes||'';
+    const trad = item.tradition||item.source||'';
+    const col = tradColor(trad);
+    const tradLabel = trad?(TRADS.find(t=>t.slug===trad)?.label||trad):'';
+    const selected = window.selectedCeremonies.has(i);
+    return \`<div class="ceremony-card" id="cc-\${i}" onclick="toggleCard(\${i})" style="opacity:\${selected?1:0.4}">
+      <div class="ceremony-dot" style="background:\${col.color};border-color:var(--cream)"></div>
+      <div class="ceremony-header">
+        <div class="ceremony-meta-wrap">
+          \${tradLabel?\`<div class="ceremony-trad-tag" style="background:\${col.bg};color:\${col.color}">\${tradLabel.split('·')[0].trim()}</div>\`:''}
+          <div class="ceremony-name">\${name}</div>
+          <div class="ceremony-timing">\${timing}\${duration?' · '+duration:''}</div>
+        </div>
+        <div class="ceremony-toggle">›</div>
+      </div>
+      <div class="ceremony-body" onclick="event.stopPropagation()">
+        <div style="margin-bottom:10px">
+          \${size?\`<div class="ceremony-detail-row"><span class="ceremony-detail-label">Guest size</span><span class="ceremony-detail-val">\${size}</span></div>\`:''}
+          \${loc?\`<div class="ceremony-detail-row"><span class="ceremony-detail-label">Location</span><span class="ceremony-detail-val">\${loc}</span></div>\`:''}
+        </div>
+        \${notes?\`<div class="ceremony-notes">\${notes}</div>\`:''}
+        <div class="ceremony-include">
+          <input type="checkbox" \${selected?'checked':''} onchange="toggleCeremony(\${i},event)">
+          Include in my plan
+        </div>
+      </div>
+    </div>\`;
+  }
+
+  const isSingle = !trad2 || rightItems.length === 0;
+
+  let html = \`<p style="font-size:12px;color:var(--muted);font-style:italic;margin-bottom:20px">
+    Click any ceremony to expand. Uncheck ceremonies you don't want included.
+  </p>\`;
+
+  if (isSingle) {
+    // Single tradition — group by phase: pre-wedding / ceremony day / post-wedding
+    const allItems = leftItems.concat(sharedItems);
+    const prewedding = allItems.filter(({item}) => {
+      const t = (item.timing||item.timeframe||'').toLowerCase();
+      return t.includes('month') || t.includes('week') || t.includes('before') || t.includes('days before') || t.includes('evening before');
+    });
+    const dayof = allItems.filter(({item}) => {
+      const t = (item.timing||item.timeframe||'').toLowerCase();
+      return t.includes('day of') || t.includes('ceremony') || t.includes('morning') || t.includes('afternoon') || t.includes('evening') || (!t.includes('month') && !t.includes('week') && !t.includes('before') && !t.includes('after'));
+    });
+    const postwedding = allItems.filter(({item}) => {
+      const t = (item.timing||item.timeframe||'').toLowerCase();
+      return t.includes('after') || t.includes('following') || t.includes('days after') || t.includes('week after');
+    });
+    // If phases are unclear, just show all as one timeline
+    if (prewedding.length === 0 && postwedding.length === 0) {
+      html += \`<div class="ceremony-timeline">\${allItems.map(cardHtml).join('')}</div>\`;
+    } else {
+      html += \`
+      <style>
+        .ceremony-cols { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:28px; }
+        @media(max-width:600px){.ceremony-cols{grid-template-columns:1fr;}}
+        .ceremony-col-header { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--bdr); font-style:italic; }
+        .ceremony-shared-header { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--bdr); font-style:italic; display:flex; align-items:center; gap:8px; }
+        .ceremony-shared-header::after { content:''; flex:1; height:1px; background:var(--bdr); }
+      </style>
+      \${prewedding.length || dayof.length ? \`
+      <div class="ceremony-cols">
+        \${prewedding.length ? \`<div>
+          <div class="ceremony-col-header">Before the wedding</div>
+          <div class="ceremony-timeline">\${prewedding.map(cardHtml).join('')}</div>
+        </div>\` : '<div></div>'}
+        \${dayof.length ? \`<div>
+          <div class="ceremony-col-header">The wedding day</div>
+          <div class="ceremony-timeline">\${dayof.map(cardHtml).join('')}</div>
+        </div>\` : '<div></div>'}
+      </div>\` : ''}
+      \${postwedding.length ? \`
+      <div class="ceremony-shared-header">After the wedding</div>
+      <div class="ceremony-timeline">\${postwedding.map(cardHtml).join('')}</div>\` : ''}\`;
+    }
+  } else {
+    // Two traditions — two columns + shared at bottom
+    html += \`
+    <style>
+      .ceremony-cols { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:28px; }
+      @media(max-width:600px){.ceremony-cols{grid-template-columns:1fr;}}
+      .ceremony-col-header { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--bdr); font-style:italic; }
+      .ceremony-shared-header { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--bdr); font-style:italic; display:flex; align-items:center; gap:8px; }
+      .ceremony-shared-header::after { content:''; flex:1; height:1px; background:var(--bdr); }
+    </style>
+    <div class="ceremony-cols">
+      <div>
+        <div class="ceremony-col-header">\${trad1Name.split('·')[0].trim()}</div>
+        <div class="ceremony-timeline">\${leftItems.map(cardHtml).join('') || '<p style="font-size:12px;color:var(--muted);font-style:italic;padding:12px 0">No specific ceremonies</p>'}</div>
+      </div>
+      <div>
+        <div class="ceremony-col-header">\${trad2Name.split('·')[0].trim()}</div>
+        <div class="ceremony-timeline">\${rightItems.map(cardHtml).join('') || '<p style="font-size:12px;color:var(--muted);font-style:italic;padding:12px 0">No specific ceremonies</p>'}</div>
+      </div>
     </div>
-    <p style="font-size:11px;color:var(--muted);font-style:italic;margin-top:16px">
-      \${window.selectedCeremonies.size} of \${items.length} ceremonies included
-    </p>\`;
+    \${sharedItems.length ? \`
+    <div class="ceremony-shared-header">Shared ceremonies</div>
+    <div class="ceremony-timeline">\${sharedItems.map(cardHtml).join('')}</div>\` : ''}\`;
+  }
+
+  html += \`<p style="font-size:11px;color:var(--muted);font-style:italic;margin-top:16px">
+    \${window.selectedCeremonies.size} of \${items.length} ceremonies included
+  </p>\`;
+
+  el.innerHTML = html;
 }
 
+// old single-tradition renderCeremonies replaced above
+function OLD_renderCeremonies_placeholder() {
 window.toggleCard = function(i) {
   document.getElementById(\`cc-\${i}\`)?.classList.toggle('open');
 };
@@ -1219,20 +1395,59 @@ window.toggleCeremony = function(i, e) {
 };
 
 // ── Render budget ──
-function renderBudget(items) {
+function renderBudget(budgetData) {
   const el = document.getElementById('tab-budget');
-  if (!items.length) { el.innerHTML='<p style="color:var(--muted);font-style:italic;font-size:13px;padding:20px 0">No budget breakdown found.</p>'; return; }
-  const total = S.budget;
+  // Engine returns { budget_lines: [...], total_budget, alerts, ... }
+  const items = Array.isArray(budgetData)
+    ? budgetData
+    : (budgetData?.budget_lines || budgetData?.budgetBreakdown || []);
+  const total = budgetData?.total_budget || S.budget;
+  const alerts = budgetData?.alerts || [];
+
+  if (!items.length) {
+    el.innerHTML=\`<div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:32px 0;text-align:center">
+      <svg width="28" height="28" viewBox="0 0 34 34" xmlns="http://www.w3.org/2000/svg" style="opacity:0.6">
+  <g fill="#E0B030" stroke="#C8941A" stroke-width="0.4">
+    <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(0 17 17)"/>
+    <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(51.4 17 17)"/>
+    <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(102.8 17 17)"/>
+    <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(154.2 17 17)"/>
+    <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(205.7 17 17)"/>
+    <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(257.1 17 17)"/>
+    <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(308.5 17 17)"/>
+  </g>
+  <g fill="#F7D44C" stroke="#E0B030" stroke-width="0.3">
+    <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(0 17 17)"/>
+    <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(60 17 17)"/>
+    <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(120 17 17)"/>
+    <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(180 17 17)"/>
+    <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(240 17 17)"/>
+    <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(300 17 17)"/>
+  </g>
+  <circle cx="17" cy="17" r="4.1" fill="#6B5318" stroke="#5A4512" stroke-width="0.3"/>
+</svg>
+      <p style="color:var(--muted);font-style:italic;font-size:13px">No budget breakdown found.</p>
+    </div>\`;
+    return;
+  }
+
+  const alertsHtml = alerts.map(a =>
+    \`<div class="conflict-banner" style="margin-bottom:8px">\${a.message}</div>\`
+  ).join('');
+
   el.innerHTML = \`
     <div class="budget-total-display">\${total.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0})}</div>
     <div class="budget-sub">allocated across \${items.length} categories</div>
+    \${alertsHtml}
     \${items.map(item=>{
       const cat = item.category||item.name||'Other';
-      const pct = item.pct_mid||item.pct||((item.pct_low||0)+(item.pct_high||0))/2||10;
-      const amt = Math.round(total*pct/100);
+      const amt = item.suggested_amount || Math.round(total * ((item.pct_low||0)+(item.pct_high||0))/2/100);
+      const pctOfTotal = total > 0 ? (amt / total * 100) : 0;
+      const tradTag = item.tradition_specific_to
+        ? \`<span style="font-size:10px;font-style:italic;opacity:0.6;margin-left:6px">\${item.tradition_specific_to}</span>\` : '';
       return \`<div class="budget-row">
-        <div class="budget-cat">\${cat}</div>
-        <div class="budget-track"><div class="budget-fill" style="width:\${Math.min(pct*2,100)}%"></div></div>
+        <div class="budget-cat">\${cat}\${tradTag}</div>
+        <div class="budget-track"><div class="budget-fill" style="width:\${Math.min(pctOfTotal*2,100)}%"></div></div>
         <div class="budget-amt">\${amt.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0})}</div>
       </div>\`;
     }).join('')}\`;
