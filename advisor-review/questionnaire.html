@@ -118,7 +118,7 @@
   }
   .fi:focus { border-bottom-color: var(--deep); }
   .fi::placeholder { color: var(--bdr); }
-  input[type="date"].fi { font-style: normal; font-size: 15px; }
+  input[type="date"].fi { font-style: normal; font-size: 15px; font-family: 'Playfair Display', Georgia, serif; color: var(--deep); }
 
   /* ── Option pills ── */
   .options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
@@ -950,6 +950,7 @@
   <!-- Q7: Ceremony selection -->
   <div class="screen" id="q7" style="overflow:hidden;position:relative;">
   <div id="q7-fade" style="position:absolute;bottom:0;left:0;right:0;height:80px;background:linear-gradient(transparent,var(--cream));pointer-events:none;z-index:10;transition:opacity 0.3s;"></div>
+    <div id="q7-scroll" style="height:100%;overflow-y:auto;overflow-x:hidden;padding:32px 24px 100px;box-sizing:border-box;">
     <div style="width:100%;max-width:900px;margin:0 auto">
       <div class="ql">Step 7 of 8</div>
       <div class="qt" id="q7-title">Choose your ceremonies</div>
@@ -959,6 +960,7 @@
         <button class="btn-back" onclick="goBack()">← back</button>
         <button class="cta" onclick="goToConfirmation()">Review my plan →</button>
       </div>
+    </div>
     </div>
     </div>
   </div>

@@ -949,6 +949,24 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Debug: check side field values for a tradition
+app.get('/api/debug/side/:slug', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('live_taxonomy')
+      .select('slug, ceremony_sequence')
+      .eq('slug', req.params.slug)
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) return res.json({ error: 'not found' });
+    const sides = (data.ceremony_sequence || []).map(c => ({
+      name: c.name,
+      side: c.side || 'MISSING'
+    }));
+    res.json({ slug: data.slug, ceremonies: sides });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
 // ── Routes: traditions list ──
 app.get('/api/traditions', async (req, res) => {
   try {
