@@ -796,18 +796,18 @@
           <input type="text" class="fi" id="name2" placeholder="e.g. James" autocomplete="given-name" oninput="updateRoleLabels()">
         </div>
       </div>
-      <div style="margin-top:24px">
-        <div class="ql" style="margin-bottom:12px">How do you refer to each other?</div>
+      <div style="margin-top:28px">
+        <div class="ql" style="margin-bottom:16px">How do you refer to each other?</div>
         <div class="role-row" id="role-row">
           <div class="role-pair">
-            <div class="role-name" id="role-name1">Partner one</div>
+            <div class="role-name"><span id="role-name1">Partner one</span> is</div>
             <div class="role-options">
               <button class="role-btn on" data-partner="1" data-role="bride" onclick="setRole(1,'bride',this)">Bride</button>
               <button class="role-btn" data-partner="1" data-role="groom" onclick="setRole(1,'groom',this)">Groom</button>
             </div>
           </div>
           <div class="role-pair">
-            <div class="role-name" id="role-name2">Partner two</div>
+            <div class="role-name"><span id="role-name2">Partner two</span> is</div>
             <div class="role-options">
               <button class="role-btn" data-partner="2" data-role="bride" onclick="setRole(2,'bride',this)">Bride</button>
               <button class="role-btn on" data-partner="2" data-role="groom" onclick="setRole(2,'groom',this)">Groom</button>
@@ -1034,6 +1034,8 @@
 
 <script>
 // ── State ──
+function pos(n) { return n + "’s"; } // possessive helper avoids quote escaping issues
+
 const S = { name1:'', name2:'', role1:'bride', role2:'groom', dateSure:false, locationSure:false, date:'', location:'', traditions:[], traditionAssignment:{}, budget:50000, guests:100, plan:null };
 let guests = 100;
 let currentQ = 1;
@@ -1124,17 +1126,18 @@ function buildQ4b() {
     return '<div class="trad-assign-row">' +
       '<div class="trad-assign-name">' + label + '</div>' +
       '<div class="trad-assign-btns">' +
-        '<button class="assign-btn ' + (assigned==='name1'?'on':'') + '" onclick="assignTrad('' + slug + '','name1',this)">' + n1 + '</button>' +
-        '<button class="assign-btn ' + (assigned==='name2'?'on':'') + '" onclick="assignTrad('' + slug + '','name2',this)">' + n2 + '</button>' +
+        '<button class="assign-btn ' + (assigned==='name1'?'on':'') + '" data-slug="' + slug + '" data-partner="name1" onclick="assignTrad(this)">' + n1 + '</button>' +
+        '<button class="assign-btn ' + (assigned==='name2'?'on':'') + '" data-slug="' + slug + '" data-partner="name2" onclick="assignTrad(this)">' + n2 + '</button>' +
       '</div>' +
     '</div>';
   }).join('');
 }
 
-function assignTrad(slug, partner, btn) {
+function assignTrad(btn) {
+  var slug = btn.dataset.slug;
+  var partner = btn.dataset.partner;
   S.traditionAssignment[slug] = partner;
-  // Update buttons for this tradition row
-  const row = btn.closest('.trad-assign-row');
+  var row = btn.closest('.trad-assign-row');
   row.querySelectorAll('.assign-btn').forEach(function(b) { b.classList.remove('on'); });
   btn.classList.add('on');
 }
@@ -1537,7 +1540,7 @@ function renderChecklist(items) {
     const col = trad ? tradColor(trad) : null;
     const tradName = col ? (TRADS.find(t=>t.slug===trad)||{label:trad}).label.split('·')[0].trim() : '';
     return '<div class="checklist-item">' +
-      '<div class="check-box" onclick="this.classList.toggle('checked')"></div>' +
+      '<div class="check-box" onclick="this.classList.toggle(\'checked\')"></div>' +
       '<div class="check-label">' + label +
         (col ? '<span class="trad-tag" style="background:' + col.bg + ';color:' + col.color + ';border-color:' + col.bg + '">' + tradName + '</span>' : '') +
       '</div>' +
@@ -1590,11 +1593,11 @@ function renderChecklist(items) {
   el.innerHTML =
     '<div class="checklist-cols">' +
       '<div>' +
-        '<div class="ceremony-col-header">' + name1 + ''s checklist</div>' +
+        '<div class="ceremony-col-header">' + name1 + '\'s checklist</div>' +
         (side1.length ? renderGroup(side1) : '<p style="font-size:12px;color:var(--muted);font-style:italic;padding:8px 0">No specific items</p>') +
       '</div>' +
       (trad2 ? '<div>' +
-        '<div class="ceremony-col-header">' + name2 + ''s checklist</div>' +
+        '<div class="ceremony-col-header">' + name2 + '\'s checklist</div>' +
         (side2.length ? renderGroup(side2) : '<p style="font-size:12px;color:var(--muted);font-style:italic;padding:8px 0">No specific items</p>') +
       '</div>' : '<div></div>') +
     '</div>' +
@@ -1711,11 +1714,11 @@ function renderCeremonies(items) {
     } else {
       html += '<div class="ceremony-cols">' +
         '<div>' +
-          '<div class="ceremony-col-header">' + (S.name1 || 'Bride') + ''s side</div>' +
+          '<div class="ceremony-col-header">' + pos(S.name1 || 'Bride') + ' side</div>' +
           '<div class="ceremony-timeline">' + (brideItems.length ? brideItems.map(cardHtml).join('') : '<p style="font-size:12px;color:var(--muted);font-style:italic;padding:12px 0">No specific ceremonies</p>') + '</div>' +
         '</div>' +
         '<div>' +
-          '<div class="ceremony-col-header">' + (S.name2 || 'Groom') + ''s side</div>' +
+          '<div class="ceremony-col-header">' + pos(S.name2 || 'Groom') + ' side</div>' +
           '<div class="ceremony-timeline">' + (groomItems.length ? groomItems.map(cardHtml).join('') : '<p style="font-size:12px;color:var(--muted);font-style:italic;padding:12px 0">No specific ceremonies</p>') + '</div>' +
         '</div>' +
       '</div>' +
@@ -1931,7 +1934,7 @@ function showCeremonySelection(ceremonies) {
       const sel = ceremonySelections[block.tradSlug][group][ci.idx] !== false;
       const name = ci.item.name || ci.item.event || '';
       const timing = ci.item.timing || '';
-      return '<div class="cs-item ' + (sel ? 'selected' : 'deselected') + '" onclick="toggleCs('' + block.tradSlug + '','' + group + '',' + ci.idx + ',this)">' +
+      return '<div class="cs-item ' + (sel ? 'selected' : 'deselected') + '" data-slug="' + block.tradSlug + '" data-group="' + group + '" data-idx="' + ci.idx + '" onclick="toggleCs(this)">' +
         '<div class="cs-check"><span class="cs-check-tick">&#10003;</span></div>' +
         '<div><div class="cs-item-name">' + name + '</div>' +
         (timing ? '<div class="cs-item-timing">' + timing + '</div>' : '') +
@@ -1946,11 +1949,11 @@ function showCeremonySelection(ceremonies) {
       tradHeader +
       '<div class="cs-cols">' +
         '<div>' +
-          '<div class="cs-col-header">' + n1 + ''s ceremonies</div>' +
+          '<div class="cs-col-header">' + n1 + '\'s ceremonies</div>' +
           (col1Html || '<div style="font-size:12px;color:var(--muted);font-style:italic;padding:8px 0">None specific</div>') +
         '</div>' +
         '<div>' +
-          '<div class="cs-col-header">' + n2 + ''s ceremonies</div>' +
+          '<div class="cs-col-header">' + n2 + '\'s ceremonies</div>' +
           (col2Html || '<div style="font-size:12px;color:var(--muted);font-style:italic;padding:8px 0">None specific</div>') +
         '</div>' +
       '</div>' +
@@ -1959,12 +1962,15 @@ function showCeremonySelection(ceremonies) {
   }).join('');
 }
 
-function toggleCs(tradSlug, group, idx, el) {
-  const current = ceremonySelections[tradSlug][group][idx] !== false;
+function toggleCs(el) {
+  var tradSlug = el.dataset.slug;
+  var group = el.dataset.group;
+  var idx = parseInt(el.dataset.idx);
+  var current = ceremonySelections[tradSlug][group][idx] !== false;
   ceremonySelections[tradSlug][group][idx] = !current;
   el.classList.toggle('selected', !current);
   el.classList.toggle('deselected', current);
-  const tick = el.querySelector('.cs-check-tick');
+  var tick = el.querySelector('.cs-check-tick');
   if (tick) tick.style.display = !current ? 'block' : 'none';
 }
 
@@ -2059,10 +2065,10 @@ function buildConfirmation() {
     html += '<div class="conf-block">' +
       (trad2 ? '<div class="conf-trad-header">' + tradInfo.label + '</div>' : '') +
       '<div class="conf-cols">' +
-        '<div><div class="conf-col-header">' + n1 + ''s ceremonies</div>' +
+        '<div><div class="conf-col-header">' + n1 + '\'s ceremonies</div>' +
           (side1.length ? side1.map(confItem).join('') : '<div class="conf-item" style="opacity:0.4">None selected</div>') +
         '</div>' +
-        '<div><div class="conf-col-header">' + n2 + ''s ceremonies</div>' +
+        '<div><div class="conf-col-header">' + n2 + '\'s ceremonies</div>' +
           (side2.length ? side2.map(confItem).join('') : '<div class="conf-item" style="opacity:0.4">None selected</div>') +
         '</div>' +
       '</div>' +
