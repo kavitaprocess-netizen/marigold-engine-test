@@ -803,15 +803,17 @@
             <span class="role-sentence-name" id="role-name1">Partner one</span>
             <span class="role-sentence-is"> is the </span>
             <select class="role-select" id="role-select1" onchange="setRoleFromSelect(1,this.value)">
+              <option value="" disabled selected>Select</option>
               <option value="bride">Bride</option>
-              <option value="groom" selected>Groom</option>
+              <option value="groom">Groom</option>
             </select>
           </div>
           <div class="role-sentence">
             <span class="role-sentence-name" id="role-name2">Partner two</span>
             <span class="role-sentence-is"> is the </span>
             <select class="role-select" id="role-select2" onchange="setRoleFromSelect(2,this.value)">
-              <option value="bride" selected>Bride</option>
+              <option value="" disabled selected>Select</option>
+              <option value="bride">Bride</option>
               <option value="groom">Groom</option>
             </select>
           </div>
@@ -930,7 +932,7 @@
 
   <!-- Q7: Ceremony selection -->
   <div class="screen" id="q7">
-    <div style="height:100%;overflow-y:auto;overflow-x:hidden;padding:32px 24px 80px;box-sizing:border-box;">
+    <div style="height:100%;overflow-y:auto;overflow-x:hidden;padding:32px 24px 80px;box-sizing:border-box;" id="q7-scroll">
     <div style="width:100%;max-width:900px;margin:0 auto">
       <div class="ql">Your ceremony plan</div>
       <div class="qt" id="q7-title">Choose your ceremonies</div>
@@ -961,7 +963,8 @@
   </div>
 
   <!-- Q7: Ceremony selection -->
-  <div class="screen" id="q7" style="overflow:hidden;">
+  <div class="screen" id="q7" style="overflow:hidden;position:relative;">
+  <div id="q7-fade" style="position:absolute;bottom:0;left:0;right:0;height:80px;background:linear-gradient(transparent,var(--cream));pointer-events:none;z-index:10;transition:opacity 0.3s;"></div>
     <div style="width:100%;max-width:900px;margin:0 auto">
       <div class="ql">Step 7 of 8</div>
       <div class="qt" id="q7-title">Choose your ceremonies</div>
@@ -1042,7 +1045,7 @@
 // ── State ──
 function pos(n) { return n + "’s"; } // possessive helper avoids quote escaping issues
 
-const S = { name1:'', name2:'', role1:'bride', role2:'groom', dateSure:false, locationSure:false, date:'', location:'', traditions:[], traditionAssignment:{}, budget:50000, guests:100, plan:null };
+const S = { name1:'', name2:'', role1:'', role2:'', dateSure:false, locationSure:false, date:'', location:'', traditions:[], traditionAssignment:{}, budget:50000, guests:100, plan:null };
 let guests = 100;
 let currentQ = 1;
 const TOTAL_Q = 6;
@@ -1150,41 +1153,41 @@ function assignTrad(btn) {
 
 // ── Traditions ──
 const TRADS = [
-  {slug:'sikh',label:'Sikh',region:'South Asian'},
-  {slug:'north-indian-punjabi',label:'Hindu · North Indian / Punjabi',region:'South Asian'},
+  {slug:'andhra-telugu',label:'Hindu · Andhra / Telugu',region:'South Asian'},
+  {slug:'arya-samaj',label:'Hindu · Arya Samaj',region:'South Asian'},
+  {slug:'assamese-hindu',label:'Hindu · Assamese',region:'South Asian'},
   {slug:'bengali-hindu',label:'Hindu · Bengali',region:'South Asian'},
+  {slug:'bihari-hindu',label:'Hindu · Bihari',region:'South Asian'},
+  {slug:'catholic',label:'Christian · Catholic',region:'Christian'},
+  {slug:'chinese-taiwanese',label:'Chinese / Taiwanese',region:'East Asian'},
+  {slug:'christian-western',label:'Christian · Western',region:'Christian'},
+  {slug:'cuban',label:'Cuban',region:'Caribbean'},
+  {slug:'dawoodi-bohra',label:'Muslim · Dawoodi Bohra',region:'Muslim'},
+  {slug:'filipino-catholic',label:'Christian · Filipino Catholic',region:'Southeast Asian'},
+  {slug:'greek-orthodox',label:'Christian · Greek Orthodox',region:'Christian'},
   {slug:'gujarati',label:'Hindu · Gujarati',region:'South Asian'},
-  {slug:'marathi',label:'Hindu · Marathi',region:'South Asian'},
-  {slug:'tamil-hindu',label:'Hindu · Tamil',region:'South Asian'},
+  {slug:'hausa-muslim',label:'Muslim · West African (Hausa)',region:'Muslim'},
+  {slug:'jain-shwetambar',label:'Jain · Shwetambar',region:'South Asian'},
+  {slug:'jewish-reform-conservative',label:'Jewish · Reform / Conservative',region:'Jewish'},
   {slug:'kashmiri-pandit',label:'Hindu · Kashmiri Pandit',region:'South Asian'},
   {slug:'kerala-nair',label:'Hindu · Kerala / Nair',region:'South Asian'},
-  {slug:'andhra-telugu',label:'Hindu · Andhra / Telugu',region:'South Asian'},
-  {slug:'assamese-hindu',label:'Hindu · Assamese',region:'South Asian'},
-  {slug:'bihari-hindu',label:'Hindu · Bihari',region:'South Asian'},
-  {slug:'odia-hindu',label:'Hindu · Odia',region:'South Asian'},
-  {slug:'rajasthani-marwari',label:'Rajasthani (Marwari)',region:'South Asian'},
-  {slug:'rajasthani-rajput',label:'Rajasthani (Rajput)',region:'South Asian'},
-  {slug:'vedic-general',label:'Vedic (General)',region:'South Asian'},
-  {slug:'arya-samaj',label:'Arya Samaj',region:'South Asian'},
-  {slug:'jain-shwetambar',label:'Jain (Shwetambar)',region:'South Asian'},
-  {slug:'dawoodi-bohra',label:'Dawoodi Bohra',region:'South Asian'},
-  {slug:'manipuri-vaishnavite',label:'Manipuri (Vaishnavite)',region:'South Asian'},
   {slug:'khasi',label:'Khasi',region:'South Asian'},
-  {slug:'muslim-nikah',label:'Muslim · Nikah',region:'Muslim'},
-  {slug:'hausa-muslim',label:'Muslim · West African (Hausa)',region:'Muslim'},
-  {slug:'jewish-reform-conservative',label:'Jewish · Reform / Conservative',region:'Jewish'},
-  {slug:'christian-western',label:'Christian / Western',region:'Christian'},
-  {slug:'catholic',label:'Catholic',region:'Christian'},
-  {slug:'greek-orthodox',label:'Greek Orthodox',region:'Christian'},
-  {slug:'mexican-catholic',label:'Mexican Catholic',region:'Latin American'},
-  {slug:'latin-american-catholic',label:'Latin American Catholic',region:'Latin American'},
-  {slug:'cuban',label:'Cuban',region:'Caribbean'},
-  {slug:'yoruba-nigerian',label:'Nigerian · Yoruba',region:'West African'},
-  {slug:'chinese-taiwanese',label:'Chinese / Taiwanese',region:'East Asian'},
   {slug:'korean',label:'Korean',region:'East Asian'},
-  {slug:'thai-buddhist',label:'Thai Buddhist',region:'Buddhist'},
-  {slug:'sri-lankan-buddhist',label:'Sri Lankan Buddhist',region:'Buddhist'},
-  {slug:'filipino-catholic',label:'Filipino Catholic',region:'Southeast Asian'},
+  {slug:'latin-american-catholic',label:'Christian · Latin American Catholic',region:'Latin American'},
+  {slug:'manipuri-vaishnavite',label:'Hindu · Manipuri (Vaishnavite)',region:'South Asian'},
+  {slug:'marathi',label:'Hindu · Marathi',region:'South Asian'},
+  {slug:'mexican-catholic',label:'Christian · Mexican Catholic',region:'Latin American'},
+  {slug:'muslim-nikah',label:'Muslim · Nikah',region:'Muslim'},
+  {slug:'north-indian-punjabi',label:'Hindu · North Indian / Punjabi',region:'South Asian'},
+  {slug:'odia-hindu',label:'Hindu · Odia',region:'South Asian'},
+  {slug:'rajasthani-marwari',label:'Hindu · Rajasthani (Marwari)',region:'South Asian'},
+  {slug:'rajasthani-rajput',label:'Hindu · Rajasthani (Rajput)',region:'South Asian'},
+  {slug:'sikh',label:'Sikh',region:'South Asian'},
+  {slug:'sri-lankan-buddhist',label:'Buddhist · Sri Lankan',region:'Buddhist'},
+  {slug:'tamil-hindu',label:'Hindu · Tamil',region:'South Asian'},
+  {slug:'thai-buddhist',label:'Buddhist · Thai',region:'Buddhist'},
+  {slug:'vedic-general',label:'Hindu · Vedic (General)',region:'South Asian'},
+  {slug:'yoruba-nigerian',label:'Nigerian · Yoruba',region:'West African'},
 ];
 
 const REGION_COLORS = {
@@ -1846,7 +1849,7 @@ function showCeremonySelection(ceremonies) {
   const n2Role = S.role2;
 
   function getTradSlug(item) {
-    return item._sourceTradition || item.tradition || item.source || '';
+    return item._sourceTraditionSlug || item.tradition || item.source || '';
   }
 
   // Build one block per tradition
@@ -2026,69 +2029,93 @@ function getSelectedCeremonies() {
 }
 
 function buildConfirmation() {
-  const selected = getSelectedCeremonies();
-  const n1 = S.name1 || 'Partner one';
-  const n2 = S.name2 || 'Partner two';
-  const trad1 = S.traditions[0];
-  const trad2 = S.traditions[1] || null;
+  var n1 = S.name1 || 'Partner one';
+  var n2 = S.name2 || 'Partner two';
+  var trad1 = S.traditions[0];
+  var trad2 = S.traditions[1] || null;
+  var n1Role = S.role1;
+  var n2Role = S.role2;
+  var allTradSlugs = trad2 ? [trad1, trad2] : [trad1];
 
+  // Count total selected
+  var totalSelected = 0;
+  Object.values(ceremonySelections).forEach(function(groups) {
+    ['side1','side2','both'].forEach(function(g) {
+      Object.values(groups[g]).forEach(function(v){ if(v !== false) totalSelected++; });
+    });
+  });
+
+  var dateStr = S.date
+    ? new Date(S.date).toLocaleDateString('en-US',{month:'long',year:'numeric'})
+    : 'Date TBC';
+
+  document.getElementById('q8-title').innerHTML = '<em>' + n1 + ' &amp; ' + n2 + '</em> — your wedding plan';
   document.getElementById('q8-sub').textContent =
-    selected.length + ' ceremonies selected · ' +
-    S.budget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + ' budget · ' +
-    S.guests + ' guests';
+    totalSelected + ' ceremonies selected · ' +
+    S.budget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) +
+    ' · ' + S.guests + ' guests · ' + dateStr;
 
-  const allTradSlugs = trad2 ? [trad1, trad2] : [trad1];
-  const n1Role = S.role1;
-  const n2Role = S.role2;
-
-  let html = '';
+  var html = '';
 
   allTradSlugs.forEach(function(tradSlug) {
-    const tradInfo = TRADS.find(function(t){return t.slug===tradSlug;}) || {label:tradSlug};
-    const tradCerems = selected.filter(function(item) {
-      const src = item._sourceTradition || item.tradition || item.source || '';
-      return !trad2 || src === tradSlug || src === 'universal' || src === '';
-    });
-    if (!tradCerems.length) return;
+    var tradInfo = TRADS.find(function(t){ return t.slug===tradSlug; }) || {label:tradSlug};
+    var sel = ceremonySelections[tradSlug];
+    if (!sel) return;
 
-    const side1 = tradCerems.filter(function(i){ return (i.side||'both') === n1Role; });
-    const side2 = tradCerems.filter(function(i){ return (i.side||'both') === n2Role; });
-    const both = tradCerems.filter(function(i){ return !['bride','groom'].includes(i.side||'both'); });
+    var side1Selected = Object.entries(sel.side1).filter(function(e){ return e[1]!==false; }).map(function(e){ return planCeremonies[parseInt(e[0])]; }).filter(Boolean);
+    var side2Selected = Object.entries(sel.side2).filter(function(e){ return e[1]!==false; }).map(function(e){ return planCeremonies[parseInt(e[0])]; }).filter(Boolean);
+    var bothSelected  = Object.entries(sel.both).filter(function(e){ return e[1]!==false; }).map(function(e){ return planCeremonies[parseInt(e[0])]; }).filter(Boolean);
+
+    if (!side1Selected.length && !side2Selected.length && !bothSelected.length) return;
 
     function confItem(item) {
+      if (!item) return '';
       return '<div class="conf-item">' + (item.name||item.event||'') +
-        (item.timing ? '<span class="conf-item-timing"> &middot; ' + item.timing + '</span>' : '') +
-        '</div>';
+        (item.timing ? '<span class="conf-item-timing"> · ' + item.timing + '</span>' : '') + '</div>';
     }
+
+    var noItems = '<div class="conf-item" style="opacity:0.4;font-style:italic">None selected</div>';
 
     html += '<div class="conf-block">' +
       (trad2 ? '<div class="conf-trad-header">' + tradInfo.label + '</div>' : '') +
       '<div class="conf-cols">' +
-        '<div><div class="conf-col-header">' + n1 + '\'s ceremonies</div>' +
-          (side1.length ? side1.map(confItem).join('') : '<div class="conf-item" style="opacity:0.4">None selected</div>') +
+        '<div><div class="conf-col-header">' + pos(n1) + ' ceremonies</div>' +
+          (side1Selected.length ? side1Selected.map(confItem).join('') : noItems) +
         '</div>' +
-        '<div><div class="conf-col-header">' + n2 + '\'s ceremonies</div>' +
-          (side2.length ? side2.map(confItem).join('') : '<div class="conf-item" style="opacity:0.4">None selected</div>') +
+        '<div><div class="conf-col-header">' + pos(n2) + ' ceremonies</div>' +
+          (side2Selected.length ? side2Selected.map(confItem).join('') : noItems) +
         '</div>' +
       '</div>' +
-      (both.length ? '<div class="conf-shared-header">For both of you</div>' + both.map(confItem).join('') : '') +
+      (bothSelected.length ? '<div class="conf-shared-header">For both of you</div>' + bothSelected.map(confItem).join('') : '') +
     '</div>';
   });
 
-  // Budget adjusted by ceremony count
-  const totalCerems = planCeremonies.length || 1;
-  const selectedCount = selected.length;
-  const ratio = Math.max(0.5, Math.min(1, selectedCount / totalCerems));
-  const adjustedBudget = Math.round(S.budget * ratio);
+  // Universal
+  var univSel = ceremonySelections['universal'];
+  if (univSel) {
+    var univSelected = Object.entries(univSel.both).filter(function(e){ return e[1]!==false; }).map(function(e){ return planCeremonies[parseInt(e[0])]; }).filter(Boolean);
+    if (univSelected.length) {
+      html += '<div class="conf-block">' +
+        '<div class="conf-trad-header">Common ceremonies</div>' +
+        univSelected.map(function(item){ return '<div class="conf-item">' + (item.name||item.event||'') + '</div>'; }).join('') +
+      '</div>';
+    }
+  }
 
+  // Budget
+  var ratio = totalSelected / Math.max(planCeremonies.length, 1);
+  ratio = Math.max(0.5, Math.min(1, ratio));
+  var adjBudget = Math.round(S.budget * ratio);
   html += '<div class="conf-budget">' +
-    '<div class="conf-budget-total">' + adjustedBudget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>' +
-    '<div class="conf-budget-sub">estimated budget · adjusted for ' + selectedCount + ' of ' + totalCerems + ' ceremonies</div>' +
-    (S.plan && S.plan.budget ? buildConfBudgetBars(S.plan.budget, adjustedBudget, ratio) : '') +
+    '<div class="conf-budget-total">' + adjBudget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>' +
+    '<div class="conf-budget-sub">estimated budget for ' + totalSelected + ' ceremonies</div>' +
+    (S.plan && S.plan.budget ? buildConfBudgetBars(S.plan.budget, adjBudget, ratio) : '') +
   '</div>';
 
   document.getElementById('conf-container').innerHTML = html;
+  if (S.plan) S.plan.adjustedBudget = adjBudget;
 }
+
 
 function buildConfBudgetBars(budgetData, adjustedTotal, ratio) {
   const items = Array.isArray(budgetData) ? budgetData : (budgetData.budget_lines || []);
@@ -2114,6 +2141,18 @@ function buildFinalPlan() {
   }
   showResults();
 }
+
+// ── Q7 scroll fade ──
+document.addEventListener('DOMContentLoaded', function() {
+  var scroll = document.getElementById('q7-scroll');
+  var fade = document.getElementById('q7-fade');
+  if (scroll && fade) {
+    scroll.addEventListener('scroll', function() {
+      var atBottom = scroll.scrollHeight - scroll.scrollTop <= scroll.clientHeight + 10;
+      fade.style.opacity = atBottom ? '0' : '1';
+    });
+  }
+});
 
 // ── Keyboard ──
 document.addEventListener('keydown', e=>{

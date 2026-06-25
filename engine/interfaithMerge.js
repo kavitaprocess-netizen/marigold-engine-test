@@ -276,9 +276,10 @@ function mergeTraditions({ t1, t2, universalChecklist, totalBudget, actualEventC
     ? calculateBudget({ totalBudget, traditions: [t1, t2], actualEventCount })
     : null;
 
-  const ceremonySequence = [...(t1.ceremony_sequence || []), ...(t2.ceremony_sequence || [])].sort(
-    (a, b) => (a.order || 0) - (b.order || 0)
-  );
+  const ceremonySequence = [
+    ...(t1.ceremony_sequence || []).map(c => ({ ...c, _sourceTradition: t1.name, _sourceTraditionSlug: t1.slug })),
+    ...(t2.ceremony_sequence || []).map(c => ({ ...c, _sourceTradition: t2.name, _sourceTraditionSlug: t2.slug })),
+  ].sort((a, b) => (a.order || 0) - (b.order || 0));
 
   return {
     checklist: [...checklist, ...interfaithAdditions],
