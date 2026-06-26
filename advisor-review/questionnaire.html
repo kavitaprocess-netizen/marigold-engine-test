@@ -1667,28 +1667,8 @@ function showResults() {
 }
 
 function populateResults() {
-  // Force results-screen visible
-  var rs = document.getElementById('results-screen');
-  if (rs) {
-    rs.classList.add('active');
-    rs.style.opacity = '1';
-    rs.style.transform = 'translateX(0)';
-    rs.style.pointerEvents = 'all';
-  }
-  // Deactivate all other screens
-  document.querySelectorAll('.screen').forEach(function(s) {
-    if (s.id !== 'results-screen') {
-      s.classList.remove('active');
-      s.style.opacity = '';
-    }
-  });
   try {
-  var rt = document.getElementById('results-title');
-  if (rt) rt.innerHTML = '<em>Loading...</em>';
-  if (!S.plan) { 
-    if (rt) rt.innerHTML = '<em>No plan data</em>';
-    return; 
-  }
+  if (!S.plan) { return; }
   var p = S.plan;
   var names = S.name2 ? (S.name1 + ' & ' + S.name2) : S.name1;
   var tradNames = S.traditions.map(function(s){ var t=TRADS.find(function(t){return t.slug===s;}); return t?t.label:s; }).join(' + ');
