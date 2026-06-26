@@ -363,6 +363,7 @@ const ADVISOR_HTML = `<!DOCTYPE html>
   </div>
 </div>
 <script>
+var TRAD_LABELS = {'sri-lankan-buddhist':'Buddhist · Sri Lankan','thai-buddhist':'Buddhist · Thai','chinese-taiwanese':'Chinese / Taiwanese','catholic':'Christian · Catholic','filipino-catholic':'Christian · Filipino Catholic','greek-orthodox':'Christian · Greek Orthodox','latin-american-catholic':'Christian · Latin American Catholic','mexican-catholic':'Christian · Mexican Catholic','christian-western':'Christian · Western','cuban':'Cuban','andhra-telugu':'Hindu · Andhra / Telugu','arya-samaj':'Hindu · Arya Samaj','assamese-hindu':'Hindu · Assamese','bengali-hindu':'Hindu · Bengali','bihari-hindu':'Hindu · Bihari','gujarati':'Hindu · Gujarati','kashmiri-pandit':'Hindu · Kashmiri Pandit','kerala-nair':'Hindu · Kerala / Nair','manipuri-vaishnavite':'Hindu · Manipuri (Vaishnavite)','marathi':'Hindu · Marathi','north-indian-punjabi':'Hindu · North Indian / Punjabi','odia-hindu':'Hindu · Odia','rajasthani-marwari':'Hindu · Rajasthani (Marwari)','rajasthani-rajput':'Hindu · Rajasthani (Rajput)','tamil-hindu':'Hindu · Tamil','vedic-general':'Hindu · Vedic (General)','jain-shwetambar':'Jain · Shwetambar','jewish-reform-conservative':'Jewish · Reform / Conservative','khasi':'Khasi','korean':'Korean','dawoodi-bohra':'Muslim · Dawoodi Bohra','muslim-nikah':'Muslim · Nikah','hausa-muslim':'Muslim · West African (Hausa)','yoruba-nigerian':'Nigerian · Yoruba','sikh':'Sikh'};
 const API='/api/advisor';
 let traditions=[],currentTradition=null,currentVersion=null,allVersions=[],activeTab='content',workingData={};
 window.onload=()=>loadTraditions();
@@ -379,7 +380,7 @@ async function loadTraditions(){
 }
 function renderSidebar(){
   document.getElementById('sidebar-count').textContent=traditions.length+' traditions';
-  const sorted=[...traditions].sort((a,b)=>(a.label||a.name||"").localeCompare(b.label||b.name||""));
+  const sorted=[...traditions].sort((a,b)=>(TRAD_LABELS[a.slug]||a.name||"").localeCompare(TRAD_LABELS[b.slug]||b.name||""));
   document.getElementById('tradition-list').innerHTML=sorted.map(t=>{
     const versions=t.tradition_versions||[];
     const current=versions.find(v=>v.is_current);
@@ -428,7 +429,7 @@ function renderMain(){
   const canApprove=v?.status==='in_review';
   const canEdit=v?.status==='draft'||v?.status==='in_review';
   document.getElementById('main-content').innerHTML=\`
-    <div class="page-title">\${currentTradition.name}</div>
+    <div class="page-title">\${TRAD_LABELS[currentTradition.slug]||currentTradition.name}</div>
     <div class="page-meta">
       <span>\${currentTradition.slug}</span><span>·</span><span>\${currentTradition.region||'—'}</span><span>·</span>
       \${v?\`<span class="badge badge-\${v.status}">\${v.status.replace('_',' ')}</span><span style="color:var(--muted)">v\${v.version_number}</span>\`:'<span class="badge badge-draft">no content yet</span>'}
