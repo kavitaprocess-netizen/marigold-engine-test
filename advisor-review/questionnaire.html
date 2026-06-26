@@ -468,6 +468,7 @@
 
   /* ── Ceremony timeline gantt ── */
   .ceremony-timeline-wrap { width:100%; overflow-x:auto; padding-bottom:16px; }
+  .gantt-header-sticky { position:sticky; top:0; background:var(--cream); z-index:5; padding-top:4px; }
   .ceremony-gantt { min-width:600px; }
   .gantt-row { display:flex; align-items:center; margin-bottom:6px; gap:8px; }
   .gantt-label { width:180px; flex-shrink:0; font-size:12px; font-style:italic; color:var(--tx); text-align:right; padding-right:8px; line-height:1.3; }
@@ -1171,10 +1172,6 @@
       <div class="results-hero">
         <h1 id="results-title">Your wedding plan</h1>
         <p id="results-subtitle"></p>
-        <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap">
-          <button class="btn-back" onclick="transitionTo('results-screen','q8');currentQ=8;updateProgress();">← back to selections</button>
-          <button style="background:none;border:none;color:var(--muted);font-size:12px;font-family:'Playfair Display',serif;font-style:italic;cursor:pointer;padding:4px 0;" onclick="if(confirm('Start a new plan?'))location.reload()">Start again</button>
-        </div>
       </div>
       <div id="conflicts-wrap"></div>
       <div class="out-tabs">
@@ -1187,7 +1184,11 @@
       <div class="tab-panel" id="tab-budget"></div>
       <div style="margin-top:48px;padding-top:32px;border-top:1px solid var(--bdr);text-align:center">
         <div style="font-size:13px;color:var(--muted);font-style:italic;margin-bottom:16px">Your plan is ready. A Marigold advisor will be in touch to review it with you.</div>
-        <button class="cta" onclick="alert('Save & share — coming soon')">Save my plan →</button>
+        <button class="cta" style="margin-bottom:20px" onclick="alert('Save & share — coming soon')">Save my plan →</button>
+        <div style="display:flex;justify-content:center;gap:20px;margin-top:16px">
+          <button class="btn-back" onclick="transitionTo('results-screen','q8');currentQ=8;updateProgress();">← back to selections</button>
+          <button style="background:none;border:none;color:var(--muted);font-size:12px;font-family:'Playfair Display',serif;font-style:italic;cursor:pointer;" onclick="if(confirm('Start a new plan?'))location.reload()">Start again</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1878,7 +1879,7 @@ function renderCeremonies(items) {
   });
 
   // Timeline header
-  var timeHeader = '<div class="gantt-col-header">' +
+  var timeHeader = '<div class="gantt-col-header gantt-header-sticky">' +
     '<div class="gantt-col-label"></div>' +
     '<div class="gantt-timeline-header">' +
     BUCKETS.map(function(b){ return '<div class="gantt-time-label">' + b.label + '</div>'; }).join('') +
@@ -1959,25 +1960,42 @@ function renderBudget(budgetData) {
   var showSide2 = S.userRole === 'couple' || S.userRole === 'groom' || S.userRole === '';
   var showBoth  = true; // common always visible
 
-  function budgetBars(sectionBudget, ratio) {
-    return items.slice(0, 8).map(function(item) {
-      var cat = item.category || item.name || '';
-      var amt = Math.round((item.suggested_amount || (totalBudget * ((item.pct_low||0)+(item.pct_high||0))/2/100)) * ratio);
-      var pct = sectionBudget > 0 ? (amt / sectionBudget * 100) : 0;
+  // Separate vendor categories by ceremony type
+  var BRIDE_CATS = ['Venue hire', 'Catering & bar', 'Photography & video', 'Music & entertainment', 'Florals & decor', 'Officiant & pandit', 'Invitations & stationery', 'Guest accommodation', 'Bridal wear & styling', 'Mehndi artist', 'Hair & makeup', 'Bridal jewellery'];
+  var GROOM_CATS = ['Venue hire', 'Catering & bar', 'Photography & video', 'Music & entertainment', 'Florals & decor', 'Officiant & pandit', 'Invitations & stationery', 'Guest accommodation', 'Menswear & sherwani', 'Baraat transport', 'Sehra & turban styling'];
+  var BOTH_CATS = ['Venue hire', 'Catering & bar', 'Photography & video', 'Music & entertainment', 'Florals & decor', 'Officiant & pandit', 'Invitations & stationery', 'Guest accommodation'];
+
+  function budgetBars(sectionBudget, ratio, sectionType) {
+    if (sectionBudget <= 0) return '';
+    var cats = sectionType === 'side1' ? BRIDE_CATS : sectionType === 'side2' ? GROOM_CATS : BOTH_CATS;
+    // If we have real budget data, use it; otherwise use category estimates
+    var rows = [];
+    if (items.length) {
+      rows = items.slice(0, 6).map(function(item) {
+        var cat = item.category || item.name || '';
+        var amt = Math.round((item.suggested_amount || (totalBudget * ((item.pct_low||0)+(item.pct_high||0))/2/100)) * ratio);
+        return {cat:cat, amt:amt};
+      });
+    } else {
+      var perCat = sectionBudget / cats.length;
+      rows = cats.map(function(c){ return {cat:c, amt:Math.round(perCat)}; });
+    }
+    return rows.map(function(r) {
+      var pct = sectionBudget > 0 ? (r.amt / sectionBudget * 100) : 0;
       return '<div class="budget-row">' +
-        '<div class="budget-cat">' + cat + '</div>' +
+        '<div class="budget-cat">' + r.cat + '</div>' +
         '<div class="budget-track"><div class="budget-fill" style="width:' + Math.min(pct*2,100) + '%"></div></div>' +
-        '<div class="budget-amt">' + amt.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>' +
+        '<div class="budget-amt">' + r.amt.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>' +
       '</div>';
     }).join('');
   }
 
-  function sectionHtml(label, sectionBudget, ratio, show) {
+  function sectionHtml(label, sectionBudget, ratio, show, sectionType) {
     if (!show) return '';
     return '<div class="budget-section">' +
       '<div class="budget-section-header">' + label + '</div>' +
       '<div class="budget-section-total">' + sectionBudget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>' +
-      budgetBars(sectionBudget, ratio) +
+      budgetBars(sectionBudget, ratio, sectionType) +
     '</div>';
   }
 
@@ -1986,9 +2004,9 @@ function renderBudget(budgetData) {
   el.innerHTML = alertsHtml +
     '<div class="budget-total-display">' + totalBudget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>' +
     '<div class="budget-sub" style="margin-bottom:20px">total estimated budget</div>' +
-    sectionHtml(pos(n1) + ' ceremonies', side1Budget, side1Ratio, showSide1) +
-    sectionHtml(pos(n2) + ' ceremonies', side2Budget, side2Ratio, showSide2) +
-    sectionHtml('Common ceremonies', bothBudget, bothRatio, showBoth);
+    sectionHtml(pos(n1) + ' ceremonies', side1Budget, side1Ratio, showSide1, 'side1') +
+    sectionHtml(pos(n2) + ' ceremonies', side2Budget, side2Ratio, showSide2, 'side2') +
+    sectionHtml('Common ceremonies', bothBudget, bothRatio, showBoth, 'both');
 }
 
 
@@ -2231,9 +2249,12 @@ document.addEventListener('click', function(e) {
   // Handle move/copy buttons via delegation
   if (e.target.classList.contains('cs-move')) { moveCs(e); return; }
   if (e.target.classList.contains('cs-copy')) { copyCs(e); return; }
-  // Close menus
+  // Close ceremony menus
   document.querySelectorAll('.cs-item-popover.open').forEach(function(p){ p.classList.remove('open'); });
-  document.querySelectorAll('.role-dd-menu.open').forEach(function(m){ m.classList.remove('open'); });
+  // Close role menus only if clicking outside role-dropdown
+  if (!e.target.closest('.role-dropdown')) {
+    document.querySelectorAll('.role-dd-menu.open').forEach(function(m){ m.classList.remove('open'); });
+  }
 });
 
 document.addEventListener('keydown', function(e) {
