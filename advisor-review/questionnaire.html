@@ -48,9 +48,8 @@
     opacity: 1;
     pointer-events: all;
     transform: translateX(0);
-    z-index: 2;
   }
-  #q7.active { display: flex !important; flex-direction: column !important; align-items: stretch !important; justify-content: flex-start !important; padding: 0 !important; } #q8.active { display: block !important; padding: 0 !important; }
+  #q7.active, #q8.active { display: block !important; padding: 0 !important; }
   #q7-scroll::-webkit-scrollbar { width: 5px; }
   #q7-scroll::-webkit-scrollbar-track { background: var(--warm); border-radius: 3px; }
   #q7-scroll::-webkit-scrollbar-thumb { background: var(--bdr); border-radius: 3px; }
@@ -368,13 +367,11 @@
   /* ── Results ── */
   #results-screen {
     overflow-y: auto;
-    overflow-x: hidden;
     padding: 32px 24px 80px;
     align-items: flex-start;
     justify-content: flex-start;
     top: 57px;
   }
-
   .results-wrap { width: 100%; max-width: 720px; margin: 0 auto; }
   .results-hero { margin-bottom: 40px; }
   .results-hero h1 {
@@ -578,7 +575,7 @@
   .cs-cols { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
   @media(max-width:580px){ .cs-cols { grid-template-columns:1fr; } }
   .cs-col-header { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--deep); margin-bottom:10px; font-style:italic; font-weight:500; }
-  .cs-item { position:relative; display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border:1px solid var(--bdr); border-radius:8px; margin-bottom:8px; cursor:pointer; transition:all 0.15s; background:white; }
+  .cs-item { display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border:1px solid var(--bdr); border-radius:8px; margin-bottom:8px; cursor:pointer; transition:all 0.15s; background:white; }
   .cs-item:hover { border-color:var(--gd); }
   .cs-item.selected { border-color:var(--gk); background:#FFFAEA; }
   .cs-item.deselected { opacity:0.4; }
@@ -604,14 +601,6 @@
   .conf-item:last-child { border-bottom:none; }
   .conf-item-timing { font-size:11px; color:var(--muted); }
   .conf-shared-header { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin:16px 0 10px; font-style:italic; }
-  .conf-budget-section { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--bdr); }
-  .conf-budget-section:last-child { border-bottom:none; }
-  .conf-budget-label { font-size:12px; font-style:italic; color:var(--muted); }
-  .conf-budget-amt { font-size:14px; font-style:italic; color:var(--deep); font-weight:500; }
-  .conf-budget-section { display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr); }
-  .conf-budget-section:last-child { border-bottom:none; }
-  .conf-budget-label { font-size:12px;font-style:italic;color:var(--muted); }
-  .conf-budget-amt { font-size:14px;font-style:italic;color:var(--deep); }
   .conf-budget { background:var(--warm); border-radius:10px; padding:20px 24px; margin-top:28px; }
   .conf-budget-total { font-size:28px; font-style:italic; color:var(--deep); margin-bottom:4px; }
   .conf-budget-sub { font-size:12px; color:var(--muted); font-style:italic; margin-bottom:16px; }
@@ -627,7 +616,7 @@
   .cs-cols { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
   @media(max-width:580px){ .cs-cols { grid-template-columns:1fr; } }
   .cs-col-header { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--deep); margin-bottom:10px; font-style:italic; font-weight:500; }
-  .cs-item { position:relative; display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border:1px solid var(--bdr); border-radius:8px; margin-bottom:8px; cursor:pointer; transition:all 0.15s; background:white; }
+  .cs-item { display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border:1px solid var(--bdr); border-radius:8px; margin-bottom:8px; cursor:pointer; transition:all 0.15s; background:white; }
   .cs-item:hover { border-color:var(--gd); }
   .cs-item.selected { border-color:var(--gk); background:#FFFAEA; }
   .cs-item.deselected { opacity:0.4; }
@@ -651,10 +640,6 @@
   .conf-item:last-child { border-bottom:none; }
   .conf-item-timing { font-size:11px; color:var(--muted); }
   .conf-shared-header { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin:16px 0 10px; font-style:italic; }
-  .conf-budget-section { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--bdr); }
-  .conf-budget-section:last-child { border-bottom:none; }
-  .conf-budget-label { font-size:12px; font-style:italic; color:var(--muted); }
-  .conf-budget-amt { font-size:14px; font-style:italic; color:var(--deep); font-weight:500; }
   .conf-budget { background:var(--warm); border-radius:10px; padding:20px 24px; margin-top:28px; }
   .conf-budget-total { font-size:28px; font-style:italic; color:var(--deep); margin-bottom:4px; letter-spacing:-1px; }
   .conf-budget-sub { font-size:12px; color:var(--muted); font-style:italic; margin-bottom:16px; }
@@ -708,7 +693,7 @@
   .cs-item { position: relative; }
   .cs-item-menu-btn { position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted);padding:2px 6px;border-radius:4px;line-height:1;opacity:0;transition:opacity 0.15s; }
   .cs-item:hover .cs-item-menu-btn, .cs-item-menu-btn:focus { opacity:1;outline:none; }
-  .cs-item-popover { display:none;position:absolute;top:28px;right:4px;background:var(--cream);border:1px solid var(--bdr);border-radius:8px;box-shadow:0 4px 16px rgba(60,48,16,0.12);z-index:50;min-width:160px;overflow:hidden; }
+  .cs-item-popover { display:none;position:absolute;top:28px;right:4px;background:white;border:1px solid var(--bdr);border-radius:8px;box-shadow:0 4px 16px rgba(60,48,16,0.12);z-index:50;min-width:160px;overflow:hidden; }
   .cs-item-popover.open { display:block; }
   .cs-popover-item { padding:9px 14px;font-size:12px;font-style:italic;font-family:'Playfair Display',Georgia,serif;color:var(--tx);cursor:pointer;display:block;border:none;background:none;width:100%;text-align:left; }
   .cs-popover-item:hover { background:var(--warm); }
@@ -722,7 +707,7 @@
   .cs-item { position:relative; }
   .cs-item-menu-btn { position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted);padding:2px 6px;border-radius:4px;line-height:1;opacity:0;transition:opacity 0.15s; }
   .cs-item:hover .cs-item-menu-btn, .cs-item-menu-btn:focus { opacity:1;outline:none; }
-  .cs-item-popover { display:none;position:absolute;top:28px;right:4px;background:var(--cream);border:1px solid var(--bdr);border-radius:8px;box-shadow:0 4px 16px rgba(60,48,16,0.12);z-index:50;min-width:160px;overflow:hidden; }
+  .cs-item-popover { display:none;position:absolute;top:28px;right:4px;background:white;border:1px solid var(--bdr);border-radius:8px;box-shadow:0 4px 16px rgba(60,48,16,0.12);z-index:50;min-width:160px;overflow:hidden; }
   .cs-item-popover.open { display:block; }
   .cs-popover-item { padding:9px 14px;font-size:12px;font-style:italic;font-family:'Playfair Display',Georgia,serif;color:var(--tx);cursor:pointer;display:block;border:none;background:none;width:100%;text-align:left; }
   .cs-popover-item:hover { background:var(--warm); }
@@ -745,7 +730,7 @@
   .cs-cols { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
   @media(max-width:580px){ .cs-cols { grid-template-columns:1fr; } }
   .cs-col-header { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--deep); margin-bottom:10px; font-style:italic; font-weight:500; }
-  .cs-item { position:relative; display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border:1px solid var(--bdr); border-radius:8px; margin-bottom:8px; cursor:pointer; transition:all 0.15s; background:white; }
+  .cs-item { display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border:1px solid var(--bdr); border-radius:8px; margin-bottom:8px; cursor:pointer; transition:all 0.15s; background:white; }
   .cs-item:hover { border-color:var(--gd); }
   .cs-item.selected { border-color:var(--gk); background:#FFFAEA; }
   .cs-item.deselected { opacity:0.4; }
@@ -771,10 +756,6 @@
   .conf-item:last-child { border-bottom:none; }
   .conf-item-timing { font-size:11px; color:var(--muted); }
   .conf-shared-header { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin:16px 0 10px; font-style:italic; }
-  .conf-budget-section { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--bdr); }
-  .conf-budget-section:last-child { border-bottom:none; }
-  .conf-budget-label { font-size:12px; font-style:italic; color:var(--muted); }
-  .conf-budget-amt { font-size:14px; font-style:italic; color:var(--deep); font-weight:500; }
   .conf-budget { background:var(--warm); border-radius:10px; padding:20px 24px; margin-top:28px; }
   .conf-budget-total { font-size:28px; font-style:italic; color:var(--deep); margin-bottom:4px; }
   .conf-budget-sub { font-size:12px; color:var(--muted); font-style:italic; margin-bottom:16px; }
@@ -828,7 +809,7 @@
   .cs-item { position:relative; }
   .cs-item-menu-btn { position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted);padding:2px 6px;border-radius:4px;line-height:1;opacity:0;transition:opacity 0.15s; }
   .cs-item:hover .cs-item-menu-btn, .cs-item-menu-btn:focus { opacity:1;outline:none; }
-  .cs-item-popover { display:none;position:absolute;top:28px;right:4px;background:var(--cream);border:1px solid var(--bdr);border-radius:8px;box-shadow:0 4px 16px rgba(60,48,16,0.12);z-index:50;min-width:160px;overflow:hidden; }
+  .cs-item-popover { display:none;position:absolute;top:28px;right:4px;background:white;border:1px solid var(--bdr);border-radius:8px;box-shadow:0 4px 16px rgba(60,48,16,0.12);z-index:50;min-width:160px;overflow:hidden; }
   .cs-item-popover.open { display:block; }
   .cs-popover-item { padding:9px 14px;font-size:12px;font-style:italic;font-family:'Playfair Display',Georgia,serif;color:var(--tx);cursor:pointer;display:block;border:none;background:none;width:100%;text-align:left; }
   .cs-popover-item:hover { background:var(--warm); }
@@ -975,11 +956,10 @@
             <span class="role-sentence-name" id="role-name1">Partner one</span>
             <span class="role-sentence-is"> is the </span>
             <span class="role-dropdown" id="role-dd1">
-              <span class="role-dd-value" id="role-val1" onclick="toggleRoleDD(1,event)">Select &#9662;</span>
+              <span class="role-dd-value" id="role-val1" onclick="toggleRoleDD(1)">Select &#9662;</span>
               <div class="role-dd-menu" id="role-menu1">
-                <div onclick="pickRole(1,'partner',event)">Partner</div>
-                <div onclick="pickRole(1,'bride',event)">Bride</div>
-                <div onclick="pickRole(1,'groom',event)">Groom</div>
+                <div onclick="pickRole(1,'bride')">Bride</div>
+                <div onclick="pickRole(1,'groom')">Groom</div>
               </div>
             </span>
           </div>
@@ -987,11 +967,10 @@
             <span class="role-sentence-name" id="role-name2">Partner two</span>
             <span class="role-sentence-is"> is the </span>
             <span class="role-dropdown" id="role-dd2">
-              <span class="role-dd-value" id="role-val2" onclick="toggleRoleDD(2,event)">Select &#9662;</span>
+              <span class="role-dd-value" id="role-val2" onclick="toggleRoleDD(2)">Select &#9662;</span>
               <div class="role-dd-menu" id="role-menu2">
-                <div onclick="pickRole(2,'partner',event)">Partner</div>
-                <div onclick="pickRole(2,'bride',event)">Bride</div>
-                <div onclick="pickRole(2,'groom',event)">Groom</div>
+                <div onclick="pickRole(2,'bride')">Bride</div>
+                <div onclick="pickRole(2,'groom')">Groom</div>
               </div>
             </span>
           </div>
@@ -1112,22 +1091,20 @@
 
   <!-- Q7: Ceremony selection -->
   <!-- Q7: Ceremony selection -->
-  <div class="screen" id="q7" style="display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;padding:0!important;overflow:hidden!important;">
-    <!-- Scrollable content area — flex-grow fills space above CTA -->
-    <div id="q7-scroll" style="flex:1;overflow-y:auto;overflow-x:hidden;padding:24px 24px 16px;box-sizing:border-box;min-height:0;">
+  <div class="screen" id="q7" style="overflow:hidden;position:relative;display:block!important;padding:0!important;">
+    <!-- Scrollable content area -->
+    <div id="q7-scroll" style="height:calc(100vh - 62px - 80px);overflow-y:auto;overflow-x:hidden;padding:24px 24px 20px;box-sizing:border-box;">
     <div style="width:100%;max-width:900px;margin:0 auto">
       <div class="ql" style="margin-bottom:2px">Your ceremony plan</div>
       <div class="qt" id="q7-title">Choose your ceremonies</div>
       <div class="qs" id="q7-sub" style="margin-bottom:4px">Select the ceremonies you want — adjust anything that isn't right for you.</div>
-      <div id="cs-container" style="margin-top:16px;padding-bottom:8px"></div>
+      <div id="cs-container" style="margin-top:16px;padding-bottom:20px"></div>
     </div>
     </div>
-    <!-- CTA row — matches scroll content width -->
-    <div style="flex-shrink:0;padding:0 24px 20px;">
-      <div style="width:100%;max-width:900px;margin:0 auto;padding-top:16px;border-top:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center;">
-        <button class="btn-back" onclick="goBack()">← back</button>
-        <button class="cta" onclick="goToConfirmation()">Review my plan →</button>
-      </div>
+    <!-- Fixed CTA at bottom -->
+    <div style="position:absolute;bottom:0;left:0;right:0;height:80px;background:var(--cream);border-top:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:10;">
+      <button class="btn-back" onclick="goBack()">← back</button>
+      <button class="cta" onclick="goToConfirmation()">Review my plan →</button>
     </div>
   </div>
 
@@ -1144,6 +1121,7 @@
         <button class="cta" onclick="buildFinalPlan()">Build my full plan →</button>
       </div>
     </div>
+  </div>
   </div>
 
   <!-- Loading -->
@@ -1203,19 +1181,15 @@ let currentQ = 1;
 const TOTAL_Q = 6;
 
 // ── Role assignment ──
-function pickRole(partner, role, e) {
-  if (e) e.stopPropagation();
+function pickRole(partner, role) {
   S['role' + partner] = role;
-  var label = role === 'bride' ? 'Bride' : role === 'groom' ? 'Groom' : 'Partner';
   var val = document.getElementById('role-val' + partner);
-  if (val) val.innerHTML = label + ' &#9662;';
+  if (val) val.innerHTML = (role === 'bride' ? 'Bride' : 'Groom') + ' &#9662;';
   var menu = document.getElementById('role-menu' + partner);
   if (menu) menu.classList.remove('open');
-  updateRoleLabels();
 }
 
-function toggleRoleDD(partner, e) {
-  if (e) e.stopPropagation();
+function toggleRoleDD(partner) {
   var menu = document.getElementById('role-menu' + partner);
   if (!menu) return;
   var other = document.getElementById('role-menu' + (partner === 1 ? 2 : 1));
@@ -1670,46 +1644,41 @@ function showResults() {
 }
 
 function populateResults() {
-  try {
-  if (!S.plan) { return; }
-  var p = S.plan;
-  var names = S.name2 ? (S.name1 + ' & ' + S.name2) : S.name1;
-  var tradNames = S.traditions.map(function(s){ var t=TRADS.find(function(t){return t.slug===s;}); return t?t.label:s; }).join(' + ');
+  if (!S.plan) { console.error('populateResults: S.plan is null'); return; }
+  const p = S.plan;
+  const names = S.name2?`${S.name1} & ${S.name2}`:S.name1;
+  const tradNames = S.traditions.map(function(s){ var t=TRADS.find(function(t){return t.slug===s;}); return t?t.label:s; }).join(' + ');
 
-  document.getElementById('results-title').innerHTML = '<em>' + names + '</em> — your wedding plan';
-  var dateStr = S.date
+  document.getElementById('results-title').innerHTML = `<em>${names}</em> — your wedding plan`;
+  const dateStr = S.date
     ? new Date(S.date).toLocaleDateString('en-US',{month:'long',year:'numeric'})
     : 'Date to be confirmed';
-  document.getElementById('results-subtitle').textContent = tradNames + ' · ' + S.budget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + ' · ' + S.guests + ' guests' + (S.date ? ' · ' + dateStr : '');
+  document.getElementById('results-subtitle').textContent = `${tradNames} · ${S.budget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0})} · ${S.guests} guests · ${dateStr}`;
 
   // Date not confirmed banner
   if (!S.dateSure) {
-    var dateNote = document.createElement('div');
+    const dateNote = document.createElement('div');
     dateNote.className = 'conflict-banner';
     dateNote.innerHTML = '<em>Wedding date not yet confirmed</em> — checklist milestones are shown relative to your wedding date. Add your date any time to get calendar-specific guidance.';
     document.getElementById('conflicts-wrap').prepend(dateNote);
   }
 
   if (p.conflicts && p.conflicts.length) {
-    document.getElementById('conflicts-wrap').innerHTML = p.conflicts.map(function(c){ return '<div class="conflict-banner">Note — ' + (c.description||c.message||JSON.stringify(c)) + '</div>'; }).join('');
+    document.getElementById('conflicts-wrap').innerHTML = p.conflicts.map(c=>
+      `<div class="conflict-banner">Note — ${c.description||c.message||JSON.stringify(c)}</div>`
+    ).join('');
   }
 
   renderChecklist(p.checklist||[]);
   renderCeremonies(p.ceremonySequence||p.ceremonies||[]);
   renderBudget(p.budget||p.budgetBreakdown||[]);
-  } catch(e) {
-    console.error("populateResults error:", e.message, e.stack);
-    var rt = document.getElementById("results-title");
-    if (rt) rt.innerHTML = "<em>Error: " + e.message + "</em>";
-    var rs = document.getElementById("results-subtitle");
-    if (rs) rs.textContent = e.stack ? e.stack.split("\n")[1] : "Check console for details";
-  }
 }
+
 function switchTab(name, btn) {
-  document.querySelectorAll('.out-tab').forEach(function(t){t.classList.remove('on');});
-  document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('on');});
+  document.querySelectorAll('.out-tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('on'));
   btn.classList.add('on');
-  document.getElementById('tab-'+name).classList.add('on');
+  document.getElementById(`tab-${name}`).classList.add('on');
 }
 
 // ── Render checklist ──
@@ -1751,7 +1720,7 @@ function renderChecklist(items) {
     const label = item.label||item.task||item.description||'';
     const trad = item.tradition||item.source||item._sourceTradition||'';
     const col = trad ? tradColor(trad) : null;
-    var tradName = col ? (TRADS.find(function(t){return t.slug===trad;})||{label:trad}).label.split('·')[0].trim() : '';
+    const tradName = col ? (TRADS.find(t=>t.slug===trad)||{label:trad}).label.split('·')[0].trim() : '';
     return '<div class="checklist-item">' +
       '<div class="check-box" onclick="this.classList.toggle(\'checked\')"></div>' +
       '<div class="check-label">' + label +
@@ -1822,86 +1791,164 @@ function renderChecklist(items) {
 
 // ── Render ceremony vertical timeline ──
 function renderCeremonies(items) {
-  var el = document.getElementById('tab-ceremonies');
-  if (!el) return;
-  if (!items || !items.length) {
-    el.innerHTML = '<p style="color:var(--muted);font-style:italic;padding:20px 0">No ceremony sequence found.</p>';
+  const el = document.getElementById('tab-ceremonies');
+  if (!items.length) {
+    el.innerHTML='<p style="color:var(--muted);font-style:italic;font-size:13px;padding:20px 0">No ceremony sequence found.</p>';
     return;
   }
 
-  var trad1 = S.traditions[0];
-  var trad2 = S.traditions[1] || null;
-  var n1 = S.name1 || 'Partner one';
-  var n2 = S.name2 || 'Partner two';
-  var n1Role = S.role1 || 'bride';
-  var n2Role = S.role2 || 'groom';
+  if (!window.selectedCeremonies) window.selectedCeremonies = new Set(items.map((_,i)=>i));
 
-  function tradColor(slug) {
-    var colors = [
-      {bg:'#FFF8E7',color:'#8B6914'},{bg:'#F0F4FF',color:'#3949AB'},
-      {bg:'#F3E5F5',color:'#7B1FA2'},{bg:'#E8F5E9',color:'#2E7D32'},
-      {bg:'#FCE4EC',color:'#C62828'},{bg:'#E3F2FD',color:'#1565C0'}
-    ];
-    var h = 0;
-    for (var i=0; i<(slug||'').length; i++) h = (h*31 + slug.charCodeAt(i)) & 0xFFFFFF;
-    return colors[Math.abs(h) % colors.length];
-  }
+  // Split ceremonies by tradition
+  const trad1 = S.traditions[0];
+  const trad2 = S.traditions[1];
+  const trad1Name = TRADS.find(t=>t.slug===trad1)?.label || trad1 || '';
+  const trad2Name = trad2 ? (TRADS.find(t=>t.slug===trad2)?.label || trad2) : '';
 
-  // Group by tradition for interfaith
-  var groups = {};
-  items.forEach(function(item) {
-    var src = item._sourceTraditionSlug || item.tradition || trad1;
-    if (!groups[src]) groups[src] = {side1:[], side2:[], both:[]};
-    var side = item.side || 'both';
-    var ci = {item:item};
-    if (side === n1Role || side === 'bride+groom') groups[src].side1.push(ci);
-    if (side === n2Role || side === 'bride+groom') groups[src].side2.push(ci);
-    if (side !== n1Role && side !== n2Role) groups[src].both.push(ci);
+  // Categorise each ceremony
+  const leftItems = [];   // tradition 1
+  const rightItems = [];  // tradition 2
+  const sharedItems = []; // universal / interfaith / both
+
+  items.forEach((item, i) => {
+    const src = item._sourceTradition || item.tradition || item.source || '';
+    const slug = item.tradition || item.source || '';
+    if (src === 'Universal' || src === 'both' || src === 'Interfaith' || (!slug && !src)) {
+      sharedItems.push({item, i});
+    } else if (slug === trad1 || src === trad1Name || (trad1 && src.toLowerCase().includes(trad1.split('-')[0]))) {
+      leftItems.push({item, i});
+    } else if (trad2 && (slug === trad2 || src === trad2Name || src.toLowerCase().includes(trad2.split('-')[0]))) {
+      rightItems.push({item, i});
+    } else {
+      // fallback — odd items go left if only one tradition
+      trad2 ? sharedItems.push({item, i}) : leftItems.push({item, i});
+    }
   });
 
-  function cardHtml(ci) {
-    var item = ci.item;
-    var name = item.name || item.event || '';
-    var timing = item.timing || '';
-    var duration = item.duration || '';
-    var notes = item.notes || '';
-    return '<div class="ceremony-card">' +
-      '<div class="ceremony-card-name">' + name + '</div>' +
-      (timing ? '<div class="ceremony-detail-row"><span class="ceremony-detail-label">Timing</span><span class="ceremony-detail-val">' + timing + '</span></div>' : '') +
-      (duration ? '<div class="ceremony-detail-row"><span class="ceremony-detail-label">Duration</span><span class="ceremony-detail-val">' + duration + '</span></div>' : '') +
-      (notes ? '<div class="ceremony-notes">' + notes + '</div>' : '') +
-    '</div>';
+  function cardHtml({item, i}) {
+    const name = item.name||item.event||item.ceremony||'';
+    const timing = item.timing||item.timeframe||'';
+    const duration = item.duration||'';
+    const size = item.typical_size||item.guestSize||'';
+    const loc = item.location_type||item.locationType||'';
+    const notes = item.notes||'';
+    const trad = item.tradition||item.source||'';
+    const col = tradColor(trad);
+    const tradLabel = trad?(TRADS.find(t=>t.slug===trad)?.label||trad):'';
+    const selected = window.selectedCeremonies.has(i);
+    return `<div class="ceremony-card" id="cc-${i}" onclick="toggleCard(${i})" style="opacity:${selected?1:0.4}">
+      <div class="ceremony-dot" style="background:${col.color};border-color:var(--cream)"></div>
+      <div class="ceremony-header">
+        <div class="ceremony-meta-wrap">
+          ${tradLabel?`<div class="ceremony-trad-tag" style="background:${col.bg};color:${col.color}">${tradLabel.split('·')[0].trim()}</div>`:''}
+          <div class="ceremony-name">${name}</div>
+          <div class="ceremony-timing">${timing}${duration?' · '+duration:''}</div>
+        </div>
+        <div class="ceremony-toggle">›</div>
+      </div>
+      <div class="ceremony-body" onclick="event.stopPropagation()">
+        <div style="margin-bottom:10px">
+          ${size?`<div class="ceremony-detail-row"><span class="ceremony-detail-label">Guest size</span><span class="ceremony-detail-val">${size}</span></div>`:''}
+          ${loc?`<div class="ceremony-detail-row"><span class="ceremony-detail-label">Location</span><span class="ceremony-detail-val">${loc}</span></div>`:''}
+        </div>
+        ${notes?`<div class="ceremony-notes">${notes}</div>`:''}
+        <div class="ceremony-include">
+          <input type="checkbox" ${selected?'checked':''} onchange="toggleCeremony(${i},event)">
+          Include in my plan
+        </div>
+      </div>
+    </div>`;
   }
 
-  var html = '';
-  var tradSlugs = trad2 ? [trad1, trad2] : [trad1];
-  tradSlugs.forEach(function(slug) {
-    var group = groups[slug] || {side1:[], side2:[], both:[]};
-    var col = tradColor(slug);
-    var tradInfo = TRADS.find(function(t){ return t.slug === slug; }) || {label: slug};
+  const isSingle = !trad2 || rightItems.length === 0;
 
-    if (trad2) {
-      html += '<div class="cs-tradition-label" style="background:' + col.bg + ';color:' + col.color + ';padding:6px 12px;border-radius:6px;font-size:11px;margin-bottom:12px">' + tradInfo.label + '</div>';
+  let html = `<p style="font-size:12px;color:var(--muted);font-style:italic;margin-bottom:20px">
+    Click any ceremony to expand. Uncheck ceremonies you don't want included.
+  </p>`;
+
+  if (isSingle) {
+    // Single tradition — two columns: bride's side / groom's side
+    // Split by role hints in ceremony name/notes or just alternate evenly
+    const allItems = leftItems.concat(sharedItems);
+    const brideItems = [];
+    const groomItems = [];
+    const bothItems = [];
+
+    allItems.forEach(function(ci) {
+      const name = (ci.item.name || ci.item.event || '').toLowerCase();
+      const notes = (ci.item.notes || '').toLowerCase();
+      const text = name + ' ' + notes;
+      // Bride-side markers
+      if (/bride|chooda|mehndi|mehendi|maiyaan|kalire|bridal shower|despedida|hen|hair comb|veil|bride.*side/i.test(text)) {
+        brideItems.push(ci);
+      // Groom-side markers
+      } else if (/groom|baraat|sehrabandi|ghodi|bachelor|tisch|pre-wedding.*groom|groom.*side|khan mak/i.test(text)) {
+        groomItems.push(ci);
+      // Shared
+      } else {
+        bothItems.push(ci);
+      }
+    });
+
+    // If we couldn't split meaningfully, show as vertical timeline
+    if (brideItems.length === 0 && groomItems.length === 0) {
+      html += '<div class="ceremony-timeline">' + allItems.map(cardHtml).join('') + '</div>';
+    } else {
+      html += '<div class="ceremony-cols">' +
+        '<div>' +
+          '<div class="ceremony-col-header">' + pos(S.name1 || 'Bride') + ' side</div>' +
+          '<div class="ceremony-timeline">' + (brideItems.length ? brideItems.map(cardHtml).join('') : '<p style="font-size:12px;color:var(--muted);font-style:italic;padding:12px 0">No specific ceremonies</p>') + '</div>' +
+        '</div>' +
+        '<div>' +
+          '<div class="ceremony-col-header">' + pos(S.name2 || 'Groom') + ' side</div>' +
+          '<div class="ceremony-timeline">' + (groomItems.length ? groomItems.map(cardHtml).join('') : '<p style="font-size:12px;color:var(--muted);font-style:italic;padding:12px 0">No specific ceremonies</p>') + '</div>' +
+        '</div>' +
+      '</div>' +
+      (bothItems.length ? '<div class="ceremony-shared-header">Shared ceremonies</div><div class="ceremony-timeline">' + bothItems.map(cardHtml).join('') + '</div>' : '');
     }
+  } else {
+    // Two traditions — two columns + shared at bottom
+    html += `
+    <style>
+      .ceremony-cols { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:28px; }
+      @media(max-width:600px){.ceremony-cols{grid-template-columns:1fr;}}
+      .ceremony-col-header { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--bdr); font-style:italic; }
+      .ceremony-shared-header { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--bdr); font-style:italic; display:flex; align-items:center; gap:8px; }
+      .ceremony-shared-header::after { content:''; flex:1; height:1px; background:var(--bdr); }
+    </style>
+    <div class="ceremony-cols">
+      <div>
+        <div class="ceremony-col-header">${S.name1 ? S.name1 + '\'s ceremonies' : trad1Name.split('·')[0].trim()}</div>
+        <div class="ceremony-timeline">' + leftItems.map(cardHtml).join('') + (leftItems.length ? '' : '<p style="font-size:12px;color:var(--muted);font-style:italic;padding:12px 0">No specific ceremonies</p>') + '</div>
+      </div>
+      <div>
+        <div class="ceremony-col-header">${S.name2 ? S.name2 + '\'s ceremonies' : trad2Name.split('·')[0].trim()}</div>
+        <div class="ceremony-timeline">' + rightItems.map(cardHtml).join('') + (rightItems.length ? '' : '<p style="font-size:12px;color:var(--muted);font-style:italic;padding:12px 0">No specific ceremonies</p>') + '</div>
+      </div>
+    </div>
+    ' + (sharedItems.length ? '<div class="ceremony-shared-header">Shared ceremonies</div><div class="ceremony-timeline">' + sharedItems.map(cardHtml).join('') + '</div>' : '') + '`;
+  }
 
-    html += '<div class="cs-cols">';
-    html += '<div><div class="cs-col-header">' + pos(n1) + ' ceremonies</div>' +
-      (group.side1.length ? group.side1.map(cardHtml).join('') : '<p style="font-size:12px;color:var(--muted);font-style:italic">None</p>') + '</div>';
-    html += '<div><div class="cs-col-header">' + pos(n2) + ' ceremonies</div>' +
-      (group.side2.length ? group.side2.map(cardHtml).join('') : '<p style="font-size:12px;color:var(--muted);font-style:italic">None</p>') + '</div>';
-    html += '</div>';
-
-    if (group.both.length) {
-      html += '<div class="cs-shared-label">Common ceremonies</div>';
-      html += '<div class="cs-shared-grid">' + group.both.map(cardHtml).join('') + '</div>';
-    }
-    html += '<div style="margin-bottom:24px"></div>';
-  });
+  html += `<p style="font-size:11px;color:var(--muted);font-style:italic;margin-top:16px">
+    ${window.selectedCeremonies.size} of ${items.length} ceremonies included
+  </p>`;
 
   el.innerHTML = html;
 }
 
+// old single-tradition renderCeremonies replaced above
+window.toggleCard = function(i) {
+  document.getElementById(`cc-${i}`)?.classList.toggle('open');
+};
 
+window.toggleCeremony = function(i, e) {
+  e.stopPropagation();
+  if (window.selectedCeremonies.has(i)) window.selectedCeremonies.delete(i);
+  else window.selectedCeremonies.add(i);
+  if (S.plan) renderCeremonies(S.plan.ceremonySequence||S.plan.ceremonies||[]);
+};
+
+// ── Render budget ──
 function renderBudget(budgetData) {
   var el = document.getElementById('tab-budget');
 
@@ -1923,14 +1970,11 @@ function renderBudget(budgetData) {
   }
 
   // Split budget by selected ceremonies
-  // Count from ceremonySelections for accuracy (handles bride+groom correctly)
-  var side1Count = 0, side2Count = 0, bothCount = 0;
-  Object.values(ceremonySelections).forEach(function(groups) {
-    side1Count += Object.values(groups.side1||{}).filter(function(v){return v!==false;}).length;
-    side2Count += Object.values(groups.side2||{}).filter(function(v){return v!==false;}).length;
-    bothCount  += Object.values(groups.both||{}).filter(function(v){return v!==false;}).length;
-  });
-  var totalCount = side1Count + side2Count + bothCount || 1;
+  var selected = getSelectedCeremonies ? getSelectedCeremonies() : [];
+  var side1Count = selected.filter(function(c){ return c.side === S.role1; }).length;
+  var side2Count = selected.filter(function(c){ return c.side === S.role2; }).length;
+  var bothCount  = selected.filter(function(c){ return c.side !== S.role1 && c.side !== S.role2; }).length;
+  var totalCount = selected.length || 1;
 
   var side1Ratio = side1Count / totalCount;
   var side2Ratio = side2Count / totalCount;
@@ -1988,14 +2032,6 @@ var planCeremonies = [];
 
 function showCeremonySelection(ceremonies) {
   planCeremonies = ceremonies;
-  // Debug: log what we're working with
-  var sideCount = {bride:0, groom:0, both:0, missing:0};
-  ceremonies.forEach(function(c){ 
-    var s = c.side || 'missing';
-    if (sideCount[s] !== undefined) sideCount[s]++; else sideCount.missing++;
-  });
-  console.log('showCeremonySelection: total='+ceremonies.length+' sides='+JSON.stringify(sideCount));
-  console.log('S.role1='+S.role1+' S.role2='+S.role2);
   var container = document.getElementById('cs-container');
   if (!ceremonies || !ceremonies.length) {
     if (container) container.innerHTML = '<p style="color:var(--muted);font-style:italic;padding:20px 0">No ceremonies found.</p>';
@@ -2005,9 +2041,8 @@ function showCeremonySelection(ceremonies) {
   var n2 = S.name2 || 'Partner two';
   var trad1 = S.traditions[0];
   var trad2 = S.traditions[1] || null;
-  // Map 'partner' to bride/groom for taxonomy matching
-  var n1Role = S.role1 === 'partner' ? 'bride' : S.role1;
-  var n2Role = S.role2 === 'partner' ? 'groom' : S.role2;
+  var n1Role = S.role1;
+  var n2Role = S.role2;
   var allTradSlugs = trad2 ? [trad1, trad2] : [trad1];
   ceremonySelections = {};
 
@@ -2018,17 +2053,12 @@ function showCeremonySelection(ceremonies) {
       if (!trad2) return true;
       return src === tradSlug;
     });
-    console.log('Trad '+tradSlug+': tradCeremonies='+tradCeremonies.length+
-      ' sample_src='+(ceremonies[0]?ceremonies[0]._sourceTraditionSlug:'none')+
-      ' n1Role='+n1Role+' n2Role='+n2Role);
     var side1 = [], side2 = [], both = [];
     tradCeremonies.forEach(function(item) {
       var globalIdx = ceremonies.indexOf(item);
       var side = item.side || 'both';
       if (side === 'bride+groom') {
-        // Appears in both columns independently
         side1.push({item:item, idx:globalIdx});
-        // Push a shallow copy with a unique index for side2
         var copy = Object.assign({}, item, {_isCopy:true});
         var copyIdx = ceremonies.length + side2.length + 1000;
         side2.push({item:copy, idx:copyIdx});
@@ -2108,36 +2138,28 @@ function toggleCsMenu(e, btn) {
 
 function moveCs(e) {
   e.stopPropagation();
-  var btn = e.target;
+  var btn = e.currentTarget;
   var tradSlug = btn.dataset.slug;
   var fromGroup = btn.dataset.from;
   var idx = parseInt(btn.dataset.idx);
   var toGroup = btn.dataset.to;
   document.querySelectorAll('.cs-item-popover.open').forEach(function(p){ p.classList.remove('open'); });
   if (!ceremonySelections[tradSlug]) return;
-  // Remove from current group
   delete ceremonySelections[tradSlug][fromGroup][idx];
-  // Add to new group
   if (!ceremonySelections[tradSlug][toGroup]) ceremonySelections[tradSlug][toGroup] = {};
   ceremonySelections[tradSlug][toGroup][idx] = true;
-  // Update the item's side so re-render puts it in right column
-  if (planCeremonies[idx]) {
-    planCeremonies[idx].side = toGroup === 'side1' ? S.role1 : toGroup === 'side2' ? S.role2 : 'both';
-  }
   showCeremonySelection(planCeremonies);
 }
 
 function copyCs(e) {
   e.stopPropagation();
-  var btn = e.target;
+  var btn = e.currentTarget;
   var tradSlug = btn.dataset.slug;
   var idx = parseInt(btn.dataset.idx);
   var toGroup = btn.dataset.to;
   document.querySelectorAll('.cs-item-popover.open').forEach(function(p){ p.classList.remove('open'); });
   if (!ceremonySelections[tradSlug]) return;
   var copy = Object.assign({}, planCeremonies[idx]);
-  copy.side = toGroup === 'side1' ? S.role1 : toGroup === 'side2' ? S.role2 : 'both';
-  copy._isCopy = true;
   var newIdx = planCeremonies.length;
   planCeremonies.push(copy);
   if (!ceremonySelections[tradSlug][toGroup]) ceremonySelections[tradSlug][toGroup] = {};
@@ -2218,50 +2240,9 @@ function buildConfirmation() {
 
   var ratio = Math.max(0.5, totalSelected / Math.max(planCeremonies.length,1));
   var adj = Math.round(S.budget * ratio);
-  // Build three budget sections
-  var n1 = S.name1 || 'Partner one';
-  var n2 = S.name2 || 'Partner two';
-  var allTradSlugs2 = trad2 ? [trad1, trad2] : [trad1];
-  var s1Count = 0, s2Count = 0, sbCount = 0;
-  allTradSlugs2.forEach(function(ts) {
-    var sel2 = ceremonySelections[ts] || {side1:{},side2:{},both:{}};
-    s1Count += Object.values(sel2.side1||{}).filter(function(v){return v!==false;}).length;
-    s2Count += Object.values(sel2.side2||{}).filter(function(v){return v!==false;}).length;
-    sbCount += Object.values(sel2.both||{}).filter(function(v){return v!==false;}).length;
-  });
-  var tot2 = s1Count + s2Count + sbCount || 1;
-  var s1Budget = Math.round(adj * s1Count / tot2);
-  var s2Budget = Math.round(adj * s2Count / tot2);
-  var sbBudget = adj - s1Budget - s2Budget;
-
-  // Build detailed budget breakdown
-  var budgetData = S.plan && S.plan.budget ? S.plan.budget : [];
-  function budgetSection(label, sectionBudget, ratio) {
-    if (sectionBudget <= 0) return '';
-    var bars = '';
-    if (budgetData.length) {
-      bars = budgetData.slice(0,8).map(function(item) {
-        var cat = item.category || item.name || '';
-        var amt = Math.round((item.suggested_amount || (adj * ((item.pct_low||0)+(item.pct_high||0))/2/100)) * ratio);
-        var pct = Math.min((amt/sectionBudget)*100*2, 100);
-        return '<div class="budget-row"><div class="budget-cat">' + cat + '</div>' +
-          '<div class="budget-track"><div class="budget-fill" style="width:' + pct + '%"></div></div>' +
-          '<div class="budget-amt">' + amt.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div></div>';
-      }).join('');
-    }
-    return '<div class="budget-section" style="margin-bottom:20px">' +
-      '<div class="budget-section-header">' + label + '</div>' +
-      '<div class="budget-section-total">' + sectionBudget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>' +
-      bars + '</div>';
-  }
-
-  html += '<div class="conf-budget">' +
-    '<div class="conf-budget-total">' + adj.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>' +
-    '<div class="conf-budget-sub">estimated budget for ' + totalSelected + ' ceremonies</div>' +
-    budgetSection(pos(n1) + ' ceremonies', s1Budget, s1Count/tot2) +
-    budgetSection(pos(n2) + ' ceremonies', s2Budget, s2Count/tot2) +
-    budgetSection('Common ceremonies', sbBudget, sbCount/tot2) +
-  '</div>';
+  html += '<div class="conf-budget"><div class="conf-budget-total">' +
+    adj.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) +
+    '</div><div class="conf-budget-sub">estimated for '+totalSelected+' ceremonies</div></div>';
   document.getElementById('conf-container').innerHTML = html;
   if (S.plan) S.plan.adjustedBudget = adj;
 }
