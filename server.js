@@ -1199,8 +1199,6 @@ app.patch('/api/advisor/versions/:id', async (req, res) => {
     ];
     const filtered = {};
     allowed.forEach(function(k) { if (updates[k] !== undefined) filtered[k] = updates[k]; });
-    filtered.updated_at = new Date().toISOString();
-
     const { data, error } = await supabase
       .from('tradition_versions')
       .update(filtered)
