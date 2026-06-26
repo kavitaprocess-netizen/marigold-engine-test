@@ -1667,9 +1667,11 @@ function showResults() {
 }
 
 function populateResults() {
+  console.log('populateResults called, S.plan:', S.plan ? 'exists' : 'null');
   try {
   // Immediate visible test
   var rt = document.getElementById('results-title');
+  console.log('results-title element:', rt ? 'found' : 'NOT FOUND');
   if (rt) rt.innerHTML = '<em>Loading...</em>';
   if (!S.plan) { 
     if (rt) rt.innerHTML = '<em>No plan data</em>';
