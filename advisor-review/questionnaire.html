@@ -601,6 +601,14 @@
   .conf-item:last-child { border-bottom:none; }
   .conf-item-timing { font-size:11px; color:var(--muted); }
   .conf-shared-header { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin:16px 0 10px; font-style:italic; }
+  .conf-budget-section { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--bdr); }
+  .conf-budget-section:last-child { border-bottom:none; }
+  .conf-budget-label { font-size:12px; font-style:italic; color:var(--muted); }
+  .conf-budget-amt { font-size:14px; font-style:italic; color:var(--deep); font-weight:500; }
+  .conf-budget-section { display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr); }
+  .conf-budget-section:last-child { border-bottom:none; }
+  .conf-budget-label { font-size:12px;font-style:italic;color:var(--muted); }
+  .conf-budget-amt { font-size:14px;font-style:italic;color:var(--deep); }
   .conf-budget { background:var(--warm); border-radius:10px; padding:20px 24px; margin-top:28px; }
   .conf-budget-total { font-size:28px; font-style:italic; color:var(--deep); margin-bottom:4px; }
   .conf-budget-sub { font-size:12px; color:var(--muted); font-style:italic; margin-bottom:16px; }
@@ -640,6 +648,10 @@
   .conf-item:last-child { border-bottom:none; }
   .conf-item-timing { font-size:11px; color:var(--muted); }
   .conf-shared-header { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin:16px 0 10px; font-style:italic; }
+  .conf-budget-section { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--bdr); }
+  .conf-budget-section:last-child { border-bottom:none; }
+  .conf-budget-label { font-size:12px; font-style:italic; color:var(--muted); }
+  .conf-budget-amt { font-size:14px; font-style:italic; color:var(--deep); font-weight:500; }
   .conf-budget { background:var(--warm); border-radius:10px; padding:20px 24px; margin-top:28px; }
   .conf-budget-total { font-size:28px; font-style:italic; color:var(--deep); margin-bottom:4px; letter-spacing:-1px; }
   .conf-budget-sub { font-size:12px; color:var(--muted); font-style:italic; margin-bottom:16px; }
@@ -756,6 +768,10 @@
   .conf-item:last-child { border-bottom:none; }
   .conf-item-timing { font-size:11px; color:var(--muted); }
   .conf-shared-header { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin:16px 0 10px; font-style:italic; }
+  .conf-budget-section { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--bdr); }
+  .conf-budget-section:last-child { border-bottom:none; }
+  .conf-budget-label { font-size:12px; font-style:italic; color:var(--muted); }
+  .conf-budget-amt { font-size:14px; font-style:italic; color:var(--deep); font-weight:500; }
   .conf-budget { background:var(--warm); border-radius:10px; padding:20px 24px; margin-top:28px; }
   .conf-budget-total { font-size:28px; font-style:italic; color:var(--deep); margin-bottom:4px; }
   .conf-budget-sub { font-size:12px; color:var(--muted); font-style:italic; margin-bottom:16px; }
@@ -956,10 +972,10 @@
             <span class="role-sentence-name" id="role-name1">Partner one</span>
             <span class="role-sentence-is"> is the </span>
             <span class="role-dropdown" id="role-dd1">
-              <span class="role-dd-value" id="role-val1" onclick="toggleRoleDD(1)">Select &#9662;</span>
+              <span class="role-dd-value" id="role-val1" onclick="toggleRoleDD(1,event)">Select &#9662;</span>
               <div class="role-dd-menu" id="role-menu1">
-                <div onclick="pickRole(1,'bride')">Bride</div>
-                <div onclick="pickRole(1,'groom')">Groom</div>
+                <div onclick="pickRole(1,'bride',event)">Bride</div>
+                <div onclick="pickRole(1,'groom',event)">Groom</div>
               </div>
             </span>
           </div>
@@ -967,10 +983,10 @@
             <span class="role-sentence-name" id="role-name2">Partner two</span>
             <span class="role-sentence-is"> is the </span>
             <span class="role-dropdown" id="role-dd2">
-              <span class="role-dd-value" id="role-val2" onclick="toggleRoleDD(2)">Select &#9662;</span>
+              <span class="role-dd-value" id="role-val2" onclick="toggleRoleDD(2,event)">Select &#9662;</span>
               <div class="role-dd-menu" id="role-menu2">
-                <div onclick="pickRole(2,'bride')">Bride</div>
-                <div onclick="pickRole(2,'groom')">Groom</div>
+                <div onclick="pickRole(2,'bride',event)">Bride</div>
+                <div onclick="pickRole(2,'groom',event)">Groom</div>
               </div>
             </span>
           </div>
@@ -1093,7 +1109,7 @@
   <!-- Q7: Ceremony selection -->
   <div class="screen" id="q7" style="overflow:hidden;position:relative;display:block!important;padding:0!important;">
     <!-- Scrollable content area -->
-    <div id="q7-scroll" style="height:calc(100vh - 62px - 80px);overflow-y:auto;overflow-x:hidden;padding:24px 24px 20px;box-sizing:border-box;">
+    <div id="q7-scroll" style="height:calc(100vh - 62px - 80px);overflow-y:auto;overflow-x:hidden;padding:24px 24px 24px;box-sizing:border-box;">
     <div style="width:100%;max-width:900px;margin:0 auto">
       <div class="ql" style="margin-bottom:2px">Your ceremony plan</div>
       <div class="qt" id="q7-title">Choose your ceremonies</div>
@@ -1180,7 +1196,8 @@ let currentQ = 1;
 const TOTAL_Q = 6;
 
 // ── Role assignment ──
-function pickRole(partner, role) {
+function pickRole(partner, role, e) {
+  if (e) e.stopPropagation();
   S['role' + partner] = role;
   var val = document.getElementById('role-val' + partner);
   if (val) val.innerHTML = (role === 'bride' ? 'Bride' : 'Groom') + ' &#9662;';
@@ -1188,7 +1205,8 @@ function pickRole(partner, role) {
   if (menu) menu.classList.remove('open');
 }
 
-function toggleRoleDD(partner) {
+function toggleRoleDD(partner, e) {
+  if (e) e.stopPropagation();
   var menu = document.getElementById('role-menu' + partner);
   if (!menu) return;
   var other = document.getElementById('role-menu' + (partner === 1 ? 2 : 1));
@@ -1491,7 +1509,7 @@ function doTransition(from, to) {
   setTimeout(()=>{ a.classList.remove('exit-left'); b.classList.add('active'); }, 260);
 }
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 9;
 function updateProgress() {
   const step = currentQ === '4b' ? 4.5 : (currentQ === 7 ? 7 : currentQ === 8 ? 8 : currentQ);
   document.getElementById('progress-fill').style.width = (step/TOTAL_STEPS*100)+'%';
@@ -2031,6 +2049,14 @@ var planCeremonies = [];
 
 function showCeremonySelection(ceremonies) {
   planCeremonies = ceremonies;
+  // Debug: log what we're working with
+  var sideCount = {bride:0, groom:0, both:0, missing:0};
+  ceremonies.forEach(function(c){ 
+    var s = c.side || 'missing';
+    if (sideCount[s] !== undefined) sideCount[s]++; else sideCount.missing++;
+  });
+  console.log('showCeremonySelection: total='+ceremonies.length+' sides='+JSON.stringify(sideCount));
+  console.log('S.role1='+S.role1+' S.role2='+S.role2);
   var container = document.getElementById('cs-container');
   if (!ceremonies || !ceremonies.length) {
     if (container) container.innerHTML = '<p style="color:var(--muted);font-style:italic;padding:20px 0">No ceremonies found.</p>';
@@ -2230,9 +2256,29 @@ function buildConfirmation() {
 
   var ratio = Math.max(0.5, totalSelected / Math.max(planCeremonies.length,1));
   var adj = Math.round(S.budget * ratio);
-  html += '<div class="conf-budget"><div class="conf-budget-total">' +
-    adj.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) +
-    '</div><div class="conf-budget-sub">estimated for '+totalSelected+' ceremonies</div></div>';
+  // Build three budget sections
+  var n1 = S.name1 || 'Partner one';
+  var n2 = S.name2 || 'Partner two';
+  var allTradSlugs2 = trad2 ? [trad1, trad2] : [trad1];
+  var s1Count = 0, s2Count = 0, sbCount = 0;
+  allTradSlugs2.forEach(function(ts) {
+    var sel2 = ceremonySelections[ts] || {side1:{},side2:{},both:{}};
+    s1Count += Object.values(sel2.side1||{}).filter(function(v){return v!==false;}).length;
+    s2Count += Object.values(sel2.side2||{}).filter(function(v){return v!==false;}).length;
+    sbCount += Object.values(sel2.both||{}).filter(function(v){return v!==false;}).length;
+  });
+  var tot2 = s1Count + s2Count + sbCount || 1;
+  var s1Budget = Math.round(adj * s1Count / tot2);
+  var s2Budget = Math.round(adj * s2Count / tot2);
+  var sbBudget = adj - s1Budget - s2Budget;
+
+  html += '<div class="conf-budget">' +
+    '<div class="conf-budget-total">' + adj.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>' +
+    '<div class="conf-budget-sub">estimated budget for ' + totalSelected + ' ceremonies</div>' +
+    (s1Count > 0 ? '<div class="conf-budget-section"><span class="conf-budget-label">' + pos(n1) + ' ceremonies</span><span class="conf-budget-amt">' + s1Budget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</span></div>' : '') +
+    (s2Count > 0 ? '<div class="conf-budget-section"><span class="conf-budget-label">' + pos(n2) + ' ceremonies</span><span class="conf-budget-amt">' + s2Budget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</span></div>' : '') +
+    (sbCount > 0 ? '<div class="conf-budget-section"><span class="conf-budget-label">Common ceremonies</span><span class="conf-budget-amt">' + sbBudget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</span></div>' : '') +
+  '</div>';
   document.getElementById('conf-container').innerHTML = html;
   if (S.plan) S.plan.adjustedBudget = adj;
 }
