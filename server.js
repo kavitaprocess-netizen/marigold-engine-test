@@ -388,7 +388,7 @@ function renderSidebar(){
     const sv=current||latest;
     const status=sv?.status||'no versions';
     return \`<div class="tradition-item \${currentTradition?.id===t.id?'active':''}" onclick="selectTradition('\${t.id}')">
-      <span class="t-name">\${t.name}</span>
+      <span class="t-name">\${TRAD_LABELS[t.slug]||t.name}</span>
       <span class="t-status s-\${status.replace('_','-')}">\${status.replace('_',' ')}</span>
     </div>\`;
   }).join('');
