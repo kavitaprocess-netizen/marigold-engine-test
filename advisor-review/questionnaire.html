@@ -975,10 +975,8 @@
       <div class="ql">Step 7 of 8</div>
       <div class="qt" id="q7-title">Choose your ceremonies</div>
       <div class="qs" id="q7-sub">We've assigned ceremonies based on your traditions. Adjust any that aren't right — then review your plan.</div>
+      <div style="font-size:11px;color:var(--muted);font-style:italic;margin:8px 0 4px;text-align:right">↓ scroll for all ceremonies</div>
       <div id="cs-container" style="margin-top:24px"></div>
-      <div style="margin-top:20px;text-align:center;color:var(--muted);font-size:11px;font-style:italic;padding-bottom:8px" id="q7-scroll-hint">
-        ↓ scroll to see all ceremonies
-      </div>
       <div class="cta-row" style="margin-top:16px;padding-bottom:60px">
         <button class="btn-back" onclick="goBack()">← back</button>
         <button class="cta" onclick="goToConfirmation()">Review my plan →</button>
@@ -1485,33 +1483,13 @@ async function submitPlan() {
 }
 
 function showErr(msg) {
-  const loadingEl = document.getElementById('loading-screen');
-  loadingEl.innerHTML = `
-    <div style="display:flex;flex-direction:column;align-items:center;gap:16px;max-width:380px;text-align:center;padding:0 24px">
-      <svg width="28" height="28" viewBox="0 0 34 34" xmlns="http://www.w3.org/2000/svg" style="opacity:0.6">
-  <g fill="#E0B030" stroke="#C8941A" stroke-width="0.4">
-    <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(0 17 17)"/>
-    <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(51.4 17 17)"/>
-    <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(102.8 17 17)"/>
-    <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(154.2 17 17)"/>
-    <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(205.7 17 17)"/>
-    <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(257.1 17 17)"/>
-    <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(308.5 17 17)"/>
-  </g>
-  <g fill="#F7D44C" stroke="#E0B030" stroke-width="0.3">
-    <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(0 17 17)"/>
-    <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(60 17 17)"/>
-    <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(120 17 17)"/>
-    <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(180 17 17)"/>
-    <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(240 17 17)"/>
-    <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(300 17 17)"/>
-  </g>
-  <circle cx="17" cy="17" r="4.1" fill="#6B5318" stroke="#5A4512" stroke-width="0.3"/>
-</svg>
-      <div style="font-size:16px;font-style:italic;color:var(--deep)">Something went wrong</div>
-      <div style="font-size:13px;color:var(--muted);font-style:italic;line-height:1.6">${msg}</div>
-      <button class="cta" onclick="location.reload()" style="margin-top:8px">Start again</button>
-    </div>`;
+  var loadingEl = document.getElementById('loading-screen');
+  loadingEl.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:16px;max-width:380px;text-align:center;padding:0 24px">' +
+    '<svg width=\"20\" height=\"20\" viewBox=\"0 0 34 34\" xmlns=\"http://www.w3.org/2000/svg\">\n      <g fill=\"#E0B030\" stroke=\"#C8941A\" stroke-width=\"0.4\">\n        <ellipse cx=\"17\" cy=\"5.8\" rx=\"1.9\" ry=\"4.4\" transform=\"rotate(0 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"5.8\" rx=\"1.9\" ry=\"4.4\" transform=\"rotate(25.7 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"5.8\" rx=\"1.9\" ry=\"4.4\" transform=\"rotate(51.4 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"5.8\" rx=\"1.9\" ry=\"4.4\" transform=\"rotate(77.1 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"5.8\" rx=\"1.9\" ry=\"4.4\" transform=\"rotate(102.8 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"5.8\" rx=\"1.9\" ry=\"4.4\" transform=\"rotate(128.5 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"5.8\" rx=\"1.9\" ry=\"4.4\" transform=\"rotate(154.2 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"5.8\" rx=\"1.9\" ry=\"4.4\" transform=\"rotate(180 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"5.8\" rx=\"1.9\" ry=\"4.4\" transform=\"rotate(205.7 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"5.8\" rx=\"1.9\" ry=\"4.4\" transform=\"rotate(231.4 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"5.8\" rx=\"1.9\" ry=\"4.4\" transform=\"rotate(257.1 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"5.8\" rx=\"1.9\" ry=\"4.4\" transform=\"rotate(282.8 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"5.8\" rx=\"1.9\" ry=\"4.4\" transform=\"rotate(308.5 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"5.8\" rx=\"1.9\" ry=\"4.4\" transform=\"rotate(334.2 17 17)\"/>\n      </g>\n      <g fill=\"#F7D44C\" stroke=\"#E0B030\" stroke-width=\"0.3\">\n        <ellipse cx=\"17\" cy=\"10.2\" rx=\"1.3\" ry=\"2.4\" transform=\"rotate(0 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"10.2\" rx=\"1.3\" ry=\"2.4\" transform=\"rotate(60 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"10.2\" rx=\"1.3\" ry=\"2.4\" transform=\"rotate(120 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"10.2\" rx=\"1.3\" ry=\"2.4\" transform=\"rotate(180 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"10.2\" rx=\"1.3\" ry=\"2.4\" transform=\"rotate(240 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"10.2\" rx=\"1.3\" ry=\"2.4\" transform=\"rotate(300 17 17)\"/>\n      </g>\n      <circle cx=\"17\" cy=\"17\" r=\"4.1\" fill=\"#6B5318\" stroke=\"#5A4512\" stroke-width=\"0.3\"/>\n    </svg>' +
+    '<div style="font-size:16px;font-style:italic;color:var(--deep)">Something went wrong</div>' +
+    '<div style="font-size:13px;color:var(--muted);font-style:italic;line-height:1.6">' + msg + '</div>' +
+    '<button class="cta" onclick="location.reload()" style="margin-top:8px">Start again</button>' +
+  '</div>';
 }
 
 // ── Results ──
@@ -1955,14 +1933,26 @@ function showCeremonySelection(ceremonies) {
     tradCeremonies.forEach(function(item) {
       const globalIdx = ceremonies.indexOf(item);
       const side = item.side || 'both';
-      if (side === 'both') {
-        both.push({item: item, idx: globalIdx});
-      } else if (side === n1Role) {
+      if (side === n1Role) {
         side1.push({item: item, idx: globalIdx});
       } else if (side === n2Role) {
         side2.push({item: item, idx: globalIdx});
       } else {
-        both.push({item: item, idx: globalIdx}); // fallback
+        // side === 'both' — check name for role hints as fallback
+        const name = (item.name || '').toLowerCase();
+        const notes = (item.notes || '').toLowerCase();
+        const text = name + ' ' + notes;
+        const brideHints = ['bride','mehndi','mehendi','haldi','chooda','kalire','maiyan','vidaai','bridal','hen ','bachelorette','kabbalat','mikveh','krevati','despedida','hair comb','choora','solah shringar','gaye holud','dodhi','oonjal','kashi yatra'];
+        const groomHints = ['groom','baraat','jaan','sehrabandi','ghodi','tisch','aufruf','hahm','khan mak','sin sod','bachelor','jeonanrye','kirogi','pamanhikan','milad'];
+        var isBride = brideHints.some(function(h){return text.includes(h);});
+        var isGroom = groomHints.some(function(h){return text.includes(h);});
+        if (isBride && !isGroom) {
+          side1.push({item: item, idx: globalIdx});
+        } else if (isGroom && !isBride) {
+          side2.push({item: item, idx: globalIdx});
+        } else {
+          both.push({item: item, idx: globalIdx});
+        }
       }
     });
 
