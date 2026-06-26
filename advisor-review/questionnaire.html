@@ -1109,7 +1109,7 @@
 
   <!-- Q7: Ceremony selection -->
   <!-- Q7: Ceremony selection -->
-  <div class="screen" id="q7" style="display:flex!important;flex-direction:column!important;padding:0!important;overflow:hidden!important;">
+  <div class="screen" id="q7" style="display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;padding:0!important;overflow:hidden!important;">
     <!-- Scrollable content area — flex-grow fills space above CTA -->
     <div id="q7-scroll" style="flex:1;overflow-y:auto;overflow-x:hidden;padding:24px 24px 16px;box-sizing:border-box;min-height:0;">
     <div style="width:100%;max-width:900px;margin:0 auto">
@@ -1681,16 +1681,14 @@ function populateResults() {
 
   // Date not confirmed banner
   if (!S.dateSure) {
-    const dateNote = document.createElement('div');
+    var dateNote = document.createElement('div');
     dateNote.className = 'conflict-banner';
     dateNote.innerHTML = '<em>Wedding date not yet confirmed</em> — checklist milestones are shown relative to your wedding date. Add your date any time to get calendar-specific guidance.';
     document.getElementById('conflicts-wrap').prepend(dateNote);
   }
 
   if (p.conflicts && p.conflicts.length) {
-    document.getElementById('conflicts-wrap').innerHTML = p.conflicts.map(c=>
-      '<div class="conflict-banner">Note — ' + (c.description||c.message||JSON.stringify(c)) + '</div>'
-    ).join('');
+    document.getElementById('conflicts-wrap').innerHTML = p.conflicts.map(function(c){ return '<div class="conflict-banner">Note — ' + (c.description||c.message||JSON.stringify(c)) + '</div>'; }).join('');
   }
 
   renderChecklist(p.checklist||[]);
@@ -1705,10 +1703,10 @@ function populateResults() {
   }
 }
 function switchTab(name, btn) {
-  document.querySelectorAll('.out-tab').forEach(t=>t.classList.remove('on'));
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.out-tab').forEach(function(t){t.classList.remove('on');});
+  document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('on');});
   btn.classList.add('on');
-  document.getElementById(`tab-${name}`).classList.add('on');
+  document.getElementById('tab-'+name).classList.add('on');
 }
 
 // ── Render checklist ──
@@ -1750,7 +1748,7 @@ function renderChecklist(items) {
     const label = item.label||item.task||item.description||'';
     const trad = item.tradition||item.source||item._sourceTradition||'';
     const col = trad ? tradColor(trad) : null;
-    const tradName = col ? (TRADS.find(t=>t.slug===trad)||{label:trad}).label.split('·')[0].trim() : '';
+    var tradName = col ? (TRADS.find(function(t){return t.slug===trad;})||{label:trad}).label.split('·')[0].trim() : '';
     return '<div class="checklist-item">' +
       '<div class="check-box" onclick="this.classList.toggle(\'checked\')"></div>' +
       '<div class="check-label">' + label +
@@ -1821,164 +1819,86 @@ function renderChecklist(items) {
 
 // ── Render ceremony vertical timeline ──
 function renderCeremonies(items) {
-  const el = document.getElementById('tab-ceremonies');
-  if (!items.length) {
-    el.innerHTML='<p style="color:var(--muted);font-style:italic;font-size:13px;padding:20px 0">No ceremony sequence found.</p>';
+  var el = document.getElementById('tab-ceremonies');
+  if (!el) return;
+  if (!items || !items.length) {
+    el.innerHTML = '<p style="color:var(--muted);font-style:italic;padding:20px 0">No ceremony sequence found.</p>';
     return;
   }
 
-  if (!window.selectedCeremonies) window.selectedCeremonies = new Set(items.map((_,i)=>i));
+  var trad1 = S.traditions[0];
+  var trad2 = S.traditions[1] || null;
+  var n1 = S.name1 || 'Partner one';
+  var n2 = S.name2 || 'Partner two';
+  var n1Role = S.role1 || 'bride';
+  var n2Role = S.role2 || 'groom';
 
-  // Split ceremonies by tradition
-  const trad1 = S.traditions[0];
-  const trad2 = S.traditions[1];
-  const trad1Name = TRADS.find(t=>t.slug===trad1)?.label || trad1 || '';
-  const trad2Name = trad2 ? (TRADS.find(t=>t.slug===trad2)?.label || trad2) : '';
+  function tradColor(slug) {
+    var colors = [
+      {bg:'#FFF8E7',color:'#8B6914'},{bg:'#F0F4FF',color:'#3949AB'},
+      {bg:'#F3E5F5',color:'#7B1FA2'},{bg:'#E8F5E9',color:'#2E7D32'},
+      {bg:'#FCE4EC',color:'#C62828'},{bg:'#E3F2FD',color:'#1565C0'}
+    ];
+    var h = 0;
+    for (var i=0; i<(slug||'').length; i++) h = (h*31 + slug.charCodeAt(i)) & 0xFFFFFF;
+    return colors[Math.abs(h) % colors.length];
+  }
 
-  // Categorise each ceremony
-  const leftItems = [];   // tradition 1
-  const rightItems = [];  // tradition 2
-  const sharedItems = []; // universal / interfaith / both
-
-  items.forEach((item, i) => {
-    const src = item._sourceTradition || item.tradition || item.source || '';
-    const slug = item.tradition || item.source || '';
-    if (src === 'Universal' || src === 'both' || src === 'Interfaith' || (!slug && !src)) {
-      sharedItems.push({item, i});
-    } else if (slug === trad1 || src === trad1Name || (trad1 && src.toLowerCase().includes(trad1.split('-')[0]))) {
-      leftItems.push({item, i});
-    } else if (trad2 && (slug === trad2 || src === trad2Name || src.toLowerCase().includes(trad2.split('-')[0]))) {
-      rightItems.push({item, i});
-    } else {
-      // fallback — odd items go left if only one tradition
-      trad2 ? sharedItems.push({item, i}) : leftItems.push({item, i});
-    }
+  // Group by tradition for interfaith
+  var groups = {};
+  items.forEach(function(item) {
+    var src = item._sourceTraditionSlug || item.tradition || trad1;
+    if (!groups[src]) groups[src] = {side1:[], side2:[], both:[]};
+    var side = item.side || 'both';
+    var ci = {item:item};
+    if (side === n1Role || side === 'bride+groom') groups[src].side1.push(ci);
+    if (side === n2Role || side === 'bride+groom') groups[src].side2.push(ci);
+    if (side !== n1Role && side !== n2Role) groups[src].both.push(ci);
   });
 
-  function cardHtml({item, i}) {
-    const name = item.name||item.event||item.ceremony||'';
-    const timing = item.timing||item.timeframe||'';
-    const duration = item.duration||'';
-    const size = item.typical_size||item.guestSize||'';
-    const loc = item.location_type||item.locationType||'';
-    const notes = item.notes||'';
-    const trad = item.tradition||item.source||'';
-    const col = tradColor(trad);
-    const tradLabel = trad?(TRADS.find(t=>t.slug===trad)?.label||trad):'';
-    const selected = window.selectedCeremonies.has(i);
-    return `<div class="ceremony-card" id="cc-${i}" onclick="toggleCard(${i})" style="opacity:${selected?1:0.4}">
-      <div class="ceremony-dot" style="background:${col.color};border-color:var(--cream)"></div>
-      <div class="ceremony-header">
-        <div class="ceremony-meta-wrap">
-          ${tradLabel?`<div class="ceremony-trad-tag" style="background:${col.bg};color:${col.color}">${tradLabel.split('·')[0].trim()}</div>`:''}
-          <div class="ceremony-name">${name}</div>
-          <div class="ceremony-timing">${timing}${duration?' · '+duration:''}</div>
-        </div>
-        <div class="ceremony-toggle">›</div>
-      </div>
-      <div class="ceremony-body" onclick="event.stopPropagation()">
-        <div style="margin-bottom:10px">
-          ${size?`<div class="ceremony-detail-row"><span class="ceremony-detail-label">Guest size</span><span class="ceremony-detail-val">${size}</span></div>`:''}
-          ${loc?`<div class="ceremony-detail-row"><span class="ceremony-detail-label">Location</span><span class="ceremony-detail-val">${loc}</span></div>`:''}
-        </div>
-        ${notes?`<div class="ceremony-notes">${notes}</div>`:''}
-        <div class="ceremony-include">
-          <input type="checkbox" ${selected?'checked':''} onchange="toggleCeremony(${i},event)">
-          Include in my plan
-        </div>
-      </div>
-    </div>`;
+  function cardHtml(ci) {
+    var item = ci.item;
+    var name = item.name || item.event || '';
+    var timing = item.timing || '';
+    var duration = item.duration || '';
+    var notes = item.notes || '';
+    return '<div class="ceremony-card">' +
+      '<div class="ceremony-card-name">' + name + '</div>' +
+      (timing ? '<div class="ceremony-detail-row"><span class="ceremony-detail-label">Timing</span><span class="ceremony-detail-val">' + timing + '</span></div>' : '') +
+      (duration ? '<div class="ceremony-detail-row"><span class="ceremony-detail-label">Duration</span><span class="ceremony-detail-val">' + duration + '</span></div>' : '') +
+      (notes ? '<div class="ceremony-notes">' + notes + '</div>' : '') +
+    '</div>';
   }
 
-  const isSingle = !trad2 || rightItems.length === 0;
+  var html = '';
+  var tradSlugs = trad2 ? [trad1, trad2] : [trad1];
+  tradSlugs.forEach(function(slug) {
+    var group = groups[slug] || {side1:[], side2:[], both:[]};
+    var col = tradColor(slug);
+    var tradInfo = TRADS.find(function(t){ return t.slug === slug; }) || {label: slug};
 
-  let html = `<p style="font-size:12px;color:var(--muted);font-style:italic;margin-bottom:20px">
-    Click any ceremony to expand. Uncheck ceremonies you don't want included.
-  </p>`;
-
-  if (isSingle) {
-    // Single tradition — two columns: bride's side / groom's side
-    // Split by role hints in ceremony name/notes or just alternate evenly
-    const allItems = leftItems.concat(sharedItems);
-    const brideItems = [];
-    const groomItems = [];
-    const bothItems = [];
-
-    allItems.forEach(function(ci) {
-      const name = (ci.item.name || ci.item.event || '').toLowerCase();
-      const notes = (ci.item.notes || '').toLowerCase();
-      const text = name + ' ' + notes;
-      // Bride-side markers
-      if (/bride|chooda|mehndi|mehendi|maiyaan|kalire|bridal shower|despedida|hen|hair comb|veil|bride.*side/i.test(text)) {
-        brideItems.push(ci);
-      // Groom-side markers
-      } else if (/groom|baraat|sehrabandi|ghodi|bachelor|tisch|pre-wedding.*groom|groom.*side|khan mak/i.test(text)) {
-        groomItems.push(ci);
-      // Shared
-      } else {
-        bothItems.push(ci);
-      }
-    });
-
-    // If we couldn't split meaningfully, show as vertical timeline
-    if (brideItems.length === 0 && groomItems.length === 0) {
-      html += '<div class="ceremony-timeline">' + allItems.map(cardHtml).join('') + '</div>';
-    } else {
-      html += '<div class="ceremony-cols">' +
-        '<div>' +
-          '<div class="ceremony-col-header">' + pos(S.name1 || 'Bride') + ' side</div>' +
-          '<div class="ceremony-timeline">' + (brideItems.length ? brideItems.map(cardHtml).join('') : '<p style="font-size:12px;color:var(--muted);font-style:italic;padding:12px 0">No specific ceremonies</p>') + '</div>' +
-        '</div>' +
-        '<div>' +
-          '<div class="ceremony-col-header">' + pos(S.name2 || 'Groom') + ' side</div>' +
-          '<div class="ceremony-timeline">' + (groomItems.length ? groomItems.map(cardHtml).join('') : '<p style="font-size:12px;color:var(--muted);font-style:italic;padding:12px 0">No specific ceremonies</p>') + '</div>' +
-        '</div>' +
-      '</div>' +
-      (bothItems.length ? '<div class="ceremony-shared-header">Shared ceremonies</div><div class="ceremony-timeline">' + bothItems.map(cardHtml).join('') + '</div>' : '');
+    if (trad2) {
+      html += '<div class="cs-tradition-label" style="background:' + col.bg + ';color:' + col.color + ';padding:6px 12px;border-radius:6px;font-size:11px;margin-bottom:12px">' + tradInfo.label + '</div>';
     }
-  } else {
-    // Two traditions — two columns + shared at bottom
-    html += `
-    <style>
-      .ceremony-cols { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:28px; }
-      @media(max-width:600px){.ceremony-cols{grid-template-columns:1fr;}}
-      .ceremony-col-header { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--bdr); font-style:italic; }
-      .ceremony-shared-header { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--bdr); font-style:italic; display:flex; align-items:center; gap:8px; }
-      .ceremony-shared-header::after { content:''; flex:1; height:1px; background:var(--bdr); }
-    </style>
-    <div class="ceremony-cols">
-      <div>
-        <div class="ceremony-col-header">${S.name1 ? S.name1 + '\'s ceremonies' : trad1Name.split('·')[0].trim()}</div>
-        <div class="ceremony-timeline">' + leftItems.map(cardHtml).join('') + (leftItems.length ? '' : '<p style="font-size:12px;color:var(--muted);font-style:italic;padding:12px 0">No specific ceremonies</p>') + '</div>
-      </div>
-      <div>
-        <div class="ceremony-col-header">${S.name2 ? S.name2 + '\'s ceremonies' : trad2Name.split('·')[0].trim()}</div>
-        <div class="ceremony-timeline">' + rightItems.map(cardHtml).join('') + (rightItems.length ? '' : '<p style="font-size:12px;color:var(--muted);font-style:italic;padding:12px 0">No specific ceremonies</p>') + '</div>
-      </div>
-    </div>
-    ' + (sharedItems.length ? '<div class="ceremony-shared-header">Shared ceremonies</div><div class="ceremony-timeline">' + sharedItems.map(cardHtml).join('') + '</div>' : '') + '`;
-  }
 
-  html += `<p style="font-size:11px;color:var(--muted);font-style:italic;margin-top:16px">
-    ${window.selectedCeremonies.size} of ${items.length} ceremonies included
-  </p>`;
+    html += '<div class="cs-cols">';
+    html += '<div><div class="cs-col-header">' + pos(n1) + ' ceremonies</div>' +
+      (group.side1.length ? group.side1.map(cardHtml).join('') : '<p style="font-size:12px;color:var(--muted);font-style:italic">None</p>') + '</div>';
+    html += '<div><div class="cs-col-header">' + pos(n2) + ' ceremonies</div>' +
+      (group.side2.length ? group.side2.map(cardHtml).join('') : '<p style="font-size:12px;color:var(--muted);font-style:italic">None</p>') + '</div>';
+    html += '</div>';
+
+    if (group.both.length) {
+      html += '<div class="cs-shared-label">Common ceremonies</div>';
+      html += '<div class="cs-shared-grid">' + group.both.map(cardHtml).join('') + '</div>';
+    }
+    html += '<div style="margin-bottom:24px"></div>';
+  });
 
   el.innerHTML = html;
 }
 
-// old single-tradition renderCeremonies replaced above
-window.toggleCard = function(i) {
-  document.getElementById(`cc-${i}`)?.classList.toggle('open');
-};
 
-window.toggleCeremony = function(i, e) {
-  e.stopPropagation();
-  if (window.selectedCeremonies.has(i)) window.selectedCeremonies.delete(i);
-  else window.selectedCeremonies.add(i);
-  if (S.plan) renderCeremonies(S.plan.ceremonySequence||S.plan.ceremonies||[]);
-};
-
-// ── Render budget ──
 function renderBudget(budgetData) {
   var el = document.getElementById('tab-budget');
 
