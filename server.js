@@ -778,6 +778,27 @@ function renderCeremonyItems(canEdit){
       <div class="item-row-body" id="e\${i}">
         <div class="item-fields three">
           <div class="item-field"><label>Event name</label><input value="\${esc(item.name||'')}" \${canEdit?\`oninput="workingData.ceremony_sequence[\${i}].name=this.value"\`:' disabled'}></div>
+          <div class="item-field full"><label>Who is this for?</label>
+          <div style="display:flex;gap:16px;padding:8px 0;flex-wrap:wrap">
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;font-weight:normal;text-transform:none;letter-spacing:0">
+              <input type="checkbox" \${!canEdit?'disabled':''} 
+                \${item.side==='bride'||item.side==='bride+groom'?'checked':''}
+                onchange="setSide(workingData.ceremony_sequence[\${i}], 'bride', this.checked)">
+              Bride
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;font-weight:normal;text-transform:none;letter-spacing:0">
+              <input type="checkbox" \${!canEdit?'disabled':''} 
+                \${item.side==='groom'||item.side==='bride+groom'?'checked':''}
+                onchange="setSide(workingData.ceremony_sequence[\${i}], 'groom', this.checked)">
+              Groom
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;font-weight:normal;text-transform:none;letter-spacing:0">
+              <input type="checkbox" \${!canEdit?'disabled':''} 
+                \${item.side==='both'?'checked':''}
+                onchange="setSide(workingData.ceremony_sequence[\${i}], 'both', this.checked)">
+              Both together
+            </label>
+          </div></div>
           <div class="item-field"><label>Timing</label><input value="\${esc(item.timing||'')}" \${canEdit?\`oninput="workingData.ceremony_sequence[\${i}].timing=this.value"\`:' disabled'} placeholder="e.g. day before"></div>
           <div class="item-field"><label>Duration</label><input value="\${esc(item.duration||'')}" \${canEdit?\`oninput="workingData.ceremony_sequence[\${i}].duration=this.value"\`:' disabled'}></div>
           <div class="item-field"><label>Typical guest count</label><input value="\${esc(item.typical_size||'')}" \${canEdit?\`oninput="workingData.ceremony_sequence[\${i}].typical_size=this.value"\`:' disabled'}></div>
@@ -984,6 +1005,24 @@ async function rejectVersion(){
   if(!notes)return;
   try{currentVersion=await api('/versions/'+currentVersion.id+'/reject','POST',{notes});toast('Returned to draft');allVersions=await api('/traditions/'+currentTradition.id+'/versions');renderMain();}
   catch(e){toast('Failed: '+e.message,'error');}
+}
+function setSide(item, role, checked) {
+  var cur = item.side || 'both';
+  if (role === 'both') {
+    item.side = checked ? 'both' : 'bride';
+  } else if (role === 'bride') {
+    if (checked) {
+      item.side = (cur === 'groom' || cur === 'bride+groom') ? 'bride+groom' : 'bride';
+    } else {
+      item.side = (cur === 'bride+groom') ? 'groom' : 'both';
+    }
+  } else if (role === 'groom') {
+    if (checked) {
+      item.side = (cur === 'bride' || cur === 'bride+groom') ? 'bride+groom' : 'groom';
+    } else {
+      item.side = (cur === 'bride+groom') ? 'bride' : 'both';
+    }
+  }
 }
 function toast(msg,type='default'){
   const el=document.getElementById('toast');
