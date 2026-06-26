@@ -1668,7 +1668,13 @@ function showResults() {
 
 function populateResults() {
   try {
-  if (!S.plan) { console.error('populateResults: S.plan is null'); return; }
+  // Immediate visible test
+  var rt = document.getElementById('results-title');
+  if (rt) rt.innerHTML = '<em>Loading...</em>';
+  if (!S.plan) { 
+    if (rt) rt.innerHTML = '<em>No plan data</em>';
+    return; 
+  }
   var p = S.plan;
   var names = S.name2 ? (S.name1 + ' & ' + S.name2) : S.name1;
   var tradNames = S.traditions.map(function(s){ var t=TRADS.find(function(t){return t.slug===s;}); return t?t.label:s; }).join(' + ');
