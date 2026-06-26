@@ -649,6 +649,74 @@
   .conf-budget-fill { height:100%; background:var(--gd); border-radius:2px; }
   .conf-budget-amt { font-size:12px; color:var(--muted); min-width:65px; text-align:right; font-style:italic; }
 
+  /* ── Ceremony card move/copy menu ── */
+  .cs-item { position: relative; }
+  .cs-item-menu-btn {
+    position: absolute; top: 8px; right: 8px;
+    background: none; border: none; cursor: pointer;
+    font-size: 16px; color: var(--muted); padding: 2px 6px;
+    border-radius: 4px; line-height: 1; opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .cs-item:hover .cs-item-menu-btn { opacity: 1; }
+  .cs-item-menu-btn:focus { opacity: 1; outline: none; }
+  .cs-item-popover {
+    display: none; position: absolute; top: 28px; right: 4px;
+    background: white; border: 1px solid var(--bdr);
+    border-radius: 8px; box-shadow: 0 4px 16px rgba(60,48,16,0.12);
+    z-index: 50; min-width: 160px; overflow: hidden;
+  }
+  .cs-item-popover.open { display: block; }
+  .cs-popover-item {
+    padding: 9px 14px; font-size: 12px; font-style: italic;
+    font-family: 'Playfair Display', Georgia, serif;
+    color: var(--tx); cursor: pointer; display: block;
+    border: none; background: none; width: 100%; text-align: left;
+    transition: background 0.1s;
+  }
+  .cs-popover-item:hover { background: var(--warm); }
+  .cs-popover-divider { height: 1px; background: var(--bdr); margin: 2px 0; }
+
+  /* ── Budget three sections ── */
+  .budget-section { margin-bottom: 24px; }
+  .budget-section-header {
+    font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--muted); font-style: italic; margin-bottom: 12px;
+    padding-bottom: 8px; border-bottom: 1px solid var(--bdr);
+  }
+  .budget-section-total {
+    font-size: 20px; font-style: italic; color: var(--deep);
+    margin-bottom: 10px; letter-spacing: -0.5px;
+  }
+
+    /* ── Ceremony card move/copy menu ── */
+  .cs-item { position: relative; }
+  .cs-item-menu-btn { position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted);padding:2px 6px;border-radius:4px;line-height:1;opacity:0;transition:opacity 0.15s; }
+  .cs-item:hover .cs-item-menu-btn, .cs-item-menu-btn:focus { opacity:1;outline:none; }
+  .cs-item-popover { display:none;position:absolute;top:28px;right:4px;background:white;border:1px solid var(--bdr);border-radius:8px;box-shadow:0 4px 16px rgba(60,48,16,0.12);z-index:50;min-width:160px;overflow:hidden; }
+  .cs-item-popover.open { display:block; }
+  .cs-popover-item { padding:9px 14px;font-size:12px;font-style:italic;font-family:'Playfair Display',Georgia,serif;color:var(--tx);cursor:pointer;display:block;border:none;background:none;width:100%;text-align:left; }
+  .cs-popover-item:hover { background:var(--warm); }
+  .cs-popover-divider { height:1px;background:var(--bdr);margin:2px 0; }
+  /* ── Budget three sections ── */
+  .budget-section { margin-bottom:24px; }
+  .budget-section-header { font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-style:italic;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--bdr); }
+  .budget-section-total { font-size:20px;font-style:italic;color:var(--deep);margin-bottom:10px;letter-spacing:-0.5px; }
+
+  /* ── Ceremony card menu ── */
+  .cs-item { position:relative; }
+  .cs-item-menu-btn { position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted);padding:2px 6px;border-radius:4px;line-height:1;opacity:0;transition:opacity 0.15s; }
+  .cs-item:hover .cs-item-menu-btn, .cs-item-menu-btn:focus { opacity:1;outline:none; }
+  .cs-item-popover { display:none;position:absolute;top:28px;right:4px;background:white;border:1px solid var(--bdr);border-radius:8px;box-shadow:0 4px 16px rgba(60,48,16,0.12);z-index:50;min-width:160px;overflow:hidden; }
+  .cs-item-popover.open { display:block; }
+  .cs-popover-item { padding:9px 14px;font-size:12px;font-style:italic;font-family:'Playfair Display',Georgia,serif;color:var(--tx);cursor:pointer;display:block;border:none;background:none;width:100%;text-align:left; }
+  .cs-popover-item:hover { background:var(--warm); }
+  .cs-popover-divider { height:1px;background:var(--bdr);margin:2px 0; }
+  /* ── Budget three sections ── */
+  .budget-section { margin-bottom:24px; }
+  .budget-section-header { font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-style:italic;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--bdr); }
+  .budget-section-total { font-size:20px;font-style:italic;color:var(--deep);margin-bottom:10px; }
+
   /* ── Two-column layout (ceremonies + checklist) ── */
   .ceremony-cols, .checklist-cols { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px; }
   @media(max-width:600px){ .ceremony-cols, .checklist-cols { grid-template-columns:1fr; } }
@@ -696,6 +764,60 @@
   .conf-budget-track { flex:1; background:var(--bdr); border-radius:2px; height:5px; }
   .conf-budget-fill { height:100%; background:var(--gd); border-radius:2px; }
   .conf-budget-amt { font-size:12px; color:var(--muted); min-width:65px; text-align:right; font-style:italic; }
+
+  /* ── Ceremony card move/copy menu ── */
+  .cs-item { position: relative; }
+  .cs-item-menu-btn {
+    position: absolute; top: 8px; right: 8px;
+    background: none; border: none; cursor: pointer;
+    font-size: 16px; color: var(--muted); padding: 2px 6px;
+    border-radius: 4px; line-height: 1; opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .cs-item:hover .cs-item-menu-btn { opacity: 1; }
+  .cs-item-menu-btn:focus { opacity: 1; outline: none; }
+  .cs-item-popover {
+    display: none; position: absolute; top: 28px; right: 4px;
+    background: white; border: 1px solid var(--bdr);
+    border-radius: 8px; box-shadow: 0 4px 16px rgba(60,48,16,0.12);
+    z-index: 50; min-width: 160px; overflow: hidden;
+  }
+  .cs-item-popover.open { display: block; }
+  .cs-popover-item {
+    padding: 9px 14px; font-size: 12px; font-style: italic;
+    font-family: 'Playfair Display', Georgia, serif;
+    color: var(--tx); cursor: pointer; display: block;
+    border: none; background: none; width: 100%; text-align: left;
+    transition: background 0.1s;
+  }
+  .cs-popover-item:hover { background: var(--warm); }
+  .cs-popover-divider { height: 1px; background: var(--bdr); margin: 2px 0; }
+
+  /* ── Budget three sections ── */
+  .budget-section { margin-bottom: 24px; }
+  .budget-section-header {
+    font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--muted); font-style: italic; margin-bottom: 12px;
+    padding-bottom: 8px; border-bottom: 1px solid var(--bdr);
+  }
+  .budget-section-total {
+    font-size: 20px; font-style: italic; color: var(--deep);
+    margin-bottom: 10px; letter-spacing: -0.5px;
+  }
+
+  /* ── Ceremony card menu ── */
+  .cs-item { position:relative; }
+  .cs-item-menu-btn { position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted);padding:2px 6px;border-radius:4px;line-height:1;opacity:0;transition:opacity 0.15s; }
+  .cs-item:hover .cs-item-menu-btn, .cs-item-menu-btn:focus { opacity:1;outline:none; }
+  .cs-item-popover { display:none;position:absolute;top:28px;right:4px;background:white;border:1px solid var(--bdr);border-radius:8px;box-shadow:0 4px 16px rgba(60,48,16,0.12);z-index:50;min-width:160px;overflow:hidden; }
+  .cs-item-popover.open { display:block; }
+  .cs-popover-item { padding:9px 14px;font-size:12px;font-style:italic;font-family:'Playfair Display',Georgia,serif;color:var(--tx);cursor:pointer;display:block;border:none;background:none;width:100%;text-align:left; }
+  .cs-popover-item:hover { background:var(--warm); }
+  .cs-popover-divider { height:1px;background:var(--bdr);margin:2px 0; }
+  /* ── Budget three sections ── */
+  .budget-section { margin-bottom:24px; }
+  .budget-section-header { font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-style:italic;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--bdr); }
+  .budget-section-total { font-size:20px;font-style:italic;color:var(--deep);margin-bottom:10px; }
 
   /* ── Two-column layout (ceremonies + checklist) ── */
   .ceremony-cols, .checklist-cols { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px; }
@@ -970,18 +1092,19 @@
   <!-- Q7: Ceremony selection -->
   <!-- Q7: Ceremony selection -->
   <div class="screen" id="q7" style="overflow:hidden;position:relative;display:block!important;padding:0!important;">
-    <div id="q7-scroll" style="height:calc(100vh - 62px);overflow-y:auto;overflow-x:hidden;padding:32px 24px 20px;box-sizing:border-box;">
+    <!-- Scrollable content area -->
+    <div id="q7-scroll" style="height:calc(100vh - 62px - 80px);overflow-y:auto;overflow-x:hidden;padding:24px 24px 20px;box-sizing:border-box;">
     <div style="width:100%;max-width:900px;margin:0 auto">
-      <div class="ql">Step 7 of 8</div>
+      <div class="ql" style="margin-bottom:2px">Your ceremony plan</div>
       <div class="qt" id="q7-title">Choose your ceremonies</div>
-      <div class="qs" id="q7-sub">We've assigned ceremonies based on your traditions. Adjust any that aren't right — then review your plan.</div>
-      <div style="font-size:11px;color:var(--muted);font-style:italic;margin:8px 0 4px;text-align:right">↓ scroll for all ceremonies</div>
-      <div id="cs-container" style="margin-top:24px"></div>
-      <div class="cta-row" style="margin-top:16px;padding-bottom:60px">
-        <button class="btn-back" onclick="goBack()">← back</button>
-        <button class="cta" onclick="goToConfirmation()">Review my plan →</button>
-      </div>
+      <div class="qs" id="q7-sub" style="margin-bottom:4px">Select the ceremonies you want — adjust anything that isn't right for you.</div>
+      <div id="cs-container" style="margin-top:16px;padding-bottom:20px"></div>
     </div>
+    </div>
+    <!-- Fixed CTA at bottom -->
+    <div style="position:absolute;bottom:0;left:0;right:0;height:80px;background:var(--cream);border-top:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:10;">
+      <button class="btn-back" onclick="goBack()">← back</button>
+      <button class="cta" onclick="goToConfirmation()">Review my plan →</button>
     </div>
   </div>
 
@@ -1045,14 +1168,13 @@
     </div>
   </div>
 
-</div>
-
-
 <script>
 // ── State ──
-function pos(n) { return n + "’s"; } // possessive helper avoids quote escaping issues
+function pos(n) { return n + "’s"; }
 
-const S = { name1:'', name2:'', role1:'bride', role2:'groom', dateSure:false, locationSure:false, date:'', location:'', traditions:[], traditionAssignment:{}, budget:50000, guests:100, plan:null };
+var FLOWER_SVG_20 = '<svg width="20" height="20" viewBox="0 0 34 34" xmlns="http://www.w3.org/2000/svg"><g fill="#E0B030" stroke="#C8941A" stroke-width="0.4"><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(0 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(25.7 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(51.4 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(77.1 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(102.8 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(128.5 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(154.2 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(180 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(205.7 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(231.4 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(257.1 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(282.8 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(308.5 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(334.2 17 17)"/></g><g fill="#F7D44C" stroke="#E0B030" stroke-width="0.3"><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(0 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(20 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(60 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(120 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(180 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(240 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(300 17 17)"/></g><circle cx="17" cy="17" r="4.1" fill="#6B5318" stroke="#5A4512" stroke-width="0.3"/></svg>'; // possessive helper avoids quote escaping issues
+
+const S = { name1:'', name2:'', role1:'bride', role2:'groom', userRole:'couple', dateSure:false, locationSure:false, date:'', location:'', traditions:[], traditionAssignment:{}, budget:50000, guests:100, plan:null };
 let guests = 100;
 let currentQ = 1;
 const TOTAL_Q = 6;
@@ -1485,7 +1607,7 @@ async function submitPlan() {
 function showErr(msg) {
   var loadingEl = document.getElementById('loading-screen');
   loadingEl.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:16px;max-width:380px;text-align:center;padding:0 24px">' +
-    '<svg width=\"20\" height=\"20\" viewBox=\"0 0 34 34\" xmlns=\"http://www.w3.org/2000/svg\">\n      <g fill=\"#E0B030\" stroke=\"#C8941A\" stroke-width=\"0.4\">\n        <ellipse cx=\"17\" cy=\"5.8\" rx=\"1.9\" ry=\"4.4\" transform=\"rotate(0 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"5.8\" rx=\"1.9\" ry=\"4.4\" transform=\"rotate(25.7 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"5.8\" rx=\"1.9\" ry=\"4.4\" transform=\"rotate(51.4 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"5.8\" rx=\"1.9\" ry=\"4.4\" transform=\"rotate(77.1 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"5.8\" rx=\"1.9\" ry=\"4.4\" transform=\"rotate(102.8 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"5.8\" rx=\"1.9\" ry=\"4.4\" transform=\"rotate(128.5 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"5.8\" rx=\"1.9\" ry=\"4.4\" transform=\"rotate(154.2 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"5.8\" rx=\"1.9\" ry=\"4.4\" transform=\"rotate(180 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"5.8\" rx=\"1.9\" ry=\"4.4\" transform=\"rotate(205.7 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"5.8\" rx=\"1.9\" ry=\"4.4\" transform=\"rotate(231.4 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"5.8\" rx=\"1.9\" ry=\"4.4\" transform=\"rotate(257.1 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"5.8\" rx=\"1.9\" ry=\"4.4\" transform=\"rotate(282.8 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"5.8\" rx=\"1.9\" ry=\"4.4\" transform=\"rotate(308.5 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"5.8\" rx=\"1.9\" ry=\"4.4\" transform=\"rotate(334.2 17 17)\"/>\n      </g>\n      <g fill=\"#F7D44C\" stroke=\"#E0B030\" stroke-width=\"0.3\">\n        <ellipse cx=\"17\" cy=\"10.2\" rx=\"1.3\" ry=\"2.4\" transform=\"rotate(0 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"10.2\" rx=\"1.3\" ry=\"2.4\" transform=\"rotate(60 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"10.2\" rx=\"1.3\" ry=\"2.4\" transform=\"rotate(120 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"10.2\" rx=\"1.3\" ry=\"2.4\" transform=\"rotate(180 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"10.2\" rx=\"1.3\" ry=\"2.4\" transform=\"rotate(240 17 17)\"/>\n        <ellipse cx=\"17\" cy=\"10.2\" rx=\"1.3\" ry=\"2.4\" transform=\"rotate(300 17 17)\"/>\n      </g>\n      <circle cx=\"17\" cy=\"17\" r=\"4.1\" fill=\"#6B5318\" stroke=\"#5A4512\" stroke-width=\"0.3\"/>\n    </svg>' +
+    FLOWER_SVG_20 +
     '<div style="font-size:16px;font-style:italic;color:var(--deep)">Something went wrong</div>' +
     '<div style="font-size:13px;color:var(--muted);font-style:italic;line-height:1.6">' + msg + '</div>' +
     '<button class="cta" onclick="location.reload()" style="margin-top:8px">Start again</button>' +
@@ -1521,6 +1643,7 @@ function showResults() {
 }
 
 function populateResults() {
+  if (!S.plan) { console.error('populateResults: S.plan is null'); return; }
   const p = S.plan;
   const names = S.name2?`${S.name1} & ${S.name2}`:S.name1;
   const tradNames = S.traditions.map(function(s){ var t=TRADS.find(function(t){return t.slug===s;}); return t?t.label:s; }).join(' + ');
@@ -1826,270 +1949,93 @@ window.toggleCeremony = function(i, e) {
 
 // ── Render budget ──
 function renderBudget(budgetData) {
-  const el = document.getElementById('tab-budget');
-  // Engine returns { budget_lines: [...], total_budget, alerts, ... }
-  const items = Array.isArray(budgetData)
-    ? budgetData
-    : (budgetData?.budget_lines || budgetData?.budgetBreakdown || []);
-  const total = budgetData?.total_budget || S.budget;
-  const alerts = budgetData?.alerts || [];
+  var el = document.getElementById('tab-budget');
 
-  if (!items.length) {
-    el.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:32px 0;text-align:center">
-      <svg width="28" height="28" viewBox="0 0 34 34" xmlns="http://www.w3.org/2000/svg" style="opacity:0.6">
-  <g fill="#E0B030" stroke="#C8941A" stroke-width="0.4">
-    <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(0 17 17)"/>
-    <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(51.4 17 17)"/>
-    <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(102.8 17 17)"/>
-    <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(154.2 17 17)"/>
-    <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(205.7 17 17)"/>
-    <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(257.1 17 17)"/>
-    <ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(308.5 17 17)"/>
-  </g>
-  <g fill="#F7D44C" stroke="#E0B030" stroke-width="0.3">
-    <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(0 17 17)"/>
-    <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(60 17 17)"/>
-    <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(120 17 17)"/>
-    <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(180 17 17)"/>
-    <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(240 17 17)"/>
-    <ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(300 17 17)"/>
-  </g>
-  <circle cx="17" cy="17" r="4.1" fill="#6B5318" stroke="#5A4512" stroke-width="0.3"/>
-</svg>
-      <p style="color:var(--muted);font-style:italic;font-size:13px">No budget breakdown found.</p>
-    </div>`;
+  // Advisor has no budget access
+  if (S.userRole === 'advisor') {
+    el.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:32px 0;text-align:center">' +
+      FLOWER_SVG_20 + '<p style="color:var(--muted);font-style:italic;font-size:13px">Budget is not available in advisor view.</p></div>';
     return;
   }
 
-  const alertsHtml = alerts.map(a =>
-    `<div class="conflict-banner" style="margin-bottom:8px">${a.message}</div>`
-  ).join('');
+  var items = Array.isArray(budgetData) ? budgetData : (budgetData && budgetData.budget_lines ? budgetData.budget_lines : []);
+  var totalBudget = (budgetData && budgetData.total_budget) || S.budget || 50000;
+  var alerts = (budgetData && budgetData.alerts) || [];
 
-  el.innerHTML = `
-    <div class="budget-total-display">${total.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0})}</div>
-    <div class="budget-sub">allocated across ${items.length} categories</div>
-    ${alertsHtml}
-    ${items.map(item=>{
-      const cat = item.category||item.name||'Other';
-      const amt = item.suggested_amount || Math.round(total * ((item.pct_low||0)+(item.pct_high||0))/2/100);
-      const pctOfTotal = total > 0 ? (amt / total * 100) : 0;
-      const tradTag = item.tradition_specific_to
-        ? `<span style="font-size:10px;font-style:italic;opacity:0.6;margin-left:6px">${item.tradition_specific_to}</span>` : '';
-      return `<div class="budget-row">
-        <div class="budget-cat">${cat}${tradTag}</div>
-        <div class="budget-track"><div class="budget-fill" style="width:${Math.min(pctOfTotal*2,100)}%"></div></div>
-        <div class="budget-amt">${amt.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0})}</div>
-      </div>`;
-    }).join('')}`;
+  if (!items.length) {
+    el.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:32px 0;text-align:center">' +
+      FLOWER_SVG_20 + '<p style="color:var(--muted);font-style:italic;font-size:13px">No budget breakdown found.</p></div>';
+    return;
+  }
+
+  // Split budget by selected ceremonies
+  var selected = getSelectedCeremonies ? getSelectedCeremonies() : [];
+  var side1Count = selected.filter(function(c){ return c.side === S.role1; }).length;
+  var side2Count = selected.filter(function(c){ return c.side === S.role2; }).length;
+  var bothCount  = selected.filter(function(c){ return c.side !== S.role1 && c.side !== S.role2; }).length;
+  var totalCount = selected.length || 1;
+
+  var side1Ratio = side1Count / totalCount;
+  var side2Ratio = side2Count / totalCount;
+  var bothRatio  = bothCount  / totalCount;
+
+  var side1Budget = Math.round(totalBudget * side1Ratio);
+  var side2Budget = Math.round(totalBudget * side2Ratio);
+  var bothBudget  = Math.round(totalBudget * bothRatio);
+
+  var n1 = S.name1 || 'Partner one';
+  var n2 = S.name2 || 'Partner two';
+
+  // Role-based visibility
+  var showSide1 = S.userRole === 'couple' || S.userRole === 'bride' || S.userRole === '';
+  var showSide2 = S.userRole === 'couple' || S.userRole === 'groom' || S.userRole === '';
+  var showBoth  = true; // common always visible
+
+  function budgetBars(sectionBudget, ratio) {
+    return items.slice(0, 8).map(function(item) {
+      var cat = item.category || item.name || '';
+      var amt = Math.round((item.suggested_amount || (totalBudget * ((item.pct_low||0)+(item.pct_high||0))/2/100)) * ratio);
+      var pct = sectionBudget > 0 ? (amt / sectionBudget * 100) : 0;
+      return '<div class="budget-row">' +
+        '<div class="budget-cat">' + cat + '</div>' +
+        '<div class="budget-track"><div class="budget-fill" style="width:' + Math.min(pct*2,100) + '%"></div></div>' +
+        '<div class="budget-amt">' + amt.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function sectionHtml(label, sectionBudget, ratio, show) {
+    if (!show) return '';
+    return '<div class="budget-section">' +
+      '<div class="budget-section-header">' + label + '</div>' +
+      '<div class="budget-section-total">' + sectionBudget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>' +
+      budgetBars(sectionBudget, ratio) +
+    '</div>';
+  }
+
+  var alertsHtml = alerts.map(function(a){ return '<div class="conflict-banner" style="margin-bottom:8px">' + a.message + '</div>'; }).join('');
+
+  el.innerHTML = alertsHtml +
+    '<div class="budget-total-display">' + totalBudget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>' +
+    '<div class="budget-sub" style="margin-bottom:20px">total estimated budget</div>' +
+    sectionHtml(pos(n1) + ' ceremonies', side1Budget, side1Ratio, showSide1) +
+    sectionHtml(pos(n2) + ' ceremonies', side2Budget, side2Ratio, showSide2) +
+    sectionHtml('Common ceremonies', bothBudget, bothRatio, showBoth);
 }
 
+
+
 // ── Ceremony selection state ──
-// ceremonySelections: { tradSlug: { side1: [indices], side2: [indices], both: [indices] } }
-let ceremonySelections = {};
-let planCeremonies = []; // raw from engine
+var ceremonySelections = {};
+var planCeremonies = [];
 
 function showCeremonySelection(ceremonies) {
   planCeremonies = ceremonies;
   var container = document.getElementById('cs-container');
   if (!ceremonies || !ceremonies.length) {
-    if (container) container.innerHTML = '<p style="color:var(--muted);font-style:italic;padding:20px 0">No ceremonies found for this tradition yet.</p>';
+    if (container) container.innerHTML = '<p style="color:var(--muted);font-style:italic;padding:20px 0">No ceremonies found.</p>';
     return;
   }
-  if (!S.traditions || !S.traditions.length) {
-    if (container) container.innerHTML = '<p style="color:var(--muted);font-style:italic;padding:20px 0">Please select a tradition first.</p>';
-    return;
-  }
-  const n1 = S.name1 || 'Partner one';
-  const n2 = S.name2 || 'Partner two';
-  const trad1 = S.traditions[0];
-  const trad2 = S.traditions[1] || null;
-  const n1Role = S.role1; // bride or groom
-  const n2Role = S.role2;
-
-  function getTradSlug(item) {
-    return item._sourceTraditionSlug || item.tradition || item.source || '';
-  }
-
-  // Build one block per tradition
-  const allTradSlugs = trad2 ? [trad1, trad2] : [trad1];
-  ceremonySelections = {};
-
-  const tradBlocks = allTradSlugs.map(function(tradSlug) {
-    const tradInfo = TRADS.find(function(t){ return t.slug === tradSlug; }) || {label: tradSlug};
-
-    // For single tradition: all ceremonies belong to this block
-    // For interfaith: only ceremonies whose source matches this tradition
-    const tradCeremonies = ceremonies.filter(function(item) {
-      const src = getTradSlug(item);
-      if (!trad2) return true; // single — all ceremonies
-      return src === tradSlug; // interfaith — only this tradition's ceremonies
-    });
-
-    // Split by side field vs n1Role/n2Role
-    const side1 = []; // Name 1's ceremonies
-    const side2 = []; // Name 2's ceremonies
-    const both  = []; // Common — for both
-
-    tradCeremonies.forEach(function(item) {
-      const globalIdx = ceremonies.indexOf(item);
-      const side = item.side || 'both';
-      if (side === n1Role) {
-        side1.push({item: item, idx: globalIdx});
-      } else if (side === n2Role) {
-        side2.push({item: item, idx: globalIdx});
-      } else {
-        // side === 'both' — check name for role hints as fallback
-        const name = (item.name || '').toLowerCase();
-        const notes = (item.notes || '').toLowerCase();
-        const text = name + ' ' + notes;
-        const brideHints = ['bride','mehndi','mehendi','haldi','chooda','kalire','maiyan','vidaai','bridal','hen ','bachelorette','kabbalat','mikveh','krevati','despedida','hair comb','choora','solah shringar','gaye holud','dodhi','oonjal','kashi yatra'];
-        const groomHints = ['groom','baraat','jaan','sehrabandi','ghodi','tisch','aufruf','hahm','khan mak','sin sod','bachelor','jeonanrye','kirogi','pamanhikan','milad'];
-        var isBride = brideHints.some(function(h){return text.includes(h);});
-        var isGroom = groomHints.some(function(h){return text.includes(h);});
-        if (isBride && !isGroom) {
-          side1.push({item: item, idx: globalIdx});
-        } else if (isGroom && !isBride) {
-          side2.push({item: item, idx: globalIdx});
-        } else {
-          both.push({item: item, idx: globalIdx});
-        }
-      }
-    });
-
-    // Initialise all as selected
-    ceremonySelections[tradSlug] = {side1: {}, side2: {}, both: {}};
-    side1.forEach(function(ci){ ceremonySelections[tradSlug].side1[ci.idx] = true; });
-    side2.forEach(function(ci){ ceremonySelections[tradSlug].side2[ci.idx] = true; });
-    both.forEach(function(ci){ ceremonySelections[tradSlug].both[ci.idx] = true; });
-
-    return {tradSlug: tradSlug, tradLabel: tradInfo.label, side1: side1, side2: side2, both: both};
-  });
-
-  // Also collect universal ceremonies (no tradition source) for interfaith
-  var universalItems = [];
-  if (trad2) {
-    ceremonies.forEach(function(item) {
-      var src = getTradSlug(item);
-      if (!src || src === 'universal') {
-        var globalIdx = ceremonies.indexOf(item);
-        if (!ceremonySelections['universal']) {
-          ceremonySelections['universal'] = {side1:{}, side2:{}, both:{}};
-        }
-        ceremonySelections['universal'].both[globalIdx] = true;
-        universalItems.push({item: item, idx: globalIdx});
-      }
-    });
-    if (universalItems.length) {
-      tradBlocks.push({
-        tradSlug: 'universal',
-        tradLabel: 'For both of you',
-        side1: [],
-        side2: [],
-        both: universalItems,
-        isUniversal: true
-      });
-    }
-  }
-
-  function csItemHtml(ci, tradSlug, group) {
-    var sel = (ceremonySelections[tradSlug] && ceremonySelections[tradSlug][group][ci.idx]) !== false;
-    var name = ci.item.name || ci.item.event || '';
-    var timing = ci.item.timing || '';
-    return '<div class="cs-item ' + (sel ? 'selected' : 'deselected') +
-      '" data-slug="' + tradSlug + '" data-group="' + group + '" data-idx="' + ci.idx + '" onclick="toggleCs(this)">' +
-      '<div class="cs-check"><span class="cs-check-tick">&#10003;</span></div>' +
-      '<div><div class="cs-item-name">' + name + '</div>' +
-      (timing ? '<div class="cs-item-timing">' + timing + '</div>' : '') +
-      '</div></div>';
-  }
-
-  var html = tradBlocks.map(function(block) {
-    // Universal block — show as single column grid
-    if (block.isUniversal) {
-      return '<div class="cs-tradition-block">' +
-        '<div class="cs-tradition-label">Common ceremonies — for both of you</div>' +
-        '<div class="cs-shared-grid">' +
-        block.both.map(function(ci){ return csItemHtml(ci, 'universal', 'both'); }).join('') +
-        '</div></div>';
-    }
-
-    var side1Html = block.side1.map(function(ci){ return csItemHtml(ci, block.tradSlug, 'side1'); }).join('');
-    var side2Html = block.side2.map(function(ci){ return csItemHtml(ci, block.tradSlug, 'side2'); }).join('');
-    var bothHtml  = block.both.map(function(ci){ return csItemHtml(ci, block.tradSlug, 'both'); }).join('');
-
-    var noItems = '<div style="font-size:12px;color:var(--muted);font-style:italic;padding:8px 0">None</div>';
-
-    return '<div class="cs-tradition-block">' +
-      '<div class="cs-tradition-label">' + block.tradLabel + '</div>' +
-      '<div class="cs-cols">' +
-        '<div><div class="cs-col-header">' + pos(n1) + ' ceremonies</div>' + (side1Html || noItems) + '</div>' +
-        '<div><div class="cs-col-header">' + pos(n2) + ' ceremonies</div>' + (side2Html || noItems) + '</div>' +
-      '</div>' +
-      (bothHtml ? '<div class="cs-shared-label">Common — for both of you</div><div class="cs-shared-grid">' + bothHtml + '</div>' : '') +
-    '</div>';
-  }).join('');
-
-  var cont2 = document.getElementById('cs-container');
-  if (cont2) cont2.innerHTML = html || '<p style="color:var(--muted);font-style:italic;padding:20px 0">No ceremonies to display.</p>';
-}
-function toggleCs(el) {
-  var tradSlug = el.dataset.slug;
-  var group = el.dataset.group;
-  var idx = parseInt(el.dataset.idx);
-  var current = ceremonySelections[tradSlug][group][idx] !== false;
-  ceremonySelections[tradSlug][group][idx] = !current;
-  el.classList.toggle('selected', !current);
-  el.classList.toggle('deselected', current);
-  var tick = el.querySelector('.cs-check-tick');
-  if (tick) tick.style.display = !current ? 'block' : 'none';
-}
-
-function goToConfirmation() {
-  buildConfirmation();
-  transitionTo('q7', 'q8');
-  currentQ = 8;
-  updateProgress();
-}
-
-function goBackFromConf() {
-  const q8 = document.getElementById('q8');
-  const q7 = document.getElementById('q7');
-  q8.style.transition = 'opacity 0.25s, transform 0.25s';
-  q8.style.opacity = '0';
-  q8.style.transform = 'translateX(50px)';
-  setTimeout(function() {
-    q8.classList.remove('active');
-    q8.style.transition = '';
-    q8.style.opacity = '';
-    q8.style.transform = '';
-    q7.classList.add('active');
-  }, 260);
-  currentQ = 7;
-  updateProgress();
-}
-
-function getSelectedCeremonies() {
-  // Return array of selected ceremony objects
-  const selected = [];
-  const seen = new Set();
-  Object.values(ceremonySelections).forEach(function(groups) {
-    ['side1','side2','both'].forEach(function(group) {
-      Object.entries(groups[group]).forEach(function(e) {
-        const idx = parseInt(e[0]);
-        const isSelected = e[1] !== false;
-        if (isSelected && !seen.has(idx)) {
-          seen.add(idx);
-          if (planCeremonies[idx]) selected.push({item: planCeremonies[idx], idx: idx});
-        }
-      });
-    });
-  });
-  // Sort by original order
-  selected.sort(function(a,b){ return a.idx - b.idx; });
-  return selected.map(function(s){ return s.item; });
-}
-
-function buildConfirmation() {
   var n1 = S.name1 || 'Partner one';
   var n2 = S.name2 || 'Partner two';
   var trad1 = S.traditions[0];
@@ -2097,142 +2043,231 @@ function buildConfirmation() {
   var n1Role = S.role1;
   var n2Role = S.role2;
   var allTradSlugs = trad2 ? [trad1, trad2] : [trad1];
+  ceremonySelections = {};
 
-  // Count total selected
+  var tradBlocks = allTradSlugs.map(function(tradSlug) {
+    var tradInfo = TRADS.find(function(t){ return t.slug===tradSlug; }) || {label:tradSlug};
+    var tradCeremonies = ceremonies.filter(function(item) {
+      var src = item._sourceTraditionSlug || item.tradition || item.source || '';
+      if (!trad2) return true;
+      return src === tradSlug;
+    });
+    var side1 = [], side2 = [], both = [];
+    tradCeremonies.forEach(function(item) {
+      var globalIdx = ceremonies.indexOf(item);
+      var side = item.side || 'both';
+      if (side === n1Role) side1.push({item:item,idx:globalIdx});
+      else if (side === n2Role) side2.push({item:item,idx:globalIdx});
+      else both.push({item:item,idx:globalIdx});
+    });
+    ceremonySelections[tradSlug] = {side1:{},side2:{},both:{}};
+    side1.forEach(function(ci){ ceremonySelections[tradSlug].side1[ci.idx]=true; });
+    side2.forEach(function(ci){ ceremonySelections[tradSlug].side2[ci.idx]=true; });
+    both.forEach(function(ci){ ceremonySelections[tradSlug].both[ci.idx]=true; });
+    return {tradSlug:tradSlug,tradLabel:tradInfo.label,side1:side1,side2:side2,both:both};
+  });
+
+  function csItemHtml(ci, tradSlug, group) {
+    var sel = ceremonySelections[tradSlug] && ceremonySelections[tradSlug][group][ci.idx] !== false;
+    var name = ci.item.name || ci.item.event || '';
+    var timing = ci.item.timing || '';
+    var ds = 'data-slug="' + tradSlug + '" data-from="' + group + '" data-idx="' + ci.idx + '"';
+    var menuItems = '';
+    if (group !== 'side1') menuItems += '<button class="cs-popover-item cs-move" ' + ds + ' data-to="side1">Move to ' + n1 + '</button>';
+    if (group !== 'side2') menuItems += '<button class="cs-popover-item cs-move" ' + ds + ' data-to="side2">Move to ' + n2 + '</button>';
+    if (group !== 'both')  menuItems += '<button class="cs-popover-item cs-move" ' + ds + ' data-to="both">Move to Both</button>';
+    menuItems += '<div class="cs-popover-divider"></div>';
+    if (group !== 'side1') menuItems += '<button class="cs-popover-item cs-copy" ' + ds + ' data-to="side1">Copy to ' + n1 + '</button>';
+    if (group !== 'side2') menuItems += '<button class="cs-popover-item cs-copy" ' + ds + ' data-to="side2">Copy to ' + n2 + '</button>';
+    if (group !== 'both')  menuItems += '<button class="cs-popover-item cs-copy" ' + ds + ' data-to="both">Copy to Both</button>';
+    return '<div class="cs-item ' + (sel ? 'selected' : 'deselected') +
+      '" data-slug="' + tradSlug + '" data-group="' + group + '" data-idx="' + ci.idx + '" onclick="toggleCs(this)">' +
+      '<div class="cs-check"><span class="cs-check-tick">&#10003;</span></div>' +
+      '<div style="flex:1"><div class="cs-item-name">' + name + '</div>' +
+      (timing ? '<div class="cs-item-timing">' + timing + '</div>' : '') + '</div>' +
+      '<button class="cs-item-menu-btn" onclick="toggleCsMenu(event,this)">&#8943;</button>' +
+      '<div class="cs-item-popover">' + menuItems + '</div>' +
+    '</div>';
+  }
+
+  var noItems = '<p style="font-size:12px;color:var(--muted);font-style:italic;padding:8px 0">None</p>';
+
+  container.innerHTML = tradBlocks.map(function(block) {
+    var s1h = block.side1.map(function(ci){ return csItemHtml(ci,block.tradSlug,'side1'); }).join('');
+    var s2h = block.side2.map(function(ci){ return csItemHtml(ci,block.tradSlug,'side2'); }).join('');
+    var bh  = block.both.map(function(ci){ return csItemHtml(ci,block.tradSlug,'both'); }).join('');
+    return '<div class="cs-tradition-block">' +
+      (trad2 ? '<div class="cs-tradition-label">' + block.tradLabel + '</div>' : '') +
+      '<div class="cs-cols">' +
+        '<div><div class="cs-col-header">' + pos(n1) + ' ceremonies</div>' + (s1h||noItems) + '</div>' +
+        '<div><div class="cs-col-header">' + pos(n2) + ' ceremonies</div>' + (s2h||noItems) + '</div>' +
+      '</div>' +
+      (bh ? '<div class="cs-shared-label">For both of you</div><div class="cs-shared-grid">' + bh + '</div>' : '') +
+    '</div>';
+  }).join('');
+}
+
+function toggleCs(el) {
+  var tradSlug = el.dataset.slug;
+  var group = el.dataset.group;
+  var idx = parseInt(el.dataset.idx);
+  if (!ceremonySelections[tradSlug] || !ceremonySelections[tradSlug][group]) return;
+  var cur = ceremonySelections[tradSlug][group][idx] !== false;
+  ceremonySelections[tradSlug][group][idx] = !cur;
+  el.classList.toggle('selected', !cur);
+  el.classList.toggle('deselected', cur);
+}
+
+function toggleCsMenu(e, btn) {
+  e.stopPropagation();
+  document.querySelectorAll('.cs-item-popover.open').forEach(function(p){
+    if (p !== btn.nextElementSibling) p.classList.remove('open');
+  });
+  btn.nextElementSibling.classList.toggle('open');
+}
+
+function moveCs(e) {
+  e.stopPropagation();
+  var btn = e.currentTarget;
+  var tradSlug = btn.dataset.slug;
+  var fromGroup = btn.dataset.from;
+  var idx = parseInt(btn.dataset.idx);
+  var toGroup = btn.dataset.to;
+  document.querySelectorAll('.cs-item-popover.open').forEach(function(p){ p.classList.remove('open'); });
+  if (!ceremonySelections[tradSlug]) return;
+  delete ceremonySelections[tradSlug][fromGroup][idx];
+  if (!ceremonySelections[tradSlug][toGroup]) ceremonySelections[tradSlug][toGroup] = {};
+  ceremonySelections[tradSlug][toGroup][idx] = true;
+  showCeremonySelection(planCeremonies);
+}
+
+function copyCs(e) {
+  e.stopPropagation();
+  var btn = e.currentTarget;
+  var tradSlug = btn.dataset.slug;
+  var idx = parseInt(btn.dataset.idx);
+  var toGroup = btn.dataset.to;
+  document.querySelectorAll('.cs-item-popover.open').forEach(function(p){ p.classList.remove('open'); });
+  if (!ceremonySelections[tradSlug]) return;
+  var copy = Object.assign({}, planCeremonies[idx]);
+  var newIdx = planCeremonies.length;
+  planCeremonies.push(copy);
+  if (!ceremonySelections[tradSlug][toGroup]) ceremonySelections[tradSlug][toGroup] = {};
+  ceremonySelections[tradSlug][toGroup][newIdx] = true;
+  showCeremonySelection(planCeremonies);
+}
+
+function getSelectedCeremonies() {
+  var selected = [];
+  var seen = new Set();
+  Object.values(ceremonySelections).forEach(function(groups) {
+    ['side1','side2','both'].forEach(function(g) {
+      Object.entries(groups[g] || {}).forEach(function(e) {
+        var idx = parseInt(e[0]);
+        if (e[1] !== false && !seen.has(idx)) {
+          seen.add(idx);
+          if (planCeremonies[idx]) selected.push({item:planCeremonies[idx],idx:idx});
+        }
+      });
+    });
+  });
+  selected.sort(function(a,b){ return a.idx-b.idx; });
+  return selected.map(function(s){ return s.item; });
+}
+
+function goToConfirmation() {
+  buildConfirmation();
+  transitionTo('q7','q8');
+  currentQ = 8;
+  updateProgress();
+}
+
+function goBackFromConf() {
+  transitionTo('q8','q7');
+  currentQ = 7;
+  updateProgress();
+}
+
+function buildConfirmation() {
+  var n1 = S.name1 || 'Partner one';
+  var n2 = S.name2 || 'Partner two';
+  var trad1 = S.traditions[0];
+  var trad2 = S.traditions[1] || null;
+  var allTradSlugs = trad2 ? [trad1, trad2] : [trad1];
   var totalSelected = 0;
   Object.values(ceremonySelections).forEach(function(groups) {
     ['side1','side2','both'].forEach(function(g) {
-      Object.values(groups[g]).forEach(function(v){ if(v !== false) totalSelected++; });
+      Object.values(groups[g]||{}).forEach(function(v){ if(v!==false) totalSelected++; });
     });
   });
-
-  var dateStr = S.date
-    ? new Date(S.date).toLocaleDateString('en-US',{month:'long',year:'numeric'})
-    : 'Date TBC';
-
-  document.getElementById('q8-title').innerHTML = '<em>' + n1 + ' &amp; ' + n2 + '</em> — your wedding plan';
-  document.getElementById('q8-sub').textContent =
-    totalSelected + ' ceremonies selected · ' +
+  var dateStr = S.date ? new Date(S.date).toLocaleDateString('en-US',{month:'long',year:'numeric'}) : 'Date TBC';
+  document.getElementById('q8-title').innerHTML = '<em>' + n1 + ' & ' + n2 + '</em>';
+  document.getElementById('q8-sub').textContent = totalSelected + ' ceremonies · ' +
     S.budget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) +
     ' · ' + S.guests + ' guests · ' + dateStr;
 
   var html = '';
-
   allTradSlugs.forEach(function(tradSlug) {
     var tradInfo = TRADS.find(function(t){ return t.slug===tradSlug; }) || {label:tradSlug};
-    var sel = ceremonySelections[tradSlug];
-    if (!sel) return;
-
-    var side1Selected = Object.entries(sel.side1).filter(function(e){ return e[1]!==false; }).map(function(e){ return planCeremonies[parseInt(e[0])]; }).filter(Boolean);
-    var side2Selected = Object.entries(sel.side2).filter(function(e){ return e[1]!==false; }).map(function(e){ return planCeremonies[parseInt(e[0])]; }).filter(Boolean);
-    var bothSelected  = Object.entries(sel.both).filter(function(e){ return e[1]!==false; }).map(function(e){ return planCeremonies[parseInt(e[0])]; }).filter(Boolean);
-
-    if (!side1Selected.length && !side2Selected.length && !bothSelected.length) return;
-
-    function confItem(item) {
-      if (!item) return '';
-      return '<div class="conf-item">' + (item.name||item.event||'') +
-        (item.timing ? '<span class="conf-item-timing"> · ' + item.timing + '</span>' : '') + '</div>';
+    var sel = ceremonySelections[tradSlug] || {side1:{},side2:{},both:{}};
+    function getSel(g) {
+      return Object.entries(sel[g]||{}).filter(function(e){ return e[1]!==false; })
+        .map(function(e){ return planCeremonies[parseInt(e[0])]; }).filter(Boolean);
     }
-
-    var noItems = '<div class="conf-item" style="opacity:0.4;font-style:italic">None selected</div>';
-
+    var s1=getSel('side1'), s2=getSel('side2'), sb=getSel('both');
+    if (!s1.length && !s2.length && !sb.length) return;
+    function ci(item){ return '<div class="conf-item">'+(item.name||item.event||'')+'</div>'; }
+    var ni = '<div class="conf-item" style="opacity:0.4">None selected</div>';
     html += '<div class="conf-block">' +
-      (trad2 ? '<div class="conf-trad-header">' + tradInfo.label + '</div>' : '') +
+      (trad2 ? '<div class="conf-trad-header">'+tradInfo.label+'</div>' : '') +
       '<div class="conf-cols">' +
-        '<div><div class="conf-col-header">' + pos(n1) + ' ceremonies</div>' +
-          (side1Selected.length ? side1Selected.map(confItem).join('') : noItems) +
-        '</div>' +
-        '<div><div class="conf-col-header">' + pos(n2) + ' ceremonies</div>' +
-          (side2Selected.length ? side2Selected.map(confItem).join('') : noItems) +
-        '</div>' +
+        '<div><div class="conf-col-header">'+pos(n1)+' ceremonies</div>'+(s1.length?s1.map(ci).join(''):ni)+'</div>' +
+        '<div><div class="conf-col-header">'+pos(n2)+' ceremonies</div>'+(s2.length?s2.map(ci).join(''):ni)+'</div>' +
       '</div>' +
-      (bothSelected.length ? '<div class="conf-shared-header">For both of you</div>' + bothSelected.map(confItem).join('') : '') +
+      (sb.length ? '<div class="conf-shared-header">For both of you</div>'+sb.map(ci).join('') : '') +
     '</div>';
   });
 
-  // Universal
-  var univSel = ceremonySelections['universal'];
-  if (univSel) {
-    var univSelected = Object.entries(univSel.both).filter(function(e){ return e[1]!==false; }).map(function(e){ return planCeremonies[parseInt(e[0])]; }).filter(Boolean);
-    if (univSelected.length) {
-      html += '<div class="conf-block">' +
-        '<div class="conf-trad-header">Common ceremonies</div>' +
-        univSelected.map(function(item){ return '<div class="conf-item">' + (item.name||item.event||'') + '</div>'; }).join('') +
-      '</div>';
-    }
-  }
-
-  // Budget
-  var ratio = totalSelected / Math.max(planCeremonies.length, 1);
-  ratio = Math.max(0.5, Math.min(1, ratio));
-  var adjBudget = Math.round(S.budget * ratio);
-  html += '<div class="conf-budget">' +
-    '<div class="conf-budget-total">' + adjBudget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>' +
-    '<div class="conf-budget-sub">estimated budget for ' + totalSelected + ' ceremonies</div>' +
-    (S.plan && S.plan.budget ? buildConfBudgetBars(S.plan.budget, adjBudget, ratio) : '') +
-  '</div>';
-
+  var ratio = Math.max(0.5, totalSelected / Math.max(planCeremonies.length,1));
+  var adj = Math.round(S.budget * ratio);
+  html += '<div class="conf-budget"><div class="conf-budget-total">' +
+    adj.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) +
+    '</div><div class="conf-budget-sub">estimated for '+totalSelected+' ceremonies</div></div>';
   document.getElementById('conf-container').innerHTML = html;
-  if (S.plan) S.plan.adjustedBudget = adjBudget;
-}
-
-
-function buildConfBudgetBars(budgetData, adjustedTotal, ratio) {
-  const items = Array.isArray(budgetData) ? budgetData : (budgetData.budget_lines || []);
-  if (!items.length) return '';
-  return items.slice(0,8).map(function(item) {
-    const cat = item.category || item.name || '';
-    const amt = Math.round((item.suggested_amount || (adjustedTotal * ((item.pct_low||0)+(item.pct_high||0))/2/100)) * ratio);
-    const pct = adjustedTotal > 0 ? amt/adjustedTotal*100 : 0;
-    return '<div class="conf-budget-row">' +
-      '<div class="conf-budget-cat">' + cat + '</div>' +
-      '<div class="conf-budget-track"><div class="conf-budget-fill" style="width:' + Math.min(pct*2,100) + '%"></div></div>' +
-      '<div class="conf-budget-amt">' + amt.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>' +
-    '</div>';
-  }).join('');
+  if (S.plan) S.plan.adjustedBudget = adj;
 }
 
 function buildFinalPlan() {
   var selected = getSelectedCeremonies();
   if (S.plan) {
     S.plan.selectedCeremonies = selected;
-    S.plan.ceremonySequence = selected; // use selected for final plan
-    S.plan.adjustedBudget = Math.round(S.budget * Math.max(0.5, selected.length / (planCeremonies.length||1)));
+    S.plan.ceremonySequence = selected;
+    S.plan.adjustedBudget = Math.round(S.budget * Math.max(0.5, selected.length/(planCeremonies.length||1)));
   }
-  transitionTo('q8', 'results-screen');
+  transitionTo('q8','results-screen');
   currentQ = 9;
   updateProgress();
-  // Populate results after transition
-  setTimeout(function() { populateResults(); }, 300);
+  setTimeout(function(){ populateResults(); }, 300);
 }
 
-// ── Q7 scroll fade ──
-document.addEventListener('DOMContentLoaded', function() {
-  var scroll = document.getElementById('q7-scroll');
-  var fade = document.getElementById('q7-fade');
-  if (scroll && fade) {
-    scroll.addEventListener('scroll', function() {
-      var atBottom = scroll.scrollHeight - scroll.scrollTop <= scroll.clientHeight + 10;
-      fade.style.opacity = atBottom ? '0' : '1';
-    });
-  }
+document.addEventListener('click', function(e) {
+  // Handle move/copy buttons via delegation
+  if (e.target.classList.contains('cs-move')) { moveCs(e); return; }
+  if (e.target.classList.contains('cs-copy')) { copyCs(e); return; }
+  // Close menus
+  document.querySelectorAll('.cs-item-popover.open').forEach(function(p){ p.classList.remove('open'); });
+  document.querySelectorAll('.role-dd-menu.open').forEach(function(m){ m.classList.remove('open'); });
 });
 
-// ── Keyboard ──
-document.addEventListener('keydown', e=>{
-  if (e.key==='Enter' && currentQ<=TOTAL_Q) {
-    const btn = document.querySelector('.screen.active .cta');
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && typeof currentQ !== 'undefined' && currentQ <= 6) {
+    var btn = document.querySelector('.screen.active .cta');
     if (btn) btn.click();
   }
 });
 
-// ── Init ──
 buildGrid();
 updateProgress();
-updateBudget();
-const today = new Date().toISOString().split('T')[0];
-document.getElementById('wedding-date').min = today;
 </script>
 </body>
 </html>
