@@ -1183,7 +1183,37 @@ app.get('/api/advisor/versions/:id', async (req, res) => {
     if (error) throw error;
     res.json(data);
   } catch(e) { res.status(500).json({ error: e.message }); }
-});
+})
+
+// Update (save edits to) a specific version
+app.patch('/api/advisor/versions/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+    // Only allow updating these fields
+    const allowed = [
+      'avg_budget_low','avg_budget_high','budget_currency',
+      'typical_event_count','cultural_notes','lgbtq_notes',
+      'sources','review_notes','checklist_template',
+      'ceremony_sequence','vendor_categories','budget_allocation'
+    ];
+    const filtered = {};
+    allowed.forEach(function(k) { if (updates[k] !== undefined) filtered[k] = updates[k]; });
+    filtered.updated_at = new Date().toISOString();
+
+    const { data, error } = await supabase
+      .from('tradition_versions')
+      .update(filtered)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.json(data);
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});;
 
 app.post('/api/advisor/traditions/:id/draft', async (req, res) => {
   try {
