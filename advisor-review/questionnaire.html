@@ -1677,7 +1677,7 @@ function populateResults() {
   var dateStr = S.date
     ? new Date(S.date).toLocaleDateString('en-US',{month:'long',year:'numeric'})
     : 'Date to be confirmed';
-  document.getElementById('results-subtitle').textContent = `${tradNames} · ${S.budget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0})} · ${S.guests} guests · ${dateStr}`;
+  document.getElementById('results-subtitle').textContent = tradNames + ' · ' + S.budget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + ' · ' + S.guests + ' guests' + (S.date ? ' · ' + dateStr : '');
 
   // Date not confirmed banner
   if (!S.dateSure) {
@@ -2000,11 +2000,14 @@ function renderBudget(budgetData) {
   }
 
   // Split budget by selected ceremonies
-  var selected = getSelectedCeremonies ? getSelectedCeremonies() : [];
-  var side1Count = selected.filter(function(c){ return c.side === S.role1; }).length;
-  var side2Count = selected.filter(function(c){ return c.side === S.role2; }).length;
-  var bothCount  = selected.filter(function(c){ return c.side !== S.role1 && c.side !== S.role2; }).length;
-  var totalCount = selected.length || 1;
+  // Count from ceremonySelections for accuracy (handles bride+groom correctly)
+  var side1Count = 0, side2Count = 0, bothCount = 0;
+  Object.values(ceremonySelections).forEach(function(groups) {
+    side1Count += Object.values(groups.side1||{}).filter(function(v){return v!==false;}).length;
+    side2Count += Object.values(groups.side2||{}).filter(function(v){return v!==false;}).length;
+    bothCount  += Object.values(groups.both||{}).filter(function(v){return v!==false;}).length;
+  });
+  var totalCount = side1Count + side2Count + bothCount || 1;
 
   var side1Ratio = side1Count / totalCount;
   var side2Ratio = side2Count / totalCount;
