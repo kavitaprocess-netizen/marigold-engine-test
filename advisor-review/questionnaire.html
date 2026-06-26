@@ -705,7 +705,7 @@
   .cs-item { position: relative; }
   .cs-item-menu-btn { position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted);padding:2px 6px;border-radius:4px;line-height:1;opacity:0;transition:opacity 0.15s; }
   .cs-item:hover .cs-item-menu-btn, .cs-item-menu-btn:focus { opacity:1;outline:none; }
-  .cs-item-popover { display:none;position:absolute;top:28px;right:4px;background:white;border:1px solid var(--bdr);border-radius:8px;box-shadow:0 4px 16px rgba(60,48,16,0.12);z-index:50;min-width:160px;overflow:hidden; }
+  .cs-item-popover { display:none;position:absolute;top:28px;right:4px;background:var(--cream);border:1px solid var(--bdr);border-radius:8px;box-shadow:0 4px 16px rgba(60,48,16,0.12);z-index:50;min-width:160px;overflow:hidden; }
   .cs-item-popover.open { display:block; }
   .cs-popover-item { padding:9px 14px;font-size:12px;font-style:italic;font-family:'Playfair Display',Georgia,serif;color:var(--tx);cursor:pointer;display:block;border:none;background:none;width:100%;text-align:left; }
   .cs-popover-item:hover { background:var(--warm); }
@@ -719,7 +719,7 @@
   .cs-item { position:relative; }
   .cs-item-menu-btn { position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted);padding:2px 6px;border-radius:4px;line-height:1;opacity:0;transition:opacity 0.15s; }
   .cs-item:hover .cs-item-menu-btn, .cs-item-menu-btn:focus { opacity:1;outline:none; }
-  .cs-item-popover { display:none;position:absolute;top:28px;right:4px;background:white;border:1px solid var(--bdr);border-radius:8px;box-shadow:0 4px 16px rgba(60,48,16,0.12);z-index:50;min-width:160px;overflow:hidden; }
+  .cs-item-popover { display:none;position:absolute;top:28px;right:4px;background:var(--cream);border:1px solid var(--bdr);border-radius:8px;box-shadow:0 4px 16px rgba(60,48,16,0.12);z-index:50;min-width:160px;overflow:hidden; }
   .cs-item-popover.open { display:block; }
   .cs-popover-item { padding:9px 14px;font-size:12px;font-style:italic;font-family:'Playfair Display',Georgia,serif;color:var(--tx);cursor:pointer;display:block;border:none;background:none;width:100%;text-align:left; }
   .cs-popover-item:hover { background:var(--warm); }
@@ -825,7 +825,7 @@
   .cs-item { position:relative; }
   .cs-item-menu-btn { position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted);padding:2px 6px;border-radius:4px;line-height:1;opacity:0;transition:opacity 0.15s; }
   .cs-item:hover .cs-item-menu-btn, .cs-item-menu-btn:focus { opacity:1;outline:none; }
-  .cs-item-popover { display:none;position:absolute;top:28px;right:4px;background:white;border:1px solid var(--bdr);border-radius:8px;box-shadow:0 4px 16px rgba(60,48,16,0.12);z-index:50;min-width:160px;overflow:hidden; }
+  .cs-item-popover { display:none;position:absolute;top:28px;right:4px;background:var(--cream);border:1px solid var(--bdr);border-radius:8px;box-shadow:0 4px 16px rgba(60,48,16,0.12);z-index:50;min-width:160px;overflow:hidden; }
   .cs-item-popover.open { display:block; }
   .cs-popover-item { padding:9px 14px;font-size:12px;font-style:italic;font-family:'Playfair Display',Georgia,serif;color:var(--tx);cursor:pointer;display:block;border:none;background:none;width:100%;text-align:left; }
   .cs-popover-item:hover { background:var(--warm); }
@@ -2078,6 +2078,9 @@ function showCeremonySelection(ceremonies) {
       if (!trad2) return true;
       return src === tradSlug;
     });
+    console.log('Trad '+tradSlug+': tradCeremonies='+tradCeremonies.length+
+      ' sample_src='+(ceremonies[0]?ceremonies[0]._sourceTraditionSlug:'none')+
+      ' n1Role='+n1Role+' n2Role='+n2Role);
     var side1 = [], side2 = [], both = [];
     tradCeremonies.forEach(function(item) {
       var globalIdx = ceremonies.indexOf(item);
@@ -2154,28 +2157,36 @@ function toggleCsMenu(e, btn) {
 
 function moveCs(e) {
   e.stopPropagation();
-  var btn = e.currentTarget;
+  var btn = e.target;
   var tradSlug = btn.dataset.slug;
   var fromGroup = btn.dataset.from;
   var idx = parseInt(btn.dataset.idx);
   var toGroup = btn.dataset.to;
   document.querySelectorAll('.cs-item-popover.open').forEach(function(p){ p.classList.remove('open'); });
   if (!ceremonySelections[tradSlug]) return;
+  // Remove from current group
   delete ceremonySelections[tradSlug][fromGroup][idx];
+  // Add to new group
   if (!ceremonySelections[tradSlug][toGroup]) ceremonySelections[tradSlug][toGroup] = {};
   ceremonySelections[tradSlug][toGroup][idx] = true;
+  // Update the item's side so re-render puts it in right column
+  if (planCeremonies[idx]) {
+    planCeremonies[idx].side = toGroup === 'side1' ? S.role1 : toGroup === 'side2' ? S.role2 : 'both';
+  }
   showCeremonySelection(planCeremonies);
 }
 
 function copyCs(e) {
   e.stopPropagation();
-  var btn = e.currentTarget;
+  var btn = e.target;
   var tradSlug = btn.dataset.slug;
   var idx = parseInt(btn.dataset.idx);
   var toGroup = btn.dataset.to;
   document.querySelectorAll('.cs-item-popover.open').forEach(function(p){ p.classList.remove('open'); });
   if (!ceremonySelections[tradSlug]) return;
   var copy = Object.assign({}, planCeremonies[idx]);
+  copy.side = toGroup === 'side1' ? S.role1 : toGroup === 'side2' ? S.role2 : 'both';
+  copy._isCopy = true;
   var newIdx = planCeremonies.length;
   planCeremonies.push(copy);
   if (!ceremonySelections[tradSlug][toGroup]) ceremonySelections[tradSlug][toGroup] = {};
