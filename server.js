@@ -379,7 +379,7 @@ async function loadTraditions(){
 }
 function renderSidebar(){
   document.getElementById('sidebar-count').textContent=traditions.length+' traditions';
-  const sorted=[...traditions].sort((a,b)=>a.name.localeCompare(b.name));
+  const sorted=[...traditions].sort((a,b)=>(a.label||a.name||"").localeCompare(b.label||b.name||""));
   document.getElementById('tradition-list').innerHTML=sorted.map(t=>{
     const versions=t.tradition_versions||[];
     const current=versions.find(v=>v.is_current);
