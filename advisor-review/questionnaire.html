@@ -969,8 +969,8 @@
 
   <!-- Q7: Ceremony selection -->
   <!-- Q7: Ceremony selection -->
-  <div class="screen" id="q7" style="overflow:hidden;position:relative;display:block!important;">
-    <div id="q7-scroll" style="position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:32px 24px 20px;box-sizing:border-box;">
+  <div class="screen" id="q7" style="overflow:hidden;position:relative;display:block!important;padding:0!important;">
+    <div id="q7-scroll" style="height:calc(100vh - 62px);overflow-y:auto;overflow-x:hidden;padding:32px 24px 20px;box-sizing:border-box;">
     <div style="width:100%;max-width:900px;margin:0 auto">
       <div class="ql">Step 7 of 8</div>
       <div class="qt" id="q7-title">Choose your ceremonies</div>
@@ -985,12 +985,11 @@
       </div>
     </div>
     </div>
-    </div>
   </div>
 
   <!-- Q8: Confirmation -->
-  <div class="screen" id="q8" style="overflow:hidden;">
-    <div style="position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:32px 24px 80px;box-sizing:border-box;">
+  <div class="screen" id="q8" style="overflow:hidden;display:block!important;padding:0!important;">
+    <div style="height:calc(100vh - 62px);overflow-y:auto;overflow-x:hidden;padding:32px 24px 80px;box-sizing:border-box;">
     <div style="width:100%;max-width:720px;margin:0 auto">
       <div class="ql">Your wedding plan</div>
       <div class="qt" id="q8-title">Here's what you've chosen</div>
@@ -1457,14 +1456,7 @@ async function submitPlan() {
     if (!data.success) { showErr(data.error||'Something went wrong generating your plan.'); return; }
     S.plan=data.plan;
     // Go to ceremony selection (Q7) instead of results directly
-    console.log('Plan received:', JSON.stringify({
-      traditions: S.plan.traditions,
-      ceremonyCount: (S.plan.ceremonySequence||[]).length,
-      firstCeremony: (S.plan.ceremonySequence||[])[0],
-      keys: Object.keys(S.plan)
-    }));
     planCeremonies = S.plan.ceremonySequence || S.plan.ceremonies || [];
-    console.log('planCeremonies length:', planCeremonies.length);
     ceremonySelections = {}; // reset selections
     const ls = document.getElementById('loading-screen');
     ls.classList.add('exit-left'); ls.classList.remove('active');
