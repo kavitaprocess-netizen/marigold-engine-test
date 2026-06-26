@@ -974,6 +974,7 @@
             <span class="role-dropdown" id="role-dd1">
               <span class="role-dd-value" id="role-val1" onclick="toggleRoleDD(1,event)">Select &#9662;</span>
               <div class="role-dd-menu" id="role-menu1">
+                <div onclick="pickRole(1,'partner',event)">Partner</div>
                 <div onclick="pickRole(1,'bride',event)">Bride</div>
                 <div onclick="pickRole(1,'groom',event)">Groom</div>
               </div>
@@ -985,6 +986,7 @@
             <span class="role-dropdown" id="role-dd2">
               <span class="role-dd-value" id="role-val2" onclick="toggleRoleDD(2,event)">Select &#9662;</span>
               <div class="role-dd-menu" id="role-menu2">
+                <div onclick="pickRole(2,'partner',event)">Partner</div>
                 <div onclick="pickRole(2,'bride',event)">Bride</div>
                 <div onclick="pickRole(2,'groom',event)">Groom</div>
               </div>
@@ -1117,10 +1119,12 @@
       <div id="cs-container" style="margin-top:16px;padding-bottom:8px"></div>
     </div>
     </div>
-    <!-- Fixed CTA at bottom -->
-    <div style="flex-shrink:0;height:80px;background:var(--cream);border-top:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:10;">
-      <button class="btn-back" onclick="goBack()">← back</button>
-      <button class="cta" onclick="goToConfirmation()">Review my plan →</button>
+    <!-- CTA row — same width as content above -->
+    <div style="flex-shrink:0;padding:16px 24px 24px;">
+      <div style="width:100%;max-width:900px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--bdr);padding-top:16px;">
+        <button class="btn-back" onclick="goBack()">← back</button>
+        <button class="cta" onclick="goToConfirmation()">Review my plan →</button>
+      </div>
     </div>
   </div>
 
@@ -1199,10 +1203,12 @@ const TOTAL_Q = 6;
 function pickRole(partner, role, e) {
   if (e) e.stopPropagation();
   S['role' + partner] = role;
+  var label = role === 'bride' ? 'Bride' : role === 'groom' ? 'Groom' : 'Partner';
   var val = document.getElementById('role-val' + partner);
-  if (val) val.innerHTML = (role === 'bride' ? 'Bride' : 'Groom') + ' &#9662;';
+  if (val) val.innerHTML = label + ' &#9662;';
   var menu = document.getElementById('role-menu' + partner);
   if (menu) menu.classList.remove('open');
+  updateRoleLabels();
 }
 
 function toggleRoleDD(partner, e) {
@@ -1661,6 +1667,7 @@ function showResults() {
 }
 
 function populateResults() {
+  try {
   if (!S.plan) { console.error('populateResults: S.plan is null'); return; }
   const p = S.plan;
   const names = S.name2?`${S.name1} & ${S.name2}`:S.name1;
@@ -1689,8 +1696,11 @@ function populateResults() {
   renderChecklist(p.checklist||[]);
   renderCeremonies(p.ceremonySequence||p.ceremonies||[]);
   renderBudget(p.budget||p.budgetBreakdown||[]);
+  } catch(e) {
+    console.error("populateResults error:", e);
+    document.getElementById("results-title").innerHTML = "<em>Something went wrong</em>";
+  }
 }
-
 function switchTab(name, btn) {
   document.querySelectorAll('.out-tab').forEach(t=>t.classList.remove('on'));
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('on'));
@@ -2066,8 +2076,9 @@ function showCeremonySelection(ceremonies) {
   var n2 = S.name2 || 'Partner two';
   var trad1 = S.traditions[0];
   var trad2 = S.traditions[1] || null;
-  var n1Role = S.role1;
-  var n2Role = S.role2;
+  // Map 'partner' to bride/groom for taxonomy matching
+  var n1Role = S.role1 === 'partner' ? 'bride' : S.role1;
+  var n2Role = S.role2 === 'partner' ? 'groom' : S.role2;
   var allTradSlugs = trad2 ? [trad1, trad2] : [trad1];
   ceremonySelections = {};
 
@@ -2085,9 +2096,20 @@ function showCeremonySelection(ceremonies) {
     tradCeremonies.forEach(function(item) {
       var globalIdx = ceremonies.indexOf(item);
       var side = item.side || 'both';
-      if (side === n1Role) side1.push({item:item,idx:globalIdx});
-      else if (side === n2Role) side2.push({item:item,idx:globalIdx});
-      else both.push({item:item,idx:globalIdx});
+      if (side === 'bride+groom') {
+        // Appears in both columns independently
+        side1.push({item:item, idx:globalIdx});
+        // Push a shallow copy with a unique index for side2
+        var copy = Object.assign({}, item, {_isCopy:true});
+        var copyIdx = ceremonies.length + side2.length + 1000;
+        side2.push({item:copy, idx:copyIdx});
+      } else if (side === n1Role) {
+        side1.push({item:item, idx:globalIdx});
+      } else if (side === n2Role) {
+        side2.push({item:item, idx:globalIdx});
+      } else {
+        both.push({item:item, idx:globalIdx});
+      }
     });
     ceremonySelections[tradSlug] = {side1:{},side2:{},both:{}};
     side1.forEach(function(ci){ ceremonySelections[tradSlug].side1[ci.idx]=true; });
@@ -2283,12 +2305,33 @@ function buildConfirmation() {
   var s2Budget = Math.round(adj * s2Count / tot2);
   var sbBudget = adj - s1Budget - s2Budget;
 
+  // Build detailed budget breakdown
+  var budgetData = S.plan && S.plan.budget ? S.plan.budget : [];
+  function budgetSection(label, sectionBudget, ratio) {
+    if (sectionBudget <= 0) return '';
+    var bars = '';
+    if (budgetData.length) {
+      bars = budgetData.slice(0,8).map(function(item) {
+        var cat = item.category || item.name || '';
+        var amt = Math.round((item.suggested_amount || (adj * ((item.pct_low||0)+(item.pct_high||0))/2/100)) * ratio);
+        var pct = Math.min((amt/sectionBudget)*100*2, 100);
+        return '<div class="budget-row"><div class="budget-cat">' + cat + '</div>' +
+          '<div class="budget-track"><div class="budget-fill" style="width:' + pct + '%"></div></div>' +
+          '<div class="budget-amt">' + amt.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div></div>';
+      }).join('');
+    }
+    return '<div class="budget-section" style="margin-bottom:20px">' +
+      '<div class="budget-section-header">' + label + '</div>' +
+      '<div class="budget-section-total">' + sectionBudget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>' +
+      bars + '</div>';
+  }
+
   html += '<div class="conf-budget">' +
     '<div class="conf-budget-total">' + adj.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>' +
     '<div class="conf-budget-sub">estimated budget for ' + totalSelected + ' ceremonies</div>' +
-    (s1Count > 0 ? '<div class="conf-budget-section"><span class="conf-budget-label">' + pos(n1) + ' ceremonies</span><span class="conf-budget-amt">' + s1Budget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</span></div>' : '') +
-    (s2Count > 0 ? '<div class="conf-budget-section"><span class="conf-budget-label">' + pos(n2) + ' ceremonies</span><span class="conf-budget-amt">' + s2Budget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</span></div>' : '') +
-    (sbCount > 0 ? '<div class="conf-budget-section"><span class="conf-budget-label">Common ceremonies</span><span class="conf-budget-amt">' + sbBudget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</span></div>' : '') +
+    budgetSection(pos(n1) + ' ceremonies', s1Budget, s1Count/tot2) +
+    budgetSection(pos(n2) + ' ceremonies', s2Budget, s2Count/tot2) +
+    budgetSection('Common ceremonies', sbBudget, sbCount/tot2) +
   '</div>';
   document.getElementById('conf-container').innerHTML = html;
   if (S.plan) S.plan.adjustedBudget = adj;
