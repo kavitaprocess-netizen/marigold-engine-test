@@ -1114,6 +1114,35 @@ app.get('/api/traditions', async (req, res) => {
 });
 
 // ── Routes: generate plan ──
+app.post('/api/parse-wedding', async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text) return res.status(400).json({ error: 'No text provided' });
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 500,
+        messages: [{
+          role: 'user',
+          content: 'Extract wedding details from this text and return ONLY a JSON object with these fields (use null if not mentioned): name1 (string), name2 (string), role1 (bride/groom/partner or null), role2 (bride/groom/partner or null), traditions (array of 1-2 slugs from: sri-lankan-buddhist,thai-buddhist,chinese-taiwanese,catholic,filipino-catholic,greek-orthodox,latin-american-catholic,mexican-catholic,christian-western,cuban,andhra-telugu,arya-samaj,assamese-hindu,bengali-hindu,bihari-hindu,gujarati,kashmiri-pandit,kerala-nair,manipuri-vaishnavite,marathi,hindu-north-indian-punjabi,odia-hindu,rajasthani-marwari,rajasthani-rajput,tamil-hindu,vedic-general,jain-shwetambar,jewish-reform-conservative,khasi,korean,dawoodi-bohra,muslim-nikah,hausa-muslim,yoruba-nigerian,sikh), date (YYYY-MM-DD or null), location (string or null), budget (number or null), guests (number or null). Return ONLY the JSON, no other text. Text: ' + text
+        }]
+      })
+    });
+    const data = await response.json();
+    const raw = data.content[0].text;
+    const clean = raw.replace(/\`\`\`json|\`\`\`/g,'').trim();
+    res.json({ success: true, parsed: JSON.parse(clean) });
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 app.post('/api/generate-plan', async (req, res) => {
   const slugs = req.body.slugs || req.body.traditionSlugs;
   const budget = req.body.budget || req.body.totalBudget;
