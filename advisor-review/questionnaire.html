@@ -1679,9 +1679,7 @@ function populateResults() {
   }
 
   if (p.conflicts && p.conflicts.length) {
-    document.getElementById('conflicts-wrap').innerHTML = p.conflicts.map(c=>
-      `<div class="conflict-banner">Note — ${c.description||c.message||JSON.stringify(c)}</div>`
-    ).join('');
+    document.getElementById('conflicts-wrap').innerHTML = p.conflicts.map(function(c){ return '<div class="conflict-banner">Note — ' + (c.description||c.message||JSON.stringify(c)) + '</div>'; }).join('');
   }
 
   renderChecklist(p.checklist||[]);
