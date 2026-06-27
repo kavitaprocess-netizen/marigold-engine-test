@@ -1859,15 +1859,19 @@ function renderCeremonies(items) {
     return '<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:16px 0 8px;font-style:italic">' + title + '</div>' +
       items2.map(function(i){ return ganttRow(i, color); }).join('');
   }
-  var header = '<div style="display:flex;align-items:center;margin-bottom:8px;position:sticky;top:0;background:#FDFAF5;padding:4px 0 8px;z-index:10;border-bottom:1px solid var(--bdr)">' +
+  var header = '<div style="display:flex;align-items:center;margin-bottom:0;padding:4px 0 8px;border-bottom:1px solid var(--bdr)">' +
     '<div style="width:160px;flex-shrink:0"></div>' +
     '<div style="flex:1;display:flex">' +
     BUCKETS.map(function(b){ return '<div style="flex:1;font-size:9px;color:var(--muted);font-style:italic;text-align:center;border-left:1px solid var(--bdr);padding:2px 0">' + b + '</div>'; }).join('') +
     '</div></div>';
-  el.innerHTML = '<div style="overflow-x:auto"><div style="min-width:600px">' + header +
-    section(pos(n1)+' ceremonies', side1, COLORS.side1) +
-    section(pos(n2)+' ceremonies', side2, COLORS.side2) +
-    section('Common ceremonies', both, COLORS.both) +
+  el.innerHTML = 
+    '<div style="position:sticky;top:0;z-index:10;background:#FDFAF5;margin-bottom:0">' +
+      '<div style="overflow-x:auto">' + header + '</div>' +
+    '</div>' +
+    '<div style="overflow-x:auto"><div style="min-width:600px">' +
+      section(pos(n1)+' ceremonies', side1, COLORS.side1) +
+      section(pos(n2)+' ceremonies', side2, COLORS.side2) +
+      section('Common ceremonies', both, COLORS.both) +
     '</div></div>';
 }
 
@@ -2365,8 +2369,8 @@ function showGanttTip(e, el) {
   if (!tip) return;
   tip.textContent = el.dataset.tip;
   tip.style.display = 'block';
-  tip.style.left = (e.clientX + 12) + 'px';
-  tip.style.top = (e.clientY - 8) + 'px';
+  tip.style.left = (e.clientX + 6) + 'px';
+  tip.style.top = (e.clientY - tip.offsetHeight - 6) + 'px';
 }
 function hideGanttTip() {
   var tip = document.getElementById('gantt-tooltip');
