@@ -1187,7 +1187,7 @@ function pos(n) { return n + "’s"; }
 
 var FLOWER_SVG_20 = '<svg width="20" height="20" viewBox="0 0 34 34" xmlns="http://www.w3.org/2000/svg"><g fill="#E0B030" stroke="#C8941A" stroke-width="0.4"><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(0 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(25.7 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(51.4 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(77.1 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(102.8 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(128.5 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(154.2 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(180 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(205.7 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(231.4 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(257.1 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(282.8 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(308.5 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(334.2 17 17)"/></g><g fill="#F7D44C" stroke="#E0B030" stroke-width="0.3"><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(0 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(20 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(60 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(120 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(180 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(240 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(300 17 17)"/></g><circle cx="17" cy="17" r="4.1" fill="#6B5318" stroke="#5A4512" stroke-width="0.3"/></svg>'; // possessive helper avoids quote escaping issues
 
-const S = { name1:'', name2:'', role1:'', role2:'', userRole:'couple', dateSure:false, locationSure:false, date:'', location:'', traditions:[], traditionAssignment:{}, budget:50000, guests:100, plan:null };
+const S = { name1:'', name2:'', role1:'bride', role2:'groom', userRole:'couple', dateSure:false, locationSure:false, date:'', location:'', traditions:[], traditionAssignment:{}, budget:50000, guests:100, plan:null };
 let guests = 100;
 let currentQ = 1;
 const TOTAL_Q = 6;
@@ -1452,7 +1452,7 @@ function goNext(from, skip=false) {
     const n1 = document.getElementById('name1').value.trim();
     const n2 = document.getElementById('name2').value.trim();
     if (!n1||!n2) { document.getElementById('err-q1').classList.add('show'); document.getElementById('err-q1').textContent='Please enter both names to continue.'; return; }
-    if (!S.role1||!S.role2) { document.getElementById('err-q1').classList.add('show'); document.getElementById('err-q1').textContent='Please select a role for both partners.'; return; }
+
     document.getElementById('err-q1').classList.remove('show');
     S.name1=n1; S.name2=n2;
     // role1/role2 already set by setRole() — defaults are bride/groom
@@ -1520,15 +1520,9 @@ function updateProgress() {
 function goBack() {
   if (currentQ === 1 || currentQ === '1') return;
   if (currentQ === 7) {
-    // Go back to Q6
-    const q7 = document.getElementById('q7');
-    const q6 = document.getElementById('q6');
-    q7.style.transition = 'opacity 0.25s, transform 0.25s';
-    q7.style.opacity = '0'; q7.style.transform = 'translateX(50px)';
-    setTimeout(function() {
-      q7.classList.remove('active'); q7.style.transition=''; q7.style.opacity=''; q7.style.transform='';
-      q6.classList.add('active');
-    }, 260);
+    document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active','exit-left'); });
+    var q6el = document.getElementById('q6');
+    setTimeout(function() { if (q6el) q6el.classList.add('active'); }, 260);
     currentQ = 6; updateProgress(); return;
   }
   // Determine previous screen
@@ -1566,9 +1560,13 @@ const LOADING_MSGS = [
 ];
 
 async function submitPlan() {
+  // Reset all screens to clean state before starting
+  document.querySelectorAll('.screen').forEach(function(s){ 
+    s.classList.remove('active','exit-left'); 
+  });
   const q6 = document.getElementById('q6');
-  q6.classList.add('exit-left'); q6.classList.remove('active');
-  setTimeout(()=>{ q6.classList.remove('exit-left'); document.getElementById('loading-screen').classList.add('active'); }, 260);
+  q6.classList.add('exit-left');
+  setTimeout(function(){ q6.classList.remove('exit-left'); document.getElementById('loading-screen').classList.add('active'); }, 260);
   document.getElementById('progress-fill').style.width='90%';
   document.getElementById('step-indicator').textContent='';
 
@@ -1607,8 +1605,10 @@ async function submitPlan() {
         var cont = document.getElementById('cs-container');
         if (cont) cont.innerHTML = '<p style="color:var(--muted);font-style:italic;padding:20px 0">Could not load ceremonies — ' + e.message + '</p>';
       }
-      const q7 = document.getElementById('q7');
-      if (q7) q7.classList.add('active');
+      var ls2 = document.getElementById('loading-screen');
+      if (ls2) { ls2.classList.remove('active'); ls2.style.opacity=''; ls2.style.pointerEvents=''; }
+      var q7el = document.getElementById('q7');
+      if (q7el) q7el.classList.add('active');
       currentQ = 7;
       updateProgress();
     }, 260);
@@ -2016,8 +2016,8 @@ function showCeremonySelection(ceremonies) {
   var n2 = S.name2 || 'Partner two';
   var trad1 = S.traditions[0];
   var trad2 = S.traditions[1] || null;
-  var n1Role = S.role1;
-  var n2Role = S.role2;
+  var n1Role = S.role1 === 'partner' ? 'bride' : S.role1;
+  var n2Role = S.role2 === 'partner' ? 'groom' : S.role2;
   var allTradSlugs = trad2 ? [trad1, trad2] : [trad1];
   ceremonySelections = {};
 
@@ -2370,22 +2370,19 @@ function showGanttTip(e, el) {
   var tip = document.getElementById('gantt-tooltip');
   if (!tip) return;
   tip.textContent = el.dataset.tip;
+  tip.style.visibility = 'hidden';
   tip.style.display = 'block';
   var rect = el.getBoundingClientRect();
+  var tipH = tip.offsetHeight;
   tip.style.left = rect.left + 'px';
-  tip.style.top = (rect.top - tip.offsetHeight - 4) + 'px';
+  tip.style.top = (rect.top - tipH - 4) + 'px';
+  tip.style.visibility = 'visible';
 }
 function hideGanttTip() {
   var tip = document.getElementById('gantt-tooltip');
   if (tip) tip.style.display = 'none';
 }
-document.addEventListener('mousemove', function(e) {
-  var tip = document.getElementById('gantt-tooltip');
-  if (tip && tip.style.display === 'block') {
-    tip.style.left = (e.clientX + 12) + 'px';
-    tip.style.top = (e.clientY - 8) + 'px';
-  }
-});
+// Tooltip is pinned to bar - no mousemove tracking needed
 
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Enter' && typeof currentQ !== 'undefined' && currentQ <= 6) {
