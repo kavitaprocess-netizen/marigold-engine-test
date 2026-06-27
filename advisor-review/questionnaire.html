@@ -1155,7 +1155,6 @@
 
   <!-- Results -->
   <div class="screen" id="results-screen">
-    <div class="gantt-tooltip" id="gantt-tooltip"></div>
     <div class="results-wrap">
       <div class="results-hero">
         <h1 id="results-title">Your wedding plan</h1>
@@ -1867,7 +1866,7 @@ function renderCeremonies(items) {
     BUCKETS.map(function(b){ return '<div style="flex:1;font-size:9px;color:var(--muted);font-style:italic;text-align:center;border-left:1px solid var(--bdr);padding:2px 0">' + b + '</div>'; }).join('') +
     '</div></div>';
   el.innerHTML = 
-    '<div style="position:sticky;top:0;z-index:10;background:#FDFAF5;box-shadow:0 4px 8px #FDFAF5;margin-bottom:0">' +
+    '<div style="position:sticky;top:0;z-index:10;background:#FDFAF5;padding-bottom:4px;border-bottom:2px solid #FDFAF5;box-shadow:0 6px 0 #FDFAF5;">' +
       '<div style="overflow-x:auto;background:#FDFAF5">' + header + '</div>' +
     '</div>' +
     '<div style="overflow-x:auto"><div style="min-width:600px">' +
@@ -2408,6 +2407,7 @@ document.addEventListener('keydown', function(e) {
 buildGrid();
 updateProgress();
 </script>
+<div class="gantt-tooltip" id="gantt-tooltip"></div>
 <div id="start-again-modal" style="display:none;position:fixed;inset:0;background:rgba(60,48,16,0.4);z-index:1000;">
   <div style="background:var(--cream);border-radius:16px;padding:32px;max-width:360px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(60,48,16,0.2);margin:auto;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)">
     <div id="modal-flower" style="margin-bottom:16px"></div>
