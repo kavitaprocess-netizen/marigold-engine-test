@@ -2149,9 +2149,15 @@ function getSelectedCeremonies() {
     ['side1','side2','both'].forEach(function(g) {
       Object.entries(groups[g] || {}).forEach(function(e) {
         var idx = parseInt(e[0]);
-        if (e[1] !== false && !seen.has(idx)) {
-          seen.add(idx);
-          if (planCeremonies[idx]) selected.push({item:planCeremonies[idx],idx:idx});
+        var origIdx = idx > 1000 ? idx % 1000 : idx;
+        if (e[1] !== false) {
+          var item = planCeremonies[idx] || planCeremonies[origIdx];
+          // Only deduplicate within 'both' — bride+groom should appear in side1 AND side2
+          var dedupeKey = (g === 'both' ? 'both-' : g + '-') + origIdx;
+          if (item && !seen.has(dedupeKey)) {
+            seen.add(dedupeKey);
+            selected.push({item:item, idx:origIdx, group:g});
+          }
         }
       });
     });
@@ -2202,7 +2208,13 @@ function buildConfirmation() {
     var sel = ceremonySelections[tradSlug] || {side1:{},side2:{},both:{}};
     function getSel(g) {
       return Object.entries(sel[g]||{}).filter(function(e){ return e[1]!==false; })
-        .map(function(e){ return planCeremonies[parseInt(e[0])]; }).filter(Boolean);
+        .map(function(e){
+          var idx = parseInt(e[0]);
+          // bride+groom copies have high indices — use modulo to get original
+          var item = planCeremonies[idx];
+          if (!item && idx > 1000) item = planCeremonies[idx % 1000];
+          return item;
+        }).filter(Boolean);
     }
     var s1=getSel('side1'), s2=getSel('side2'), sb=getSel('both');
     if (!s1.length && !s2.length && !sb.length) return;
