@@ -1906,6 +1906,9 @@ function toggleCerCard(el) { el.classList.toggle('open'); }
 function switchCeremonyView(view) {
   ceremonyView = view;
   document.querySelectorAll('.view-btn').forEach(function(b){ b.classList.toggle('on', b.dataset.view===view); });
+  // Reset ceremony-content styles before re-render
+  var cc = document.getElementById('ceremony-content');
+  if (cc) { cc.style.height=''; cc.style.minHeight=''; cc.style.display=''; cc.style.flexDirection=''; }
   var el = document.getElementById('tab-ceremonies');
   var items = window._lastCeremonyItems;
   if (items) renderCeremonyContent(el, items);
@@ -1935,6 +1938,10 @@ function renderCeremonyContent(el, items) {
   }
 }
 function renderCeremonyLinear(container, items) {
+  container.style.height = '';
+  container.style.minHeight = '';
+  container.style.display = '';
+  container.style.flexDirection = '';
   var n1 = S.name1 || 'Partner one';
   var n2 = S.name2 || 'Partner two';
   var n1Role = S.role1 || 'bride';
@@ -2035,6 +2042,7 @@ function renderCeremonyGantt(container, items) {
   // Gantt: header fixed, body scrollable independently
   container.style.display = 'flex';
   container.style.flexDirection = 'column';
+  container.style.minHeight = '420px';
   container.style.height = '420px';
   container.innerHTML = 
     '<div style="flex-shrink:0;background:#FDFAF5;border-bottom:2px solid var(--bdr);padding-bottom:6px;z-index:10;">' +
@@ -2623,6 +2631,7 @@ async function parseParagraph() {
     var raw = data.content[0].text;
     var clean = raw.replace(/```json|```/g,'').trim();
     var parsed = JSON.parse(clean);
+    console.log('Parsed:', JSON.stringify(parsed));
 
     // Apply extracted values to S
     if (parsed.name1) { S.name1 = parsed.name1; document.getElementById('name1').value = parsed.name1; }
@@ -2662,12 +2671,12 @@ async function parseParagraph() {
     _cameFromParagraph = true;
     // Build list of unanswered questions in order
     var nextQ = null;
+    var rolesExtracted = !!(parsed.role1 && parsed.role2);
     if (!parsed.name1 || !parsed.name2) {
       // Names missing — ask Q1 fully
       nextQ = 'q1'; currentQ = 1;
-    } else if (!S.role1 || S.role1 === 'bride' && !parsed.role1) {
-      // Names extracted but roles not confirmed — skip to role part of Q1
-      // Q1 is pre-filled with names so user only needs to pick roles
+    } else if (!rolesExtracted) {
+      // Names given but roles not mentioned — show Q1 with names pre-filled, just pick roles
       nextQ = 'q1'; currentQ = 1;
     } else if (!parsed.traditions || !parsed.traditions.length) {
       nextQ = 'q4'; currentQ = 4;
