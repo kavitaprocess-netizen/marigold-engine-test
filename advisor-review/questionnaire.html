@@ -1844,7 +1844,7 @@ function renderCeremonies(items) {
     return '<div style="display:flex;align-items:center;margin-bottom:5px;gap:6px">' +
       '<div style="width:160px;flex-shrink:0;font-size:11px;font-style:italic;color:var(--tx);text-align:right;padding-right:8px;line-height:1.3">' + name + '</div>' +
       '<div style="flex:1;height:24px;position:relative">' +
-        '<div style="position:absolute;left:' + (b*colW) + '%;width:' + colW + '%;height:100%;background:' + color + ';border-radius:4px;display:flex;align-items:center;padding:0 6px;box-sizing:border-box">' +
+        '<div title="' + name + (item.timing ? ' — ' + item.timing : '') + (item.duration ? ' (' + item.duration + ')' : '') + '" style="position:absolute;left:' + (b*colW) + '%;width:' + colW + '%;height:100%;background:' + color + ';border-radius:4px;display:flex;align-items:center;padding:0 6px;box-sizing:border-box;cursor:default">' +
           '<span style="font-size:9px;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (item.timing||'') + '</span>' +
         '</div>' +
       '</div>' +
@@ -1855,7 +1855,7 @@ function renderCeremonies(items) {
     return '<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:16px 0 8px;font-style:italic">' + title + '</div>' +
       items2.map(function(i){ return ganttRow(i, color); }).join('');
   }
-  var header = '<div style="display:flex;align-items:center;margin-bottom:8px;position:sticky;top:0;background:var(--cream);padding:4px 0;z-index:5">' +
+  var header = '<div style="display:flex;align-items:center;margin-bottom:8px;position:sticky;top:0;background:#FDFAF5;padding:4px 0 8px;z-index:10;border-bottom:1px solid var(--bdr)">' +
     '<div style="width:160px;flex-shrink:0"></div>' +
     '<div style="flex:1;display:flex">' +
     BUCKETS.map(function(b){ return '<div style="flex:1;font-size:9px;color:var(--muted);font-style:italic;text-align:center;border-left:1px solid var(--bdr);padding:2px 0">' + b + '</div>'; }).join('') +
@@ -1914,6 +1914,9 @@ function renderBudget(budgetData) {
   var bB  = Math.round(totalBudget * bCount/total);
 
   function budgetToggleRow(cat, amt, sectionType) {
+    // Override with real estimate if available
+    var realPct = VENDOR_PCT[cat];
+    if (realPct) amt = Math.round(totalBudget * realPct);
     var excKey = sectionType + '::' + cat;
     var excluded = window.budgetExclusions[excKey];
     var pct = Math.min(amt > 0 ? (amt / Math.max(s1B,s2B,bB,1) * 100) : 0, 100);
@@ -1933,16 +1936,26 @@ function renderBudget(budgetData) {
       SHARED_VENDOR_CATS.concat(getCatsForSection(sectionType, tradSlug).filter(function(c){ return SHARED_VENDOR_CATS.indexOf(c) < 0; })) :
       getCatsForSection(sectionType, tradSlug);
     if (!cats.length) cats = SHARED_VENDOR_CATS;
-    var perCat = Math.round(sectionBudget / cats.length);
+    // Weight: shared items (Venue, Catering etc) get higher allocation
+    var sharedCount = SHARED_VENDOR_CATS.filter(function(c){ return cats.indexOf(c) >= 0; }).length;
+    var specificCount = cats.length - sharedCount;
+    var sharedAmt = sharedCount > 0 ? Math.round(sectionBudget * 0.65 / sharedCount) : 0;
+    var specificAmt = specificCount > 0 ? Math.round(sectionBudget * 0.35 / specificCount) : 0;
     // Recalculate total excluding unchecked
     var activeTotal = cats.reduce(function(sum,cat){
-      return sum + (window.budgetExclusions[sectionType+'::'+cat] ? 0 : perCat);
+      var realPct = VENDOR_PCT[cat];
+      var amt = realPct ? Math.round(totalBudget * realPct) : (SHARED_VENDOR_CATS.indexOf(cat) >= 0 ? sharedAmt : specificAmt);
+      return sum + (window.budgetExclusions[sectionType+'::'+cat] ? 0 : amt);
     }, 0);
     return '<div class="budget-section">' +
       '<div class="budget-section-header">' + label + '</div>' +
       '<div class="budget-section-total" id="bst-' + sectionType + (tradSlug||'') + '">' + activeTotal.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>' +
       '<div style="font-size:11px;color:var(--muted);font-style:italic;margin-bottom:10px">tap to include / exclude</div>' +
-      cats.map(function(cat){ return budgetToggleRow(cat, perCat, sectionType+(tradSlug||'')); }).join('') +
+      cats.map(function(cat){
+        var isShared = SHARED_VENDOR_CATS.indexOf(cat) >= 0;
+        var amt = isShared ? sharedAmt : specificAmt;
+        return budgetToggleRow(cat, amt, sectionType+(tradSlug||''));
+      }).join('') +
     '</div>';
   }
 
@@ -2290,6 +2303,23 @@ var CEREMONY_VENDOR_MAP = {
 };
 
 var SHARED_VENDOR_CATS = ['Venue hire','Catering & bar','Photography & video','Music & entertainment','Florals & décor','Officiant / pandit / rabbi / imam','Invitations & stationery','Guest accommodation & transport'];
+
+  var VENDOR_PCT = {
+    'Venue hire':0.28,'Catering & bar':0.25,'Photography & video':0.10,
+    'Music & entertainment':0.05,'Florals & décor':0.08,
+    'Officiant / pandit / rabbi / imam':0.02,'Invitations & stationery':0.02,
+    'Guest accommodation & transport':0.03,
+    'Bridal wear & lehenga':0.06,'Mehndi artist':0.01,'Hair & makeup artist':0.02,
+    'Chooda & jewellery':0.02,'Haldi & floral decor':0.01,'Bridal styling':0.01,
+    'Bridal farewell decor':0.01,'Homecoming decor & rituals':0.01,
+    'Bride pre-wedding reception':0.01,'Nalangu items & decor':0.01,
+    'Bridal trousseau gifts':0.02,'Bridal party & gifts':0.01,
+    'Menswear & sherwani':0.04,'Baraat — horse, dhol & procession':0.04,
+    'Sehra, turban & groom styling':0.01,'Groom procession & transport':0.02,
+    'Tilak ceremony & gift hamper':0.01,'Groom party':0.01,
+    'Synagogue booking':0.02,'Betrothal gifts delivery':0.02,
+    'Sacred thread ceremony':0.01,'Groom ritual items':0.01
+  }
 
 function getCeremonyVendorCat(ceremonyName) {
   if (!ceremonyName) return null;
