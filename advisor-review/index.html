@@ -156,13 +156,14 @@
   .toast.error{background:#c0392b;}
   .toast.success{background:#1e7c4e;}
   .toast-flower{font-size:14px;}
-  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 200; display: flex; align-items: center; justify-content: center; }
-  .modal-box { background: white; border-radius: var(--radius); padding: 28px; width: 420px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); }
-  .modal-title { font-size: 15px; font-weight: 700; color: var(--deep); margin-bottom: 8px; }
-  .modal-body { font-size: 13px; color: var(--muted); margin-bottom: 20px; line-height: 1.6; }
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(60,48,16,0.4); z-index: 200; display: flex; align-items: center; justify-content: center; }
+  .modal-box { background: #FDFAF5; border-radius: 16px; padding: 32px; width: 380px; max-width:90vw; box-shadow: 0 8px 32px rgba(60,48,16,0.2); text-align:center; }
+  .modal-flower { margin-bottom:16px; }
+  .modal-title { font-size: 18px; font-weight: 400; font-style:italic; font-family:'Playfair Display',Georgia,serif; color: var(--deep); margin-bottom: 8px; }
+  .modal-body { font-size:13px; color:var(--muted); font-style:italic; line-height:1.6; margin-bottom:20px; }
   .modal-input { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; font-family: var(--font); margin-bottom: 16px; }
   .modal-input:focus { outline: none; border-color: var(--gold); }
-  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+  .modal-actions { display:flex; gap:12px; justify-content:center; margin-top:4px; }
   .toast.visible { opacity: 1; }
   .toast.error { background: var(--red); }
   .toast.success { background: var(--green); }
@@ -251,6 +252,7 @@
 <div class="toast" id="toast"></div>
 <div id="custom-modal" class="modal-backdrop" style="display:none">
   <div class="modal-box">
+    <div class="modal-flower" id="modal-flower-adv"></div>
     <div class="modal-title" id="modal-title"></div>
     <div class="modal-body" id="modal-body"></div>
     <input type="text" class="modal-input" id="modal-input" style="display:none" placeholder="">
@@ -763,6 +765,8 @@ function showModal({ title, body, input = false, inputPlaceholder = '', confirmL
     document.getElementById('modal-actions').innerHTML = `
       <button class="btn btn-outline" onclick="closeModal(null)">${cancelLabel}</button>
       <button class="btn ${confirmClass}" onclick="closeModal(${input ? "'input'" : 'true'})">${confirmLabel}</button>`;
+    var flAdv = document.getElementById('modal-flower-adv');
+    if (flAdv && !flAdv.innerHTML) flAdv.innerHTML = '<svg width="32" height="32" viewBox="0 0 34 34" xmlns="http://www.w3.org/2000/svg"><g fill="#E0B030" stroke="#C8941A" stroke-width="0.4"><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(0 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(25.7 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(51.4 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(77.1 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(102.8 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(128.5 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(154.2 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(180 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(205.7 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(231.4 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(257.1 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(282.8 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(308.5 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(334.2 17 17)"/></g><g fill="#F7D44C" stroke="#E0B030" stroke-width="0.3"><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(0 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(20 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(60 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(120 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(180 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(240 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(300 17 17)"/></g><circle cx="17" cy="17" r="4.1" fill="#6B5318" stroke="#5A4512" stroke-width="0.3"/></svg>';
     document.getElementById('custom-modal').style.display = 'flex';
   });
 }
