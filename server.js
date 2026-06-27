@@ -1126,19 +1126,24 @@ app.post('/api/parse-wedding', async (req, res) => {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
+        model: 'claude-haiku-4-5-20251001',
         max_tokens: 500,
         messages: [{
           role: 'user',
-          content: 'Extract wedding details from this text and return ONLY a JSON object with these fields (use null if not mentioned): name1 (string), name2 (string), role1 (bride/groom/partner or null), role2 (bride/groom/partner or null), traditions (array of 1-2 slugs from: sri-lankan-buddhist,thai-buddhist,chinese-taiwanese,catholic,filipino-catholic,greek-orthodox,latin-american-catholic,mexican-catholic,christian-western,cuban,andhra-telugu,arya-samaj,assamese-hindu,bengali-hindu,bihari-hindu,gujarati,kashmiri-pandit,kerala-nair,manipuri-vaishnavite,marathi,hindu-north-indian-punjabi,odia-hindu,rajasthani-marwari,rajasthani-rajput,tamil-hindu,vedic-general,jain-shwetambar,jewish-reform-conservative,khasi,korean,dawoodi-bohra,muslim-nikah,hausa-muslim,yoruba-nigerian,sikh), date (YYYY-MM-DD or null), location (string or null), budget (number or null), guests (number or null). Return ONLY the JSON, no other text. Text: ' + text
+          content: 'Extract wedding details from this text and return ONLY valid JSON (no markdown, no backticks) with these fields (null if not mentioned): {"name1":"string","name2":"string","role1":"bride|groom|partner|null","role2":"bride|groom|partner|null","traditions":["slug1"],"date":"YYYY-MM-DD|null","location":"string|null","budget":number|null,"guests":number|null}. Valid tradition slugs: sri-lankan-buddhist,thai-buddhist,chinese-taiwanese,catholic,filipino-catholic,greek-orthodox,latin-american-catholic,mexican-catholic,christian-western,cuban,andhra-telugu,arya-samaj,assamese-hindu,bengali-hindu,bihari-hindu,gujarati,kashmiri-pandit,kerala-nair,manipuri-vaishnavite,marathi,hindu-north-indian-punjabi,odia-hindu,rajasthani-marwari,rajasthani-rajput,tamil-hindu,vedic-general,jain-shwetambar,jewish-reform-conservative,khasi,korean,dawoodi-bohra,muslim-nikah,hausa-muslim,yoruba-nigerian,sikh. Text: ' + text
         }]
       })
     });
     const data = await response.json();
+    console.log('Anthropic parse response:', JSON.stringify(data).slice(0,300));
+    if (!data.content || !data.content[0]) {
+      return res.status(500).json({ error: 'Anthropic error: ' + JSON.stringify(data) });
+    }
     const raw = data.content[0].text;
-    const clean = raw.replace(/\`\`\`json|\`\`\`/g,'').trim();
+    const clean = raw.replace(/```json|```/g,'').trim();
     res.json({ success: true, parsed: JSON.parse(clean) });
   } catch(e) {
+    console.error('parse-wedding error:', e.message);
     res.status(500).json({ error: e.message });
   }
 });
