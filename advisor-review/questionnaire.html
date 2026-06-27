@@ -999,12 +999,12 @@
       <div class="qs">Choose how you'd like to tell us about your wedding.</div>
       <div class="q0-choice">
         <button class="q0-option" onclick="showParagraphEntry()">
-          <div class="q0-option-title">Tell us about your wedding</div>
-          <div class="q0-option-sub">Describe your wedding in a sentence — we'll pick up the details and only ask what's missing</div>
+          <div class="q0-option-title">Write a few sentences</div>
+          <div class="q0-option-sub">Tell us about your wedding in your own words — we'll do the rest</div>
         </button>
         <button class="q0-option" onclick="startQuestionnaire()">
           <div class="q0-option-title">Answer a few questions</div>
-          <div class="q0-option-sub">We'll guide you step by step — takes about 2 minutes</div>
+          <div class="q0-option-sub">Quick and simple — takes about 2 minutes</div>
         </button>
       </div>
     </div>
@@ -1030,7 +1030,7 @@
     <div class="q-wrap">
       <div class="ql">Let's begin</div>
       <div class="qt">What are your names?</div>
-      <div class="qs">We'll use these throughout your plan — and to personalise your ceremony plan.</div>
+      <div class="qs" id="q1-sub">We'll use these throughout your plan — and to personalise your ceremony plan.</div>
       <div class="name-row">
         <div class="field-group">
           <label class="field-label">Partner one</label>
@@ -2663,9 +2663,11 @@ async function parseParagraph() {
     // Build list of unanswered questions in order
     var nextQ = null;
     if (!parsed.name1 || !parsed.name2) {
+      // Names missing — ask Q1 fully
       nextQ = 'q1'; currentQ = 1;
-    } else if (!parsed.role1 || !parsed.role2) {
-      // Names known but roles not — show Q1 pre-filled with names, role dropdowns open
+    } else if (!S.role1 || S.role1 === 'bride' && !parsed.role1) {
+      // Names extracted but roles not confirmed — skip to role part of Q1
+      // Q1 is pre-filled with names so user only needs to pick roles
       nextQ = 'q1'; currentQ = 1;
     } else if (!parsed.traditions || !parsed.traditions.length) {
       nextQ = 'q4'; currentQ = 4;
@@ -2683,6 +2685,10 @@ async function parseParagraph() {
       // Everything extracted — go straight to plan generation
       submitPlan(); currentQ = 6;
       updateProgress(); return;
+    }
+    if (nextQ === 'q1' && parsed.name1 && parsed.name2) {
+      var q1sub = document.getElementById('q1-sub');
+      if (q1sub) q1sub.textContent = 'Your names are filled in — just let us know how you refer to each other.';
     }
     if (nextQ) transitionTo('q0b', nextQ);
     updateProgress();
