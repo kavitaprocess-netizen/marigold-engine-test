@@ -1919,7 +1919,8 @@ function renderBudget(budgetData) {
 
   function budgetToggleRow(cat, amt, sectionType) {
     // Override with real estimate if available
-    var realPct = VENDOR_PCT[cat];
+    var pctKey = cat === officiantLabel() ? '__OFFICIANT__' : cat;
+    var realPct = VENDOR_PCT[pctKey];
     if (realPct) amt = Math.round(totalBudget * realPct);
     var excKey = sectionType + '::' + cat;
     var excluded = window.budgetExclusions[excKey];
@@ -1947,7 +1948,8 @@ function renderBudget(budgetData) {
     var specificAmt = specificCount > 0 ? Math.round(sectionBudget * 0.35 / specificCount) : 0;
     // Recalculate total excluding unchecked
     var activeTotal = cats.reduce(function(sum,cat){
-      var realPct = VENDOR_PCT[cat];
+      var pctKey = cat === officiantLabel() ? '__OFFICIANT__' : cat;
+    var realPct = VENDOR_PCT[pctKey];
       var amt = realPct ? Math.round(totalBudget * realPct) : (SHARED_VENDOR_CATS.indexOf(cat) >= 0 ? sharedAmt : specificAmt);
       return sum + (window.budgetExclusions[sectionType+'::'+cat] ? 0 : amt);
     }, 0);
@@ -1956,6 +1958,7 @@ function renderBudget(budgetData) {
       '<div class="budget-section-total" id="bst-' + sectionType + (tradSlug||'') + '">' + activeTotal.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>' +
       '<div style="font-size:11px;color:var(--muted);font-style:italic;margin-bottom:10px">tap to include / exclude</div>' +
       cats.map(function(cat){
+        if (cat === '__OFFICIANT__') cat = officiantLabel();
         var isShared = SHARED_VENDOR_CATS.indexOf(cat) >= 0;
         var amt = isShared ? sharedAmt : specificAmt;
         return budgetToggleRow(cat, amt, sectionType+(tradSlug||''));
@@ -2306,12 +2309,26 @@ var CEREMONY_VENDOR_MAP = {
   "chuang men": "Door games & gifts"
 };
 
-var SHARED_VENDOR_CATS = ['Venue hire','Catering & bar','Photography & video','Music & entertainment','Florals & décor','Officiant / pandit / rabbi / imam','Invitations & stationery','Guest accommodation & transport'];
+// Officiant label depends on traditions selected
+  function officiantLabel() {
+    var slugs = S.traditions || [];
+    var labels = [];
+    var has = function(k){ return slugs.some(function(s){ return s.includes(k); }); };
+    if (has('hindu')||has('vedic')||has('jain')||has('rajasthani')||has('gujarati')||has('marathi')||has('tamil')||has('bengali')||has('assamese')||has('bihari')||has('odia')||has('kerala')||has('kashmiri')||has('manipuri')||has('andhra')||has('arya')||has('punjabi')||has('north-indian')) labels.push('Pandit');
+    if (has('sikh')) labels.push('Granthi');
+    if (has('muslim')||has('nikah')||has('bohra')||has('hausa')) labels.push('Imam');
+    if (has('jewish')) labels.push('Rabbi');
+    if (has('catholic')||has('christian')||has('greek')||has('filipino')||has('latin')||has('mexican')) labels.push('Priest');
+    if (has('buddhist')||has('sri-lankan')||has('thai')) labels.push('Monk');
+    if (has('korean')||has('chinese')||has('cuban')||has('yoruba')||has('khasi')) labels.push('Officiant');
+    return labels.length ? labels.join(' / ') : 'Officiant';
+  }
+  var SHARED_VENDOR_CATS = ['Venue hire','Catering & bar','Photography & video','Music & entertainment','Florals & décor','__OFFICIANT__','Invitations & stationery','Guest accommodation & transport']
 
   var VENDOR_PCT = {
     'Venue hire':0.28,'Catering & bar':0.25,'Photography & video':0.10,
     'Music & entertainment':0.05,'Florals & décor':0.08,
-    'Officiant / pandit / rabbi / imam':0.02,'Invitations & stationery':0.02,
+    '__OFFICIANT__':0.02,'Invitations & stationery':0.02,
     'Guest accommodation & transport':0.03,
     'Bridal wear & lehenga':0.06,'Mehndi artist':0.01,'Hair & makeup artist':0.02,
     'Chooda & jewellery':0.02,'Haldi & floral decor':0.01,'Bridal styling':0.01,
