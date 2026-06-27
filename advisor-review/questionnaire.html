@@ -1353,7 +1353,7 @@ const TRADS = [
   {slug:'kerala-nair',label:'Hindu · Kerala / Nair',region:'South Asian'},
   {slug:'manipuri-vaishnavite',label:'Hindu · Manipuri (Vaishnavite)',region:'South Asian'},
   {slug:'marathi',label:'Hindu · Marathi',region:'South Asian'},
-  {slug:'north-indian-punjabi',label:'Hindu · North Indian / Punjabi',region:'South Asian'},
+  {slug:'hindu-north-indian-punjabi',label:'Hindu · North Indian / Punjabi',region:'South Asian'},
   {slug:'odia-hindu',label:'Hindu · Odia',region:'South Asian'},
   {slug:'rajasthani-marwari',label:'Hindu · Rajasthani (Marwari)',region:'South Asian'},
   {slug:'rajasthani-rajput',label:'Hindu · Rajasthani (Rajput)',region:'South Asian'},
@@ -1867,8 +1867,8 @@ function renderCeremonies(items) {
     BUCKETS.map(function(b){ return '<div style="flex:1;font-size:9px;color:var(--muted);font-style:italic;text-align:center;border-left:1px solid var(--bdr);padding:2px 0">' + b + '</div>'; }).join('') +
     '</div></div>';
   el.innerHTML = 
-    '<div style="position:sticky;top:0;z-index:10;background:#FDFAF5;margin-bottom:0">' +
-      '<div style="overflow-x:auto">' + header + '</div>' +
+    '<div style="position:sticky;top:0;z-index:10;background:#FDFAF5;box-shadow:0 2px 4px rgba(255,250,240,0.95);margin-bottom:0">' +
+      '<div style="overflow-x:auto;background:#FDFAF5">' + header + '</div>' +
     '</div>' +
     '<div style="overflow-x:auto"><div style="min-width:600px">' +
       section(pos(n1)+' ceremonies', side1, COLORS.side1) +
@@ -2149,11 +2149,10 @@ function getSelectedCeremonies() {
     ['side1','side2','both'].forEach(function(g) {
       Object.entries(groups[g] || {}).forEach(function(e) {
         var idx = parseInt(e[0]);
-        var origIdx = idx > 1000 ? idx % 1000 : idx;
+        var origIdx = idx >= 10000 ? idx - 10000 : idx;
         if (e[1] !== false) {
           var item = planCeremonies[idx] || planCeremonies[origIdx];
-          // Only deduplicate within 'both' — bride+groom should appear in side1 AND side2
-          var dedupeKey = (g === 'both' ? 'both-' : g + '-') + origIdx;
+          var dedupeKey = g + '-' + origIdx;
           if (item && !seen.has(dedupeKey)) {
             seen.add(dedupeKey);
             selected.push({item:item, idx:origIdx, group:g});
@@ -2210,9 +2209,8 @@ function buildConfirmation() {
       return Object.entries(sel[g]||{}).filter(function(e){ return e[1]!==false; })
         .map(function(e){
           var idx = parseInt(e[0]);
-          // bride+groom copies have high indices — use modulo to get original
           var item = planCeremonies[idx];
-          if (!item && idx > 1000) item = planCeremonies[idx % 1000];
+          if (!item && idx >= 10000) item = planCeremonies[idx - 10000];
           return item;
         }).filter(Boolean);
     }
@@ -2386,7 +2384,11 @@ function showGanttTip(e, el) {
   tip.style.display = 'block';
   var rect = el.getBoundingClientRect();
   var tipH = tip.offsetHeight;
-  tip.style.left = rect.left + 'px';
+  var tipW = tip.offsetWidth;
+  // Pin to top-right corner of bar
+  var left = rect.right - tipW;
+  if (left < 0) left = rect.left;
+  tip.style.left = left + 'px';
   tip.style.top = (rect.top - tipH - 4) + 'px';
   tip.style.visibility = 'visible';
 }
