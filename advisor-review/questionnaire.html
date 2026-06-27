@@ -1093,7 +1093,6 @@
   </div>
 
   <!-- Q7: Ceremony selection -->
-  <!-- Q7: Ceremony selection -->
   <div class="screen" id="q7" style="display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;padding:0!important;overflow:hidden!important;">
     <!-- Scrollable content area -->
     <div id="q7-scroll" style="flex:1;overflow-y:auto;overflow-x:hidden;padding:24px 24px 16px;box-sizing:border-box;min-height:0;">
@@ -2304,7 +2303,11 @@ function getCeremonyVendorCat(ceremonyName) {
 
 function showStartAgainModal() {
   var modal = document.getElementById('start-again-modal');
-  if (modal) { modal.style.display = 'flex'; }
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+  }
 }
 
 document.addEventListener('keydown', function(e) {
@@ -2317,7 +2320,7 @@ document.addEventListener('keydown', function(e) {
 buildGrid();
 updateProgress();
 </script>
-<div id="start-again-modal" style="display:none;position:fixed;inset:0;background:rgba(60,48,16,0.4);z-index:1000;display:none;align-items:center;justify-content:center">
+<div id="start-again-modal" style="display:none;position:fixed;inset:0;background:rgba(60,48,16,0.4);z-index:1000;">
   <div style="background:var(--cream);border-radius:16px;padding:32px;max-width:360px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(60,48,16,0.2)">
     <div style="margin-bottom:16px"> width="26" height="26" viewBox="0 0 34 34" xmlns="http://www.w3.org/2000/svg">
       <g fill="#E0B030" stroke="#C8941A" stroke-width="0.4">
