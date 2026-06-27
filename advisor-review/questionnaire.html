@@ -1094,18 +1094,19 @@
 
   <!-- Q7: Ceremony selection -->
   <div class="screen" id="q7" style="display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;padding:0!important;overflow:hidden!important;">
-    <!-- Scrollable content area -->
     <div id="q7-scroll" style="flex:1;overflow-y:auto;overflow-x:hidden;padding:24px 24px 16px;box-sizing:border-box;min-height:0;">
-    <div style="width:100%;max-width:900px;margin:0 auto">
-      <div class="ql" style="margin-bottom:2px">Your ceremony plan</div>
-      <div class="qt" id="q7-title">Choose your ceremonies</div>
-      <div class="qs" id="q7-sub" style="margin-bottom:4px">Select the ceremonies you want — adjust anything that isn't right for you.</div>
-      <div id="cs-container" style="margin-top:16px;padding-bottom:20px"></div>
+      <div style="width:100%;max-width:900px;margin:0 auto">
+        <div class="ql" style="margin-bottom:2px">Your ceremony plan</div>
+        <div class="qt" id="q7-title">Choose your ceremonies</div>
+        <div class="qs" id="q7-sub" style="margin-bottom:4px">Select the ceremonies you want — adjust anything that isn't right for you.</div>
+        <div id="cs-container" style="margin-top:16px;padding-bottom:20px"></div>
+      </div>
     </div>
-    </div>
-    <div style="flex-shrink:0;padding:0 24px 20px;"><div style="width:100%;max-width:900px;margin:0 auto;padding-top:16px;border-top:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center;">
-      <button class="btn-back" onclick="goBack()">← back</button>
-      <button class="cta" onclick="goToConfirmation()">Review my plan →</button>
+    <div style="flex-shrink:0;padding:0 24px 20px;">
+      <div style="width:100%;max-width:900px;margin:0 auto;padding-top:16px;border-top:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center;">
+        <button class="btn-back" onclick="goBack()">← back</button>
+        <button class="cta" onclick="goToConfirmation()">Review my plan →</button>
+      </div>
     </div>
   </div>
 
@@ -2136,24 +2137,15 @@ function getSelectedCeremonies() {
 }
 
 function goToConfirmation() {
-  console.log('goToConfirmation called, currentQ='+currentQ);
   try {
     buildConfirmation();
-    console.log('buildConfirmation OK');
   } catch(e) {
-    console.error('buildConfirmation error:', e.message, e.stack);
-    document.getElementById('conf-container').innerHTML = '<p style="color:var(--muted);font-style:italic">Could not build confirmation: ' + e.message + '</p>';
+    console.error('buildConfirmation error:', e.message);
+    document.getElementById('conf-container').innerHTML = '<p style="color:var(--muted);font-style:italic">Error: ' + e.message + '</p>';
   }
-  console.log('calling transitionTo q7->q8');
   transitionTo('q7','q8');
   currentQ = 8;
   updateProgress();
-  // Force Q8 visible after delay
-  setTimeout(function() {
-    var q8 = document.getElementById('q8');
-    console.log('q8 classes:', q8 ? q8.className : 'NOT FOUND');
-    console.log('q8 opacity:', q8 ? window.getComputedStyle(q8).opacity : 'N/A');
-  }, 400);
 }
 
 function goBackFromConf() {
