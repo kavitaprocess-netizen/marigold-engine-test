@@ -1843,7 +1843,9 @@ function renderCeremonies(items) {
   function ganttRow(item, color) {
     var b = getBucket(item.timing);
     var name = item.name || item.event || '';
-    var tooltip = name + (item.timing ? ' — ' + item.timing : '') + (item.duration ? ' (' + item.duration + ')' : '');
+    var bucketLabel = ['12+ months before','6–12 months before','3–6 months before','1–3 months before','Weeks before','Day before','Wedding day','After'][b];
+    var timingText = item.timing || bucketLabel;
+    var tooltip = name + ' — ' + timingText + (item.duration ? ' (' + item.duration + ')' : '');
     var safeTooltip = tooltip.replace(/"/g,'&quot;');
     return '<div style="display:flex;align-items:center;margin-bottom:5px;gap:6px">' +
       '<div style="width:160px;flex-shrink:0;font-size:11px;font-style:italic;color:var(--tx);text-align:right;padding-right:8px;line-height:1.3">' + name + '</div>' +
@@ -2369,8 +2371,9 @@ function showGanttTip(e, el) {
   if (!tip) return;
   tip.textContent = el.dataset.tip;
   tip.style.display = 'block';
-  tip.style.left = (e.clientX + 6) + 'px';
-  tip.style.top = (e.clientY - tip.offsetHeight - 6) + 'px';
+  var rect = el.getBoundingClientRect();
+  tip.style.left = rect.left + 'px';
+  tip.style.top = (rect.top - tip.offsetHeight - 4) + 'px';
 }
 function hideGanttTip() {
   var tip = document.getElementById('gantt-tooltip');
