@@ -994,17 +994,17 @@
   <!-- Q0: Entry choice -->
   <div class="screen active" id="q0">
     <div class="q-wrap">
-      <div class="ql">Welcome</div>
-      <div class="qt">Let's plan your wedding</div>
-      <div class="qs">Tell us about your wedding in your own words, or answer a few quick questions.</div>
+      <div class="ql">Welcome to Marigold</div>
+      <div class="qt">How would you like to start?</div>
+      <div class="qs">Choose how you'd like to tell us about your wedding.</div>
       <div class="q0-choice">
         <button class="q0-option" onclick="showParagraphEntry()">
           <div class="q0-option-title">Tell us about your wedding</div>
-          <div class="q0-option-sub">Write a sentence or two — we'll fill in the details</div>
+          <div class="q0-option-sub">Describe your wedding in a sentence — we'll pick up the details and only ask what's missing</div>
         </button>
         <button class="q0-option" onclick="startQuestionnaire()">
           <div class="q0-option-title">Answer a few questions</div>
-          <div class="q0-option-sub">Step by step — takes about 2 minutes</div>
+          <div class="q0-option-sub">We'll guide you step by step — takes about 2 minutes</div>
         </button>
       </div>
     </div>
@@ -1072,6 +1072,7 @@
       </div>
       <div class="err" id="err-q1">Please enter both names to continue.</div>
       <div class="cta-row">
+        <button class="btn-back" onclick="goBackToStart()">← back</button>
         <button class="cta" onclick="goNext(1)">Continue</button>
       </div>
     </div>
@@ -1279,6 +1280,7 @@ var FLOWER_SVG_20 = '<svg width="20" height="20" viewBox="0 0 34 34" xmlns="http
 const S = { name1:'', name2:'', role1:'bride', role2:'groom', userRole:'couple', dateSure:false, locationSure:false, date:'', location:'', traditions:[], traditionAssignment:{}, budget:50000, guests:100, plan:null };
 let guests = 100;
 let currentQ = 0;
+var _cameFromParagraph = false;
 const TOTAL_Q = 6;
 
 // ── Role assignment ──
@@ -2580,7 +2582,16 @@ function showParagraphEntry() {
   updateProgress();
 }
 
+function goBackToStart() {
+  if (typeof _cameFromParagraph !== 'undefined' && _cameFromParagraph) {
+    transitionTo('q1','q0b'); currentQ = '0b';
+  } else {
+    transitionTo('q1','q0'); currentQ = 0;
+  }
+  updateProgress();
+}
 function startQuestionnaire() {
+  _cameFromParagraph = false;
   transitionTo('q0','q1');
   currentQ = 1;
   updateProgress();
@@ -2648,24 +2659,32 @@ async function parseParagraph() {
 
     personalise();
 
-    // Determine first question that needs answering
+    _cameFromParagraph = true;
+    // Build list of unanswered questions in order
+    var nextQ = null;
     if (!parsed.name1 || !parsed.name2) {
-      transitionTo('q0b','q1'); currentQ = 1;
-    } else if (!parsed.date) {
-      transitionTo('q0b','q2'); currentQ = 2;
-    } else if (!parsed.location) {
-      transitionTo('q0b','q3'); currentQ = 3;
+      nextQ = 'q1'; currentQ = 1;
+    } else if (!parsed.role1 || !parsed.role2) {
+      // Names known but roles not — show Q1 pre-filled with names, role dropdowns open
+      nextQ = 'q1'; currentQ = 1;
     } else if (!parsed.traditions || !parsed.traditions.length) {
-      transitionTo('q0b','q4'); currentQ = 4;
+      nextQ = 'q4'; currentQ = 4;
+    } else if (S.traditions.length >= 2 && !Object.keys(S.traditionAssignment).length) {
+      buildQ4b(); nextQ = 'q4b'; currentQ = '4b';
+    } else if (!parsed.date) {
+      nextQ = 'q2'; currentQ = 2;
+    } else if (!parsed.location) {
+      nextQ = 'q3'; currentQ = 3;
     } else if (!parsed.budget) {
-      transitionTo('q0b','q5'); currentQ = 5;
+      nextQ = 'q5'; currentQ = 5;
     } else if (!parsed.guests) {
-      transitionTo('q0b','q6'); currentQ = 6;
+      nextQ = 'q6'; currentQ = 6;
     } else {
       // Everything extracted — go straight to plan generation
-      submitPlan();
-      currentQ = 6;
+      submitPlan(); currentQ = 6;
+      updateProgress(); return;
     }
+    if (nextQ) transitionTo('q0b', nextQ);
     updateProgress();
 
   } catch(err) {
