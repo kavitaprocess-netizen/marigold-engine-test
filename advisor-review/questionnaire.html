@@ -2136,15 +2136,24 @@ function getSelectedCeremonies() {
 }
 
 function goToConfirmation() {
+  console.log('goToConfirmation called, currentQ='+currentQ);
   try {
     buildConfirmation();
+    console.log('buildConfirmation OK');
   } catch(e) {
-    console.error('buildConfirmation error:', e.message);
+    console.error('buildConfirmation error:', e.message, e.stack);
     document.getElementById('conf-container').innerHTML = '<p style="color:var(--muted);font-style:italic">Could not build confirmation: ' + e.message + '</p>';
   }
+  console.log('calling transitionTo q7->q8');
   transitionTo('q7','q8');
   currentQ = 8;
   updateProgress();
+  // Force Q8 visible after delay
+  setTimeout(function() {
+    var q8 = document.getElementById('q8');
+    console.log('q8 classes:', q8 ? q8.className : 'NOT FOUND');
+    console.log('q8 opacity:', q8 ? window.getComputedStyle(q8).opacity : 'N/A');
+  }, 400);
 }
 
 function goBackFromConf() {
