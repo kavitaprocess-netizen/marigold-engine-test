@@ -1014,7 +1014,7 @@
   <div class="screen" id="q0b">
     <div class="q-wrap">
       <div class="ql">Tell us</div>
-      <div class="qt">Describe your wedding</div>
+      <div class="qt">Tell us about your wedding</div>
       <div class="qs">Include names, traditions, location, date, budget and guest count — whatever you know.</div>
       <textarea class="q0-textarea" id="wedding-paragraph" placeholder="e.g. Priya and James are having a Hindu Punjabi and Jewish wedding in New Jersey in October 2026, budget around $80,000, expecting 150 guests…"></textarea>
       <div class="err" id="err-q0b">Please write a few words about your wedding.</div>
@@ -2642,16 +2642,18 @@ async function parseParagraph() {
     }
     if (parsed.date) {
       S.date = parsed.date; S.dateSure = true;
-      document.getElementById('wedding-date').value = parsed.date;
+      var dateEl = document.getElementById('wedding-date');
+      if (dateEl) { dateEl.value = parsed.date; updateQ2Continue(); }
     }
     if (parsed.location) {
       S.location = parsed.location;
-      document.getElementById('location').value = parsed.location;
+      var locEl = document.getElementById('location');
+      if (locEl) { locEl.value = parsed.location; onLocationChange(); }
     }
     if (parsed.budget) {
       S.budget = parsed.budget;
-      document.getElementById('budget-slider').value = parsed.budget;
-      document.getElementById('budget-val').textContent = parsed.budget.toLocaleString();
+      var slider = document.getElementById('budget-slider');
+      if (slider) { slider.value = parsed.budget; onBudgetChange(); }
     }
     if (parsed.guests) {
       guests = parsed.guests; S.guests = parsed.guests;
