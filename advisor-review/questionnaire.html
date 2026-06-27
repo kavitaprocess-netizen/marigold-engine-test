@@ -72,6 +72,46 @@
     width: 100%;
     max-width: 580px;
   }
+  .q0-choice {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 32px;
+    width: 100%;
+    max-width: 480px;
+  }
+  .q0-option {
+    padding: 20px 24px;
+    border: 1.5px solid var(--bdr);
+    border-radius: 12px;
+    background: white;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+  .q0-option:hover { border-color: var(--gd); background: var(--warm); }
+  .q0-option-title { font-size: 16px; font-style: italic; color: var(--deep); margin-bottom: 4px; }
+  .q0-option-sub { font-size: 12px; color: var(--muted); font-style: italic; }
+  .q0-textarea {
+    width: 100%;
+    min-height: 120px;
+    border: 1px solid var(--bdr);
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 14px;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-style: italic;
+    color: var(--tx);
+    background: var(--warm);
+    outline: none;
+    resize: vertical;
+    transition: border-color 0.2s;
+    margin-top: 8px;
+    box-sizing: border-box;
+  }
+  .q0-textarea:focus { border-color: var(--gd); }
+  .q0-textarea::placeholder { color: var(--bdr); }
   .ql {
     font-size: 10px;
     letter-spacing: 2px;
@@ -373,7 +413,23 @@
     justify-content: flex-start;
     top: 57px;
   }
-    .gantt-tooltip { display:none;position:fixed;background:var(--deep);color:var(--cream);font-size:11px;font-style:italic;padding:6px 10px;border-radius:6px;pointer-events:none;z-index:500;max-width:220px;line-height:1.5; }
+    .ceremony-view-toggle { display:flex; gap:8px; margin-bottom:16px; }
+  .view-btn { padding:6px 14px; border:1px solid var(--bdr); border-radius:100px; font-size:11px; font-family:'Playfair Display',serif; font-style:italic; color:var(--muted); background:white; cursor:pointer; transition:all 0.15s; }
+  .view-btn.on { border-color:var(--deep); background:var(--deep); color:var(--cream); }
+  .ceremony-linear { }
+  .cer-section-title { font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:16px 0 8px;font-style:italic;display:flex;align-items:center;gap:8px; }
+  .cer-section-title::after { content:'';flex:1;height:1px;background:var(--bdr); }
+  .cer-card { padding:12px 0;border-bottom:1px solid var(--warm);cursor:pointer; }
+  .cer-card:last-child { border-bottom:none; }
+  .cer-card-header { display:flex;align-items:center;gap:10px; }
+  .cer-dot { width:10px;height:10px;border-radius:50%;flex-shrink:0; }
+  .cer-name { font-size:14px;font-style:italic;color:var(--deep);flex:1; }
+  .cer-timing { font-size:11px;color:var(--muted);font-style:italic; }
+  .cer-toggle-icon { color:var(--muted);transition:transform 0.2s; }
+  .cer-card.open .cer-toggle-icon { transform:rotate(90deg); }
+  .cer-body { display:none;padding:8px 20px;font-size:12px;color:var(--muted);font-style:italic;line-height:1.7; }
+  .cer-card.open .cer-body { display:block; }
+  .gantt-tooltip { display:none;position:fixed;background:var(--deep);color:var(--cream);font-size:11px;font-style:italic;padding:6px 10px;border-radius:6px;pointer-events:none;z-index:500;max-width:220px;line-height:1.5; }
   .results-wrap { width: 100%; max-width: 720px; margin: 0 auto; }
   .results-hero { margin-bottom: 40px; }
   .results-hero h1 {
@@ -935,8 +991,42 @@
 
 <div id="screens">
 
+  <!-- Q0: Entry choice -->
+  <div class="screen active" id="q0">
+    <div class="q-wrap">
+      <div class="ql">Welcome</div>
+      <div class="qt">Let's plan your wedding</div>
+      <div class="qs">Tell us about your wedding in your own words, or answer a few quick questions.</div>
+      <div class="q0-choice">
+        <button class="q0-option" onclick="showParagraphEntry()">
+          <div class="q0-option-title">Tell us about your wedding</div>
+          <div class="q0-option-sub">Write a sentence or two — we'll fill in the details</div>
+        </button>
+        <button class="q0-option" onclick="startQuestionnaire()">
+          <div class="q0-option-title">Answer a few questions</div>
+          <div class="q0-option-sub">Step by step — takes about 2 minutes</div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q0b: Paragraph entry -->
+  <div class="screen" id="q0b">
+    <div class="q-wrap">
+      <div class="ql">Tell us</div>
+      <div class="qt">Describe your wedding</div>
+      <div class="qs">Include names, traditions, location, date, budget and guest count — whatever you know.</div>
+      <textarea class="q0-textarea" id="wedding-paragraph" placeholder="e.g. Priya and James are having a Hindu Punjabi and Jewish wedding in New Jersey in October 2026, budget around $80,000, expecting 150 guests…"></textarea>
+      <div class="err" id="err-q0b">Please write a few words about your wedding.</div>
+      <div class="cta-row">
+        <button class="btn-back" onclick="transitionTo('q0b','q0');currentQ=0;updateProgress()">← back</button>
+        <button class="cta" onclick="parseParagraph()">Build my plan →</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Q1: Names + roles -->
-  <div class="screen active" id="q1">
+  <div class="screen" id="q1">
     <div class="q-wrap">
       <div class="ql">Let's begin</div>
       <div class="qt">What are your names?</div>
@@ -1188,7 +1278,7 @@ var FLOWER_SVG_20 = '<svg width="20" height="20" viewBox="0 0 34 34" xmlns="http
 
 const S = { name1:'', name2:'', role1:'bride', role2:'groom', userRole:'couple', dateSure:false, locationSure:false, date:'', location:'', traditions:[], traditionAssignment:{}, budget:50000, guests:100, plan:null };
 let guests = 100;
-let currentQ = 1;
+let currentQ = 0;
 const TOTAL_Q = 6;
 
 // ── Role assignment ──
@@ -1510,9 +1600,14 @@ function doTransition(from, to) {
 
 const TOTAL_STEPS = 9;
 function updateProgress() {
+  if (currentQ === 0 || currentQ === '0b') {
+    document.getElementById('progress-fill').style.width = '0%';
+    document.getElementById('step-indicator').textContent = '';
+    return;
+  }
   const step = currentQ === '4b' ? 4.5 : (currentQ === 7 ? 7 : currentQ === 8 ? 8 : currentQ);
   document.getElementById('progress-fill').style.width = (step/TOTAL_STEPS*100)+'%';
-  const label = currentQ === '4b' ? '4b of 8' : currentQ + ' of ' + TOTAL_STEPS;
+  const label = currentQ === '4b' ? '4 of ' + TOTAL_STEPS : currentQ + ' of ' + TOTAL_STEPS;
   document.getElementById('step-indicator').textContent = label;
 }
 
@@ -1804,13 +1899,83 @@ function renderChecklist(items) {
 }
 
 // ── Render ceremony gantt chart ──
+var ceremonyView = 'gantt'; // 'gantt' or 'linear'
+function toggleCerCard(el) { el.classList.toggle('open'); }
+function switchCeremonyView(view) {
+  ceremonyView = view;
+  document.querySelectorAll('.view-btn').forEach(function(b){ b.classList.toggle('on', b.dataset.view===view); });
+  var el = document.getElementById('tab-ceremonies');
+  var items = window._lastCeremonyItems;
+  if (items) renderCeremonyContent(el, items);
+}
 function renderCeremonies(items) {
+  window._lastCeremonyItems = items;
   var el = document.getElementById('tab-ceremonies');
   if (!el) return;
   if (!items || !items.length) {
     el.innerHTML = '<p style="color:var(--muted);font-style:italic;padding:20px 0">No ceremony sequence found.</p>';
     return;
   }
+  // Add toggle buttons
+  el.innerHTML = '<div class="ceremony-view-toggle">' +
+    '<button class="view-btn ' + (ceremonyView==='gantt'?'on':'') + '" data-view="gantt" onclick="switchCeremonyView(this.dataset.view)">Timeline</button>' +
+    '<button class="view-btn ' + (ceremonyView==='linear'?'on':'') + '" data-view="linear" onclick="switchCeremonyView(this.dataset.view)">List</button>' +
+    '</div><div id="ceremony-content"></div>';
+  renderCeremonyContent(el, items);
+}
+function renderCeremonyContent(el, items) {
+  var container = document.getElementById('ceremony-content');
+  if (!container) return;
+  if (ceremonyView === 'linear') {
+    renderCeremonyLinear(container, items);
+  } else {
+    renderCeremonyGantt(container, items);
+  }
+}
+function renderCeremonyLinear(container, items) {
+  var n1 = S.name1 || 'Partner one';
+  var n2 = S.name2 || 'Partner two';
+  var n1Role = S.role1 || 'bride';
+  var n2Role = S.role2 || 'groom';
+  var COLORS = {side1:'#C8941A', side2:'#3949AB', both:'#4A7C59'};
+  var side1 = [], side2 = [], both = [];
+  items.forEach(function(item) {
+    var side = item.side || 'both';
+    if (side === 'bride+groom') { side1.push(item); side2.push(item); }
+    else if (side === n1Role) side1.push(item);
+    else if (side === n2Role) side2.push(item);
+    else both.push(item);
+  });
+  function cerCard(item, color) {
+    var name = item.name || item.event || '';
+    var timing = item.timing || '';
+    var duration = item.duration || '';
+    var notes = item.notes || '';
+    return '<div class="cer-card" onclick="toggleCerCard(this)">' +
+      '<div class="cer-card-header">' +
+        '<div class="cer-dot" style="background:' + color + '"></div>' +
+        '<div class="cer-name">' + name + '</div>' +
+        '<div class="cer-timing">' + timing + '</div>' +
+        '<div class="cer-toggle-icon">›</div>' +
+      '</div>' +
+      '<div class="cer-body">' +
+        (duration ? '<div><em>Duration:</em> ' + duration + '</div>' : '') +
+        (notes ? '<div style="margin-top:6px">' + notes + '</div>' : '') +
+      '</div>' +
+    '</div>';
+  }
+  function linSection(title, items2, color) {
+    if (!items2.length) return '';
+    return '<div class="cer-section-title">' + title + '</div>' +
+      items2.map(function(i){ return cerCard(i, color); }).join('');
+  }
+  container.innerHTML = '<div class="ceremony-linear">' +
+    linSection(pos(n1) + ' ceremonies', side1, COLORS.side1) +
+    linSection(pos(n2) + ' ceremonies', side2, COLORS.side2) +
+    linSection('Common ceremonies', both, COLORS.both) +
+    '</div>';
+}
+function renderCeremonyGantt(container, items) {
   var n1 = S.name1 || 'Partner one';
   var n2 = S.name2 || 'Partner two';
   var n1Role = S.role1 || 'bride';
@@ -1866,10 +2031,10 @@ function renderCeremonies(items) {
     BUCKETS.map(function(b){ return '<div style="flex:1;font-size:9px;color:var(--muted);font-style:italic;text-align:center;border-left:1px solid var(--bdr);padding:2px 0">' + b + '</div>'; }).join('') +
     '</div></div>';
   // Gantt: header fixed, body scrollable independently
-  el.style.display = 'flex';
-  el.style.flexDirection = 'column';
-  el.style.height = '420px';
-  el.innerHTML = 
+  container.style.display = 'flex';
+  container.style.flexDirection = 'column';
+  container.style.height = '420px';
+  container.innerHTML = 
     '<div style="flex-shrink:0;background:#FDFAF5;border-bottom:2px solid var(--bdr);padding-bottom:6px;z-index:10;">' +
       '<div style="overflow-x:auto;">' + header + '</div>' +
     '</div>' +
@@ -1881,7 +2046,6 @@ function renderCeremonies(items) {
       '</div>' +
     '</div>';
 }
-
 
 function renderBudget(budgetData) {
   var el = document.getElementById('tab-budget');
@@ -2409,6 +2573,109 @@ document.addEventListener('keydown', function(e) {
     if (btn) btn.click();
   }
 });
+
+function showParagraphEntry() {
+  transitionTo('q0','q0b');
+  currentQ = '0b';
+  updateProgress();
+}
+
+function startQuestionnaire() {
+  transitionTo('q0','q1');
+  currentQ = 1;
+  updateProgress();
+}
+
+async function parseParagraph() {
+  var text = document.getElementById('wedding-paragraph').value.trim();
+  if (!text) { document.getElementById('err-q0b').classList.add('show'); return; }
+  document.getElementById('err-q0b').classList.remove('show');
+
+  // Show loading
+  var btn = document.querySelector('#q0b .cta');
+  if (btn) { btn.disabled = true; btn.textContent = 'Reading your wedding…'; }
+
+  try {
+    var res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: 'Extract wedding details from this text and return ONLY a JSON object with these fields (use null if not mentioned): name1 (string), name2 (string), role1 (bride/groom/partner), role2 (bride/groom/partner), traditions (array of 1-2 slugs from: sri-lankan-buddhist, thai-buddhist, chinese-taiwanese, catholic, filipino-catholic, greek-orthodox, latin-american-catholic, mexican-catholic, christian-western, cuban, andhra-telugu, arya-samaj, assamese-hindu, bengali-hindu, bihari-hindu, gujarati, kashmiri-pandit, kerala-nair, manipuri-vaishnavite, marathi, hindu-north-indian-punjabi, odia-hindu, rajasthani-marwari, rajasthani-rajput, tamil-hindu, vedic-general, jain-shwetambar, jewish-reform-conservative, khasi, korean, dawoodi-bohra, muslim-nikah, hausa-muslim, yoruba-nigerian, sikh), date (YYYY-MM-DD or null), location (string or null), budget (number or null), guests (number or null). Text: ' + text
+        }]
+      })
+    });
+    var data = await res.json();
+    var raw = data.content[0].text;
+    var clean = raw.replace(/```json|```/g,'').trim();
+    var parsed = JSON.parse(clean);
+
+    // Apply extracted values to S
+    if (parsed.name1) { S.name1 = parsed.name1; document.getElementById('name1').value = parsed.name1; }
+    if (parsed.name2) { S.name2 = parsed.name2; document.getElementById('name2').value = parsed.name2; }
+    if (parsed.role1) { S.role1 = parsed.role1; pickRole(1, parsed.role1); }
+    if (parsed.role2) { S.role2 = parsed.role2; pickRole(2, parsed.role2); }
+    if (parsed.traditions && parsed.traditions.length) {
+      parsed.traditions.forEach(function(slug) {
+        if (S.traditions.indexOf(slug) < 0 && S.traditions.length < 2) {
+          S.traditions.push(slug);
+        }
+      });
+      document.querySelectorAll('.trad-chip').forEach(function(c) {
+        c.classList.toggle('on', S.traditions.includes(c.dataset.slug));
+      });
+    }
+    if (parsed.date) {
+      S.date = parsed.date; S.dateSure = true;
+      document.getElementById('wedding-date').value = parsed.date;
+    }
+    if (parsed.location) {
+      S.location = parsed.location;
+      document.getElementById('location').value = parsed.location;
+    }
+    if (parsed.budget) {
+      S.budget = parsed.budget;
+      document.getElementById('budget-slider').value = parsed.budget;
+      document.getElementById('budget-val').textContent = parsed.budget.toLocaleString();
+    }
+    if (parsed.guests) {
+      guests = parsed.guests; S.guests = parsed.guests;
+      document.getElementById('guest-count').textContent = parsed.guests;
+    }
+
+    personalise();
+
+    // Determine first question that needs answering
+    if (!parsed.name1 || !parsed.name2) {
+      transitionTo('q0b','q1'); currentQ = 1;
+    } else if (!parsed.date) {
+      transitionTo('q0b','q2'); currentQ = 2;
+    } else if (!parsed.location) {
+      transitionTo('q0b','q3'); currentQ = 3;
+    } else if (!parsed.traditions || !parsed.traditions.length) {
+      transitionTo('q0b','q4'); currentQ = 4;
+    } else if (!parsed.budget) {
+      transitionTo('q0b','q5'); currentQ = 5;
+    } else if (!parsed.guests) {
+      transitionTo('q0b','q6'); currentQ = 6;
+    } else {
+      // Everything extracted — go straight to plan generation
+      submitPlan();
+      currentQ = 6;
+    }
+    updateProgress();
+
+  } catch(err) {
+    console.error('Parse error:', err);
+    // Fall back to questionnaire with whatever was extracted
+    transitionTo('q0b','q1'); currentQ = 1; updateProgress();
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Build my plan →'; }
+  }
+}
 
 buildGrid();
 updateProgress();
