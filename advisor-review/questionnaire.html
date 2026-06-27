@@ -1867,7 +1867,7 @@ function renderCeremonies(items) {
     BUCKETS.map(function(b){ return '<div style="flex:1;font-size:9px;color:var(--muted);font-style:italic;text-align:center;border-left:1px solid var(--bdr);padding:2px 0">' + b + '</div>'; }).join('') +
     '</div></div>';
   el.innerHTML = 
-    '<div style="position:sticky;top:0;z-index:10;background:#FDFAF5;box-shadow:0 2px 4px rgba(255,250,240,0.95);margin-bottom:0">' +
+    '<div style="position:sticky;top:0;z-index:10;background:#FDFAF5;box-shadow:0 4px 8px #FDFAF5;margin-bottom:0">' +
       '<div style="overflow-x:auto;background:#FDFAF5">' + header + '</div>' +
     '</div>' +
     '<div style="overflow-x:auto"><div style="min-width:600px">' +
@@ -2035,7 +2035,7 @@ function showCeremonySelection(ceremonies) {
       if (side === 'bride+groom') {
         side1.push({item:item, idx:globalIdx});
         var copy = Object.assign({}, item, {_isCopy:true});
-        var copyIdx = ceremonies.length + side2.length + 1000;
+        var copyIdx = globalIdx + 10000;
         side2.push({item:copy, idx:copyIdx});
       } else if (side === n1Role) {
         side1.push({item:item, idx:globalIdx});
