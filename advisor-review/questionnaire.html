@@ -1865,15 +1865,21 @@ function renderCeremonies(items) {
     '<div style="flex:1;display:flex">' +
     BUCKETS.map(function(b){ return '<div style="flex:1;font-size:9px;color:var(--muted);font-style:italic;text-align:center;border-left:1px solid var(--bdr);padding:2px 0">' + b + '</div>'; }).join('') +
     '</div></div>';
+  // Gantt: header fixed, body scrollable independently
+  el.style.display = 'flex';
+  el.style.flexDirection = 'column';
+  el.style.height = '420px';
   el.innerHTML = 
-    '<div style="position:sticky;top:0;z-index:10;background:#FDFAF5;padding-bottom:6px;border-bottom:2px solid var(--bdr);margin-bottom:4px;">' +
-      '<div style="overflow-x:auto;background:#FDFAF5">' + header + '</div>' +
+    '<div style="flex-shrink:0;background:#FDFAF5;border-bottom:2px solid var(--bdr);padding-bottom:6px;z-index:10;">' +
+      '<div style="overflow-x:auto;">' + header + '</div>' +
     '</div>' +
-    '<div style="overflow-x:auto"><div style="min-width:600px">' +
-      section(pos(n1)+' ceremonies', side1, COLORS.side1) +
-      section(pos(n2)+' ceremonies', side2, COLORS.side2) +
-      section('Common ceremonies', both, COLORS.both) +
-    '</div></div>';
+    '<div style="flex:1;overflow-y:auto;overflow-x:auto;">' +
+      '<div style="min-width:600px">' +
+        section(pos(n1)+' ceremonies', side1, COLORS.side1) +
+        section(pos(n2)+' ceremonies', side2, COLORS.side2) +
+        section('Common ceremonies', both, COLORS.both) +
+      '</div>' +
+    '</div>';
 }
 
 
