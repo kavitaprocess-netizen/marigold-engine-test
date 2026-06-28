@@ -2086,16 +2086,12 @@ function renderBudget(budgetData) {
   var totalBudget = S.budget || 50000;
   var n1 = S.name1 || 'Partner one';
   var n2 = S.name2 || 'Partner two';
-  var n1Role = S.role1 || 'bride';
-  var n2Role = S.role2 || 'groom';
   if (!window.budgetExclusions) window.budgetExclusions = {};
 
-  // Build ceremony list per section from selections
-  function getCeremoniesForSection(sectionType, tradSlug) {
+  function getCeremoniesForSection(sectionType) {
     var cers = [];
     var seen = {};
-    var slugs = tradSlug ? [tradSlug] : Object.keys(ceremonySelections);
-    slugs.forEach(function(slug) {
+    Object.keys(ceremonySelections).forEach(function(slug) {
       var sel = ceremonySelections[slug] || {};
       Object.entries(sel[sectionType]||{}).forEach(function(e) {
         if (e[1] === false) return;
@@ -2103,93 +2099,147 @@ function renderBudget(budgetData) {
         var item = planCeremonies[cidx] || (cidx >= 10000 ? planCeremonies[cidx - 10000] : null);
         if (!item) return;
         var name = item.name || item.event || '';
-        if (!seen[name]) { seen[name] = true; cers.push(item); }
+        if (!seen[name]) { seen[name] = true; cers.push({item:item, slug:slug}); }
       });
     });
     return cers;
   }
 
-  // Count all selected ceremonies to proportion budget
-  var side1Cers = getCeremoniesForSection('side1', null);
-  var side2Cers = getCeremoniesForSection('side2', null);
-  var bothCers  = getCeremoniesForSection('both', null);
-  var total = side1Cers.length + side2Cers.length + bothCers.length || 1;
-  var s1Budget = Math.round(totalBudget * side1Cers.length / total);
-  var s2Budget = Math.round(totalBudget * side2Cers.length / total);
-  var bBudget  = Math.round(totalBudget * bothCers.length / total);
+  var side1 = getCeremoniesForSection('side1');
+  var side2 = getCeremoniesForSection('side2');
+  var both  = getCeremoniesForSection('both');
+  var total = side1.length + side2.length + both.length || 1;
+  var s1Budget = Math.round(totalBudget * side1.length / total);
+  var s2Budget = Math.round(totalBudget * side2.length / total);
+  var bBudget  = Math.round(totalBudget * both.length / total);
 
-  // Per-ceremony budget = section budget / number of ceremonies in section
-  function cerBudget(cers, sectionBudget) {
+  function cerAmt(cers, sectionBudget) {
     return cers.length ? Math.round(sectionBudget / cers.length) : 0;
   }
 
-  // Build vendor rows for a ceremony
-  function cerVendorRows(item, cerAmt, sectionType, cerName) {
-    console.log('[budget] ceremony:', item.name, 'vendor_categories:', JSON.stringify(item.vendor_categories));
+  function vendorAmt(cat) {
+    if (VENDOR_PCT[cat]) return Math.round(totalBudget * VENDOR_PCT[cat]);
+    return Math.round(totalBudget * 0.01); // 1% fallback
+  }
+
+  function cerSubtotal(item, budget) {
     var cats = item.vendor_categories && item.vendor_categories.length
       ? item.vendor_categories.map(function(v){ return v.category; })
       : null;
-    if (!cats) return ''; // no vendor categories set yet
-
-    return cats.map(function(cat) {
-      var pctKey = cat;
-      var amt = VENDOR_PCT[pctKey]
-        ? Math.round(totalBudget * VENDOR_PCT[pctKey])
-        : Math.round(cerAmt / Math.max(cats.length, 1));
-      var excKey = sectionType + '::' + cerName + '::' + cat;
-      var excluded = window.budgetExclusions[excKey];
-      var pct = cerAmt > 0 ? Math.min((amt / cerAmt) * 100, 100) : 0;
-      return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0 4px 16px;' + (excluded?'opacity:0.4':'') + '">' +
-        '<input type="checkbox" class="budget-cat-toggle" data-exckey="' + excKey + '" data-section="' + sectionType + '" data-amt="' + amt + '" ' + (excluded?'':'checked') + ' style="accent-color:var(--gd);flex-shrink:0;cursor:pointer">' +
-        '<div style="flex:1;font-size:12px;font-style:italic;color:var(--muted)' + (excluded?';text-decoration:line-through':'') + '">' + cat + '</div>' +
-        '<div style="flex:1;background:var(--warm);border-radius:2px;height:4px;overflow:hidden;max-width:80px"><div style="width:' + pct + '%;height:100%;background:var(--gd);border-radius:2px"></div></div>' +
-        '<div style="font-size:12px;color:var(--muted);min-width:65px;text-align:right;font-style:italic">' + amt.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>' +
-      '</div>';
-    }).join('');
+    if (!cats) return budget;
+    return cats.reduce(function(sum, cat) {
+      var excKey = 'cer::' + (item.name||'') + '::' + cat;
+      return sum + (window.budgetExclusions[excKey] ? 0 : vendorAmt(cat));
+    }, 0);
   }
 
-  // Build a section (bride / groom / common)
-  function sectionHtml(label, cers, sectionBudget, show, sectionType, color) {
-    if (!show || !cers.length) return '';
-    var perCer = cerBudget(cers, sectionBudget);
-    var html = '<div class="budget-section">' +
-      '<div class="budget-section-header" style="display:flex;align-items:center;gap:8px">' +
-        '<div style="width:10px;height:10px;border-radius:50%;background:' + color + ';flex-shrink:0"></div>' +
-        label +
-      '</div>' +
-      '<div class="budget-section-total">' + sectionBudget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>';
+  function cerAccordion(entry, perCerBudget, sectionType, idx) {
+    var item = entry.item;
+    var slug = entry.slug;
+    var name = item.name || item.event || '';
+    var timing = item.timing || '';
+    var cats = item.vendor_categories && item.vendor_categories.length
+      ? item.vendor_categories.map(function(v){ return v.category; })
+      : null;
+    var offLabel = officiantLabelForSlug(slug);
+    var subtotal = cerSubtotal(item, perCerBudget);
+    var accId = 'bacc-' + sectionType + '-' + idx;
 
-    cers.forEach(function(item) {
-      var name = item.name || item.event || '';
-      var hasVendors = item.vendor_categories && item.vendor_categories.length;
-      var rows = cerVendorRows(item, perCer, sectionType, name);
-      html += '<div style="margin-bottom:12px">' +
-        '<div style="font-size:13px;font-style:italic;color:var(--deep);padding:8px 0 4px;border-bottom:1px solid var(--warm);display:flex;justify-content:space-between">' +
-          '<span>' + name + '</span>' +
-          '<span style="font-size:11px;color:var(--muted)">' + (item.timing||'') + '</span>' +
+    var rows = cats ? cats.map(function(cat) {
+      var displayCat = (cat === 'Officiant / pandit / priest') ? offLabel : cat;
+      var amt = vendorAmt(cat);
+      var excKey = 'cer::' + name + '::' + cat;
+      var excluded = window.budgetExclusions[excKey];
+      var barPct = perCerBudget > 0 ? Math.min(Math.round(amt / perCerBudget * 100), 100) : 0;
+      return '<div style="display:flex;align-items:center;gap:8px;padding:6px 12px;border-bottom:1px solid var(--warm);' + (excluded?'opacity:0.45':'') + '">' +
+        '<input type="checkbox" data-exckey="' + excKey + '" data-section="' + sectionType + '" ' + (excluded?'':'checked') + ' onchange="toggleBudgetCat(this)" style="accent-color:var(--gd);cursor:pointer;flex-shrink:0">' +
+        '<span style="flex:1;font-size:12px;font-style:italic;color:var(--muted);' + (excluded?'text-decoration:line-through':'') + '">' + displayCat + '</span>' +
+        '<div style="width:60px;background:var(--warm);border-radius:2px;height:4px;flex-shrink:0;overflow:hidden">' +
+          '<div style="width:' + barPct + '%;height:100%;background:' + (excluded?'var(--bdr)':'var(--gd)') + ';border-radius:2px;transition:width 0.3s"></div>' +
         '</div>' +
-        (hasVendors
-          ? rows
-          : (console.log('[budget] NO VENDORS for:', name, item), '<div style="font-size:11px;color:var(--bdr);font-style:italic;padding:4px 0 4px 16px">Vendor categories not yet set for this ceremony</div>')
-        ) +
+        '<span style="font-size:12px;color:var(--muted);min-width:65px;text-align:right;font-style:italic">' + amt.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</span>' +
       '</div>';
-    });
+    }).join('') : '<div style="font-size:11px;color:var(--bdr);font-style:italic;padding:6px 12px">Vendor categories not yet set</div>';
 
+    return '<div style="border:1px solid var(--bdr);border-radius:8px;margin-bottom:8px;overflow:hidden">' +
+      '<div data-accid="' + accId + '" onclick="toggleBudgetAcc(this.dataset.accid)" style="display:flex;align-items:center;gap:10px;style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;background:var(--cream)">' +
+        '<span id="' + accId + '-arrow" style="font-size:10px;color:var(--muted);transition:transform 0.2s">▶</span>' +
+        '<div style="flex:1">' +
+          '<div style="font-size:13px;font-style:italic;color:var(--deep)">' + name + '</div>' +
+          (timing ? '<div style="font-size:11px;color:var(--muted)">' + timing + '</div>' : '') +
+        '</div>' +
+        '<div id="' + accId + '-total" style="font-size:13px;font-style:italic;color:var(--deep);min-width:70px;text-align:right">' + subtotal.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>' +
+      '</div>' +
+      '<div id="' + accId + '" style="display:none;border-top:1px solid var(--bdr)">' + rows + '</div>' +
+    '</div>';
+  }
+
+  function sectionTab(cers, sectionBudget, sectionType) {
+    if (!cers.length) return '<div style="padding:24px;text-align:center;color:var(--muted);font-style:italic">No ceremonies in this section</div>';
+    var perCer = cerAmt(cers, sectionBudget);
+    var html = '<div style="margin-bottom:16px">';
+    cers.forEach(function(entry, i) {
+      html += cerAccordion(entry, perCer, sectionType, i);
+    });
     html += '</div>';
+    var sectionTotal = cers.reduce(function(sum, entry) { return sum + cerSubtotal(entry.item, perCer); }, 0);
+    html += '<div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--warm);border-radius:8px;font-style:italic">' +
+      '<span style="font-size:13px;color:var(--deep)">Section total</span>' +
+      '<span style="font-size:14px;color:var(--deep);font-weight:600">' + sectionTotal.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</span>' +
+    '</div>';
     return html;
   }
 
-  var showS1 = S.userRole==='couple'||S.userRole==='bride'||S.userRole==='';
-  var showS2 = S.userRole==='couple'||S.userRole==='groom'||S.userRole==='';
+  var sections = [
+    { id:'s1', label: pos(n1) + "'s ceremonies", cers: side1, budget: s1Budget, type: 'side1' },
+    { id:'s2', label: pos(n2) + "'s ceremonies", cers: side2, budget: s2Budget, type: 'side2' },
+    { id:'sb', label: 'Common ceremonies',        cers: both,  budget: bBudget,  type: 'both'  },
+  ].filter(function(s){ return s.cers.length > 0; });
 
-  var html = '<div class="budget-total-display">' + totalBudget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>' +
-    '<div class="budget-sub" style="margin-bottom:20px">total estimated budget · ' + total + ' ceremonies</div>' +
-    sectionHtml(pos(n1) + "'s ceremonies", side1Cers, s1Budget, showS1, 'side1', '#C8941A') +
-    sectionHtml(pos(n2) + "'s ceremonies", side2Cers, s2Budget, showS2, 'side2', '#3949AB') +
-    sectionHtml('Common ceremonies', bothCers, bBudget, true, 'both', '#4A7C59');
+  var activeTab = window._budgetTab || sections[0].id;
 
-  el.innerHTML = html;
+  var tabBar = '<div style="display:flex;border-bottom:1px solid var(--bdr);margin-bottom:20px;overflow-x:auto">' +
+    sections.map(function(s) {
+      var active = s.id === activeTab;
+      var bstyle = 'padding:8px 16px;border:none;background:none;font-size:11px;letter-spacing:1px;font-style:italic;cursor:pointer;border-bottom:2px solid ' + (active?'var(--deep)':'transparent') + ';color:' + (active?'var(--deep)':'var(--muted)') + ';white-space:nowrap;flex-shrink:0';
+      return '<button data-tabid="' + s.id + '" onclick="switchBudgetTab(this.dataset.tabid)" style="' + bstyle + '">' + s.label + '</button>';    }).join('') +
+  '</div>';
+
+  var activeSection = sections.find(function(s){ return s.id === activeTab; }) || sections[0];
+  var tabContent = sectionTab(activeSection.cers, activeSection.budget, activeSection.type);
+
+  el.innerHTML =
+    '<div style="text-align:center;margin-bottom:20px">' +
+      '<div class="budget-total-display">' + totalBudget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>' +
+      '<div class="budget-sub">total estimated budget · ' + total + ' ceremonies</div>' +
+    '</div>' +
+    tabBar +
+    '<div id="budget-tab-content">' + tabContent + '</div>';
 }
+
+function switchBudgetTab(id) {
+  window._budgetTab = id;
+  renderBudget({});
+}
+
+function toggleBudgetAcc(id) {
+  var el = document.getElementById(id);
+  var arrow = document.getElementById(id + '-arrow');
+  if (!el) return;
+  var open = el.style.display !== 'none';
+  el.style.display = open ? 'none' : 'block';
+  if (arrow) arrow.style.transform = open ? '' : 'rotate(90deg)';
+}
+
+function toggleBudgetCat(cb) {
+  var excKey = cb.dataset.exckey;
+  var sectionType = cb.dataset.section;
+  if (!window.budgetExclusions) window.budgetExclusions = {};
+  window.budgetExclusions[excKey] = !cb.checked;
+  renderBudget({});
+}
+
+
 
 
 
