@@ -2084,120 +2084,113 @@ function renderBudget(budgetData) {
     return;
   }
   var totalBudget = S.budget || 50000;
-  var alerts = (budgetData && budgetData.alerts) || [];
-  var n1 = S.name1 || 'Partner one', n2 = S.name2 || 'Partner two';
-  var showS1 = S.userRole==='couple'||S.userRole==='bride'||S.userRole==='';
-  var showS2 = S.userRole==='couple'||S.userRole==='groom'||S.userRole==='';
+  var n1 = S.name1 || 'Partner one';
+  var n2 = S.name2 || 'Partner two';
+  var n1Role = S.role1 || 'bride';
+  var n2Role = S.role2 || 'groom';
   if (!window.budgetExclusions) window.budgetExclusions = {};
 
-  // Derive vendor categories from selected ceremonies per section
-  function getCatsForSection(sectionType, tradSlug) {
-    var cats = [];
+  // Build ceremony list per section from selections
+  function getCeremoniesForSection(sectionType, tradSlug) {
+    var cers = [];
     var seen = {};
     var slugs = tradSlug ? [tradSlug] : Object.keys(ceremonySelections);
     slugs.forEach(function(slug) {
       var sel = ceremonySelections[slug] || {};
       Object.entries(sel[sectionType]||{}).forEach(function(e) {
         if (e[1] === false) return;
-        var item = planCeremonies[parseInt(e[0])];
+        var cidx = parseInt(e[0]);
+        var item = planCeremonies[cidx] || (cidx >= 10000 ? planCeremonies[cidx - 10000] : null);
         if (!item) return;
-        var cat = getCeremonyVendorCat(item.name || item.event || '');
-        if (cat && !seen[cat]) { seen[cat] = true; cats.push(cat); }
+        var name = item.name || item.event || '';
+        if (!seen[name]) { seen[name] = true; cers.push(item); }
       });
     });
-    // Add shared cats not already listed
-    SHARED_VENDOR_CATS.forEach(function(c){ if (!seen[c]) { seen[c]=true; cats.push(c); } });
-    return cats;
+    return cers;
   }
 
-  // Count ceremonies per section
-  var s1Count = 0, s2Count = 0, bCount = 0;
-  Object.values(ceremonySelections).forEach(function(g) {
-    s1Count += Object.values(g.side1||{}).filter(function(v){return v!==false;}).length;
-    s2Count += Object.values(g.side2||{}).filter(function(v){return v!==false;}).length;
-    bCount  += Object.values(g.both||{}).filter(function(v){return v!==false;}).length;
-  });
-  var total = s1Count + s2Count + bCount || 1;
-  var s1B = Math.round(totalBudget * s1Count/total);
-  var s2B = Math.round(totalBudget * s2Count/total);
-  var bB  = Math.round(totalBudget * bCount/total);
+  // Count all selected ceremonies to proportion budget
+  var side1Cers = getCeremoniesForSection('side1', null);
+  var side2Cers = getCeremoniesForSection('side2', null);
+  var bothCers  = getCeremoniesForSection('both', null);
+  var total = side1Cers.length + side2Cers.length + bothCers.length || 1;
+  var s1Budget = Math.round(totalBudget * side1Cers.length / total);
+  var s2Budget = Math.round(totalBudget * side2Cers.length / total);
+  var bBudget  = Math.round(totalBudget * bothCers.length / total);
 
-  function budgetToggleRow(cat, amt, sectionType) {
-    // Override with real estimate if available
-    var pctKey = cat === officiantLabel() ? '__OFFICIANT__' : cat;
-    var realPct = VENDOR_PCT[pctKey];
-    if (realPct) amt = Math.round(totalBudget * realPct);
-    var excKey = sectionType + '::' + cat;
-    var excluded = window.budgetExclusions[excKey];
-    var pct = Math.min(amt > 0 ? (amt / Math.max(s1B,s2B,bB,1) * 100) : 0, 100);
-    return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px' + (excluded?';opacity:0.4':'') + '">' +
-      '<input type="checkbox" class="budget-cat-toggle" data-exckey="' + excKey + '" data-section="' + sectionType + '" data-amt="' + amt + '" ' + (excluded?'':'checked') + ' style="accent-color:var(--gd);flex-shrink:0;cursor:pointer">' +
-      '<div style="flex:1;display:flex;align-items:center;gap:8px">' +
-        '<div style="width:140px;flex-shrink:0;font-size:12px;font-style:italic;color:var(--tx);' + (excluded?'text-decoration:line-through':'') + '">' + cat + '</div>' +
-        '<div style="flex:1;background:var(--warm);border-radius:2px;height:5px;overflow:hidden"><div style="width:' + pct + '%;height:100%;background:var(--gd);border-radius:2px"></div></div>' +
+  // Per-ceremony budget = section budget / number of ceremonies in section
+  function cerBudget(cers, sectionBudget) {
+    return cers.length ? Math.round(sectionBudget / cers.length) : 0;
+  }
+
+  // Build vendor rows for a ceremony
+  function cerVendorRows(item, cerAmt, sectionType, cerName) {
+    console.log('[budget] ceremony:', item.name, 'vendor_categories:', JSON.stringify(item.vendor_categories));
+    var cats = item.vendor_categories && item.vendor_categories.length
+      ? item.vendor_categories.map(function(v){ return v.category; })
+      : null;
+    if (!cats) return ''; // no vendor categories set yet
+
+    return cats.map(function(cat) {
+      var pctKey = cat;
+      var amt = VENDOR_PCT[pctKey]
+        ? Math.round(totalBudget * VENDOR_PCT[pctKey])
+        : Math.round(cerAmt / Math.max(cats.length, 1));
+      var excKey = sectionType + '::' + cerName + '::' + cat;
+      var excluded = window.budgetExclusions[excKey];
+      var pct = cerAmt > 0 ? Math.min((amt / cerAmt) * 100, 100) : 0;
+      return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0 4px 16px;' + (excluded?'opacity:0.4':'') + '">' +
+        '<input type="checkbox" class="budget-cat-toggle" data-exckey="' + excKey + '" data-section="' + sectionType + '" data-amt="' + amt + '" ' + (excluded?'':'checked') + ' style="accent-color:var(--gd);flex-shrink:0;cursor:pointer">' +
+        '<div style="flex:1;font-size:12px;font-style:italic;color:var(--muted)' + (excluded?';text-decoration:line-through':'') + '">' + cat + '</div>' +
+        '<div style="flex:1;background:var(--warm);border-radius:2px;height:4px;overflow:hidden;max-width:80px"><div style="width:' + pct + '%;height:100%;background:var(--gd);border-radius:2px"></div></div>' +
         '<div style="font-size:12px;color:var(--muted);min-width:65px;text-align:right;font-style:italic">' + amt.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  // Build a section (bride / groom / common)
+  function sectionHtml(label, cers, sectionBudget, show, sectionType, color) {
+    if (!show || !cers.length) return '';
+    var perCer = cerBudget(cers, sectionBudget);
+    var html = '<div class="budget-section">' +
+      '<div class="budget-section-header" style="display:flex;align-items:center;gap:8px">' +
+        '<div style="width:10px;height:10px;border-radius:50%;background:' + color + ';flex-shrink:0"></div>' +
+        label +
       '</div>' +
-    '</div>';
+      '<div class="budget-section-total">' + sectionBudget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>';
+
+    cers.forEach(function(item) {
+      var name = item.name || item.event || '';
+      var hasVendors = item.vendor_categories && item.vendor_categories.length;
+      var rows = cerVendorRows(item, perCer, sectionType, name);
+      html += '<div style="margin-bottom:12px">' +
+        '<div style="font-size:13px;font-style:italic;color:var(--deep);padding:8px 0 4px;border-bottom:1px solid var(--warm);display:flex;justify-content:space-between">' +
+          '<span>' + name + '</span>' +
+          '<span style="font-size:11px;color:var(--muted)">' + (item.timing||'') + '</span>' +
+        '</div>' +
+        (hasVendors
+          ? rows
+          : (console.log('[budget] NO VENDORS for:', name, item), '<div style="font-size:11px;color:var(--bdr);font-style:italic;padding:4px 0 4px 16px">Vendor categories not yet set for this ceremony</div>')
+        ) +
+      '</div>';
+    });
+
+    html += '</div>';
+    return html;
   }
 
-  function sectionBlock(label, sectionBudget, show, sectionType, tradSlug) {
-    if (!show || sectionBudget <= 0) return '';
-    var cats = sectionType === 'both' ? 
-      SHARED_VENDOR_CATS.concat(getCatsForSection(sectionType, tradSlug).filter(function(c){ return SHARED_VENDOR_CATS.indexOf(c) < 0; })) :
-      getCatsForSection(sectionType, tradSlug);
-    if (!cats.length) cats = SHARED_VENDOR_CATS;
-    // Weight: shared items (Venue, Catering etc) get higher allocation
-    var sharedCount = SHARED_VENDOR_CATS.filter(function(c){ return cats.indexOf(c) >= 0; }).length;
-    var specificCount = cats.length - sharedCount;
-    var sharedAmt = sharedCount > 0 ? Math.round(sectionBudget * 0.65 / sharedCount) : 0;
-    var specificAmt = specificCount > 0 ? Math.round(sectionBudget * 0.35 / specificCount) : 0;
-    // Recalculate total excluding unchecked
-    var activeTotal = cats.reduce(function(sum,cat){
-      var pctKey = cat === officiantLabel() ? '__OFFICIANT__' : cat;
-    var realPct = VENDOR_PCT[pctKey];
-      var amt = realPct ? Math.round(totalBudget * realPct) : (SHARED_VENDOR_CATS.indexOf(cat) >= 0 ? sharedAmt : specificAmt);
-      return sum + (window.budgetExclusions[sectionType+'::'+cat] ? 0 : amt);
-    }, 0);
-    return '<div class="budget-section">' +
-      '<div class="budget-section-header">' + label + '</div>' +
-      '<div class="budget-section-total" id="bst-' + sectionType + (tradSlug||'') + '">' + activeTotal.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>' +
-      '<div style="font-size:11px;color:var(--muted);font-style:italic;margin-bottom:10px">tap to include / exclude</div>' +
-      cats.map(function(cat){
-        if (cat === '__OFFICIANT__') cat = officiantLabel();
-        var isShared = SHARED_VENDOR_CATS.indexOf(cat) >= 0;
-        var amt = isShared ? sharedAmt : specificAmt;
-        return budgetToggleRow(cat, amt, sectionType+(tradSlug||''));
-      }).join('') +
-    '</div>';
-  }
+  var showS1 = S.userRole==='couple'||S.userRole==='bride'||S.userRole==='';
+  var showS2 = S.userRole==='couple'||S.userRole==='groom'||S.userRole==='';
 
-  // For interfaith: show per-tradition sections
-  var trad1 = S.traditions[0], trad2 = S.traditions[1] || null;
-  var alertsHtml = alerts.map(function(a){ return '<div class="conflict-banner" style="margin-bottom:8px">' + a.message + '</div>'; }).join('');
-  var html = alertsHtml +
-    '<div class="budget-total-display">' + totalBudget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>' +
-    '<div class="budget-sub" style="margin-bottom:20px">total estimated budget</div>';
-
-  if (trad2) {
-    // Interfaith: 6 sections (3 per tradition)
-    var tradInfo1 = TRADS.find(function(t){return t.slug===trad1;})||{label:trad1};
-    var tradInfo2 = TRADS.find(function(t){return t.slug===trad2;})||{label:trad2};
-    html += '<div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px">' + tradInfo1.label + '</div>';
-    html += sectionBlock(pos(n1)+' ceremonies', Math.round(s1B/2), showS1, 'side1', trad1);
-    html += sectionBlock(pos(n2)+' ceremonies', Math.round(s2B/2), showS2, 'side2', trad1);
-    html += sectionBlock('Common', Math.round(bB/2), true, 'both', trad1);
-    html += '<div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:20px 0 12px">' + tradInfo2.label + '</div>';
-    html += sectionBlock(pos(n1)+' ceremonies', Math.round(s1B/2), showS1, 'side1', trad2);
-    html += sectionBlock(pos(n2)+' ceremonies', Math.round(s2B/2), showS2, 'side2', trad2);
-    html += sectionBlock('Common', Math.round(bB/2), true, 'both', trad2);
-  } else {
-    html += sectionBlock(pos(n1)+' ceremonies', s1B, showS1, 'side1', null);
-    html += sectionBlock(pos(n2)+' ceremonies', s2B, showS2, 'side2', null);
-    html += sectionBlock('Common ceremonies', bB, true, 'both', null);
-  }
+  var html = '<div class="budget-total-display">' + totalBudget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) + '</div>' +
+    '<div class="budget-sub" style="margin-bottom:20px">total estimated budget · ' + total + ' ceremonies</div>' +
+    sectionHtml(pos(n1) + "'s ceremonies", side1Cers, s1Budget, showS1, 'side1', '#C8941A') +
+    sectionHtml(pos(n2) + "'s ceremonies", side2Cers, s2Budget, showS2, 'side2', '#3949AB') +
+    sectionHtml('Common ceremonies', bothCers, bBudget, true, 'both', '#4A7C59');
 
   el.innerHTML = html;
 }
+
 
 
 // ── Ceremony selection state ──
