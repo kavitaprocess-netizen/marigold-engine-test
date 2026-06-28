@@ -78,7 +78,6 @@
     gap: 16px;
     margin-top: 32px;
     width: 100%;
-    max-width: 480px;
   }
   .q0-option {
     padding: 20px 24px;
@@ -993,12 +992,12 @@
 
   <!-- Q0: Entry choice -->
   <div class="screen active" id="q0">
-    <div class="q-wrap" style="text-align:center;align-items:center">
+    <div class="q-wrap">
       <div id="q0-flower" style="margin-bottom:20px"></div>
       <div class="ql">Welcome</div>
-      <div class="qt" style="margin-bottom:8px">Let's plan your wedding</div>
-      <div class="qs" style="margin-bottom:32px;max-width:360px">Tell us about your wedding in your own words, or step through a few quick questions.</div>
-      <div class="q0-choice" style="width:100%;max-width:400px">
+      <div class="qt">Let's plan your wedding</div>
+      <div class="qs" style="margin-bottom:32px">Tell us about your wedding in your own words, or step through a few quick questions.</div>
+      <div class="q0-choice">
         <button class="q0-option" onclick="showParagraphEntry()">
           <div class="q0-option-title">✍️ &nbsp;Write a few sentences</div>
           <div class="q0-option-sub">Tell us about your wedding — we'll pick up the details and only ask what's missing</div>
@@ -1016,19 +1015,12 @@
     <div class="q-wrap">
       <div class="ql">Your wedding</div>
       <div class="qt">Tell us about your wedding</div>
-      <div class="qs" style="margin-bottom:20px;line-height:1.8">
-        Write a sentence or two — names, traditions, where and when, budget, guests.<br>
-        <span style="font-size:12px;color:var(--bdr)">Include as much or as little as you know.</span>
-      </div>
-      <div style="position:relative;width:100%;max-width:520px">
-        <textarea class="q0-textarea" id="wedding-paragraph"
-          placeholder="e.g. Priya and James are having a Hindu Punjabi and Jewish wedding in New Jersey in October 2026, around $80,000 budget and 150 guests…"
-          oninput="var btn=document.getElementById('q0b-btn');if(btn)btn.disabled=this.value.trim().length<5;"
-        ></textarea>
-        <div style="position:absolute;bottom:10px;right:12px;font-size:11px;color:var(--bdr);font-style:italic;pointer-events:none">
-          press <kbd style="font-family:inherit;background:var(--warm);padding:1px 5px;border-radius:3px;border:1px solid var(--bdr)">↵</kbd> to build
-        </div>
-      </div>
+      <div class="qs" style="margin-bottom:20px">Write a sentence or two — names, traditions, where and when, budget, guests. Include as much or as little as you know.</div>
+      <textarea class="q0-textarea" id="wedding-paragraph"
+        placeholder="e.g. Priya and James are having a Hindu Punjabi and Jewish wedding in New Jersey in October 2026, around $80,000 budget and 150 guests…"
+        oninput="var btn=document.getElementById('q0b-btn');if(btn)btn.disabled=this.value.trim().length<5;"
+        style="width:100%"
+      ></textarea>
       <div class="err" id="err-q0b">Please write a few words about your wedding.</div>
       <div class="cta-row" style="margin-top:24px">
         <button class="btn-back" onclick="transitionTo('q0b','q0');currentQ=0;updateProgress()">← back</button>
