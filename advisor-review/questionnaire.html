@@ -1050,7 +1050,7 @@
         <div class="role-sentences">
           <div class="role-sentence">
             <span class="role-sentence-name" id="role-name1">Partner one</span>
-            <span class="role-sentence-is"> is the </span>
+            <span class="role-sentence-is">&nbsp;is the&nbsp;</span>
             <span class="role-dropdown" id="role-dd1">
               <span class="role-dd-value" id="role-val1" onclick="toggleRoleDD(1,event)">Select &#9662;</span>
               <div class="role-dd-menu" id="role-menu1">
@@ -1062,7 +1062,7 @@
           </div>
           <div class="role-sentence">
             <span class="role-sentence-name" id="role-name2">Partner two</span>
-            <span class="role-sentence-is"> is the </span>
+            <span class="role-sentence-is">&nbsp;is the&nbsp;</span>
             <span class="role-dropdown" id="role-dd2">
               <span class="role-dd-value" id="role-val2" onclick="toggleRoleDD(2,event)">Select &#9662;</span>
               <div class="role-dd-menu" id="role-menu2">
@@ -2527,17 +2527,24 @@ var CEREMONY_VENDOR_MAP = {
 };
 
 // Officiant label depends on traditions selected
-  function officiantLabel() {
+  function officiantLabelForSlug(slug) {
+    var s = slug || '';
+    var has = function(k){ return s.includes(k); };
+    if (has('hindu')||has('vedic')||has('jain')||has('rajasthani')||has('gujarati')||has('marathi')||has('tamil')||has('bengali')||has('assamese')||has('bihari')||has('odia')||has('kerala')||has('kashmiri')||has('manipuri')||has('andhra')||has('arya')||has('punjabi')||has('north-indian')) return 'Pandit';
+    if (has('sikh')) return 'Granthi';
+    if (has('muslim')||has('nikah')||has('bohra')||has('hausa')) return 'Imam';
+    if (has('jewish')) return 'Rabbi';
+    if (has('catholic')||has('christian')||has('greek')||has('filipino')||has('latin')||has('mexican')) return 'Priest';
+    if (has('buddhist')||has('sri-lankan')||has('thai')) return 'Monk';
+    return 'Officiant';
+  }
+  function officiantLabel(slug) {
+    // If slug provided, return label for that tradition only
+    if (slug) return officiantLabelForSlug(slug);
+    // Otherwise combine all traditions (single-faith or fallback)
     var slugs = S.traditions || [];
-    var labels = [];
-    var has = function(k){ return slugs.some(function(s){ return s.includes(k); }); };
-    if (has('hindu')||has('vedic')||has('jain')||has('rajasthani')||has('gujarati')||has('marathi')||has('tamil')||has('bengali')||has('assamese')||has('bihari')||has('odia')||has('kerala')||has('kashmiri')||has('manipuri')||has('andhra')||has('arya')||has('punjabi')||has('north-indian')) labels.push('Pandit');
-    if (has('sikh')) labels.push('Granthi');
-    if (has('muslim')||has('nikah')||has('bohra')||has('hausa')) labels.push('Imam');
-    if (has('jewish')) labels.push('Rabbi');
-    if (has('catholic')||has('christian')||has('greek')||has('filipino')||has('latin')||has('mexican')) labels.push('Priest');
-    if (has('buddhist')||has('sri-lankan')||has('thai')) labels.push('Monk');
-    if (has('korean')||has('chinese')||has('cuban')||has('yoruba')||has('khasi')) labels.push('Officiant');
+    var seen = {};
+    var labels = slugs.map(function(s){ return officiantLabelForSlug(s); }).filter(function(l){ if(seen[l])return false; seen[l]=true; return true; });
     return labels.length ? labels.join(' / ') : 'Officiant';
   }
   var SHARED_VENDOR_CATS = ['Venue hire','Catering & bar','Photography & video','Music & entertainment','Florals & décor','__OFFICIANT__','Invitations & stationery','Guest accommodation & transport']
