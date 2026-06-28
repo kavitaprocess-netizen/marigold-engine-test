@@ -807,6 +807,18 @@ function renderCeremonyItems(canEdit){
           <div class="item-field"><label>Typical guest count</label><input value="\${esc(item.typical_size||'')}" \${canEdit?\`oninput="workingData.ceremony_sequence[\${i}].typical_size=this.value"\`:' disabled'}></div>
           <div class="item-field"><label>Location type</label><input value="\${esc(item.location_type||'')}" \${canEdit?\`oninput="workingData.ceremony_sequence[\${i}].location_type=this.value"\`:' disabled'}></div>
           <div class="item-field full"><label>Notes</label><textarea \${canEdit?\`oninput="workingData.ceremony_sequence[\${i}].notes=this.value"\`:' disabled'}>\${esc(item.notes||'')}</textarea></div>
+          <div class="item-field full">
+            <label>Vendor categories <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">— tick all that apply to this ceremony</span></label>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
+              \${'["Venue hire","Catering & bar","Photography & video","Music & entertainment","Florals & décor","Hair & makeup (bride)","Officiant / pandit / priest","Mehndi artist","Horse & procession","Dhol & band","Bridal wear & styling","Menswear & styling","Invitations & stationery","Lighting & AV","Cake & desserts","Transport (couple)","Guest accommodation","Henna for guests"]'.split(',').map(c=>c.replace(/[\\[\\]"]/g,'')).filter(c=>c).map(cat => {
+                const checked = (item.vendor_categories||[]).some(v=>v.category===cat);
+                return '<label style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid '+(checked?'var(--gold)':'var(--border)')+';border-radius:20px;background:'+(checked?'var(--gold-light)':'white')+';font-size:11px;cursor:'+(canEdit?'pointer':'default')+';white-space:nowrap;margin:2px">'
+                  + '<input type="checkbox" '+(checked?'checked ':' ')+(canEdit?'onchange="toggleVc('+i+',\\''+cat+'\\',this.checked)"':'disabled')+' style="accent-color:var(--gold)">'
+                  + cat + '</label>';
+              }).join('')}
+            </div>
+            \${canEdit?'<div style="font-size:11px;color:var(--muted);margin-top:6px;font-style:italic">Missing a vendor category? Note it in the Sources & verification notes field and we'll add it to the list.</div>':''}
+          </div>
         </div>
         \${canEdit?\`<div class="item-actions"><button class="btn btn-sm btn-danger" onclick="removeItem('ceremony_sequence',\${i})">Remove event</button></div>\`:''}
       </div>
@@ -853,14 +865,18 @@ function renderBudgetItems(canEdit){
       </div>
     </div>\`).join('');
 }
-function updateCeremonyVendors(i, text) {
-  var lines = text.split('\\n').filter(function(l){ return l.trim(); });
-  workingData.ceremony_sequence[i].vendor_categories = lines.map(function(line) {
-    var parts = line.split(',');
-    var cat = parts[0].trim();
-    var pct = parseFloat(parts[1]) || 0;
-    return { category: cat, typical_pct_of_ceremony_budget: pct };
-  }).filter(function(v){ return v.category; });
+function toggleVc(i, cat, checked) {
+  if (!workingData.ceremony_sequence[i].vendor_categories) workingData.ceremony_sequence[i].vendor_categories = [];
+  if (checked) {
+    // Add if not already present
+    if (!workingData.ceremony_sequence[i].vendor_categories.some(function(v){ return v.category === cat; })) {
+      workingData.ceremony_sequence[i].vendor_categories.push({category: cat, typical_pct_of_ceremony_budget: 0});
+    }
+  } else {
+    // Remove
+    workingData.ceremony_sequence[i].vendor_categories = workingData.ceremony_sequence[i].vendor_categories.filter(function(v){ return v.category !== cat; });
+  }
+  refreshLists();
 }
 function toggleItem(id){const el=document.getElementById(id);if(el)el.classList.toggle('open');}
 // ============================================================================
