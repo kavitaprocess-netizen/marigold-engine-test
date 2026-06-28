@@ -853,6 +853,15 @@ function renderBudgetItems(canEdit){
       </div>
     </div>\`).join('');
 }
+function updateCeremonyVendors(i, text) {
+  var lines = text.split('\\n').filter(function(l){ return l.trim(); });
+  workingData.ceremony_sequence[i].vendor_categories = lines.map(function(line) {
+    var parts = line.split(',');
+    var cat = parts[0].trim();
+    var pct = parseFloat(parts[1]) || 0;
+    return { category: cat, typical_pct_of_ceremony_budget: pct };
+  }).filter(function(v){ return v.category; });
+}
 function toggleItem(id){const el=document.getElementById(id);if(el)el.classList.toggle('open');}
 // ============================================================================
 // CUSTOM MODAL — replaces browser confirm() and prompt()
