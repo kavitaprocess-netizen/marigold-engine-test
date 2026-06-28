@@ -1952,12 +1952,20 @@ function renderCeremonyLinear(container, items) {
   var n2Role = S.role2 || 'groom';
   var COLORS = {side1:'#C8941A', side2:'#3949AB', both:'#4A7C59'};
   var side1 = [], side2 = [], both = [];
+  var seenSide1 = {}, seenSide2 = {}, seenBoth = {};
   items.forEach(function(item) {
     var side = item.side || 'both';
-    if (side === 'bride+groom') { side1.push(item); side2.push(item); }
-    else if (side === n1Role) side1.push(item);
-    else if (side === n2Role) side2.push(item);
-    else both.push(item);
+    var name = item.name || item.event || '';
+    if (side === 'bride+groom') {
+      if (!seenSide1[name]) { seenSide1[name] = true; side1.push(item); }
+      if (!seenSide2[name]) { seenSide2[name] = true; side2.push(item); }
+    } else if (side === n1Role) {
+      if (!seenSide1[name]) { seenSide1[name] = true; side1.push(item); }
+    } else if (side === n2Role) {
+      if (!seenSide2[name]) { seenSide2[name] = true; side2.push(item); }
+    } else {
+      if (!seenBoth[name]) { seenBoth[name] = true; both.push(item); }
+    }
   });
   function cerCard(item, color) {
     var name = item.name || item.event || '';
@@ -2009,12 +2017,20 @@ function renderCeremonyGantt(container, items) {
   }
   var COLORS = {side1:'#C8941A', side2:'#3949AB', both:'#4A7C59', 'bride+groom':'#7B1FA2'};
   var side1 = [], side2 = [], both = [];
+  var seenSide1 = {}, seenSide2 = {}, seenBoth = {};
   items.forEach(function(item) {
     var side = item.side || 'both';
-    if (side === 'bride+groom') { side1.push(item); side2.push(item); }
-    else if (side === n1Role) side1.push(item);
-    else if (side === n2Role) side2.push(item);
-    else both.push(item);
+    var name = item.name || item.event || '';
+    if (side === 'bride+groom') {
+      if (!seenSide1[name]) { seenSide1[name] = true; side1.push(item); }
+      if (!seenSide2[name]) { seenSide2[name] = true; side2.push(item); }
+    } else if (side === n1Role) {
+      if (!seenSide1[name]) { seenSide1[name] = true; side1.push(item); }
+    } else if (side === n2Role) {
+      if (!seenSide2[name]) { seenSide2[name] = true; side2.push(item); }
+    } else {
+      if (!seenBoth[name]) { seenBoth[name] = true; both.push(item); }
+    }
   });
   var colW = 100 / BUCKETS.length;
   function ganttRow(item, color) {
@@ -2335,10 +2351,12 @@ function getSelectedCeremonies() {
         var origIdx = idx >= 10000 ? idx - 10000 : idx;
         if (e[1] !== false) {
           var item = planCeremonies[idx] || planCeremonies[origIdx];
-          var dedupeKey = g + '-' + origIdx;
+          // Dedupe: for bride+groom ceremonies, only include once (from side1 pass)
+          // use origIdx as key — side1 and side2 copies of same ceremony get same key
+          var dedupeKey = origIdx;
           if (item && !seen.has(dedupeKey)) {
             seen.add(dedupeKey);
-            selected.push({item:item, idx:origIdx, group:g});
+            selected.push({item:item, idx:origIdx});
           }
         }
       });
