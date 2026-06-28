@@ -817,8 +817,7 @@ function renderCeremonyItems(canEdit){
                   + cat + '</label>';
               }).join('')}
             </div>
-            \${canEdit?'<div style="font-size:11px;color:var(--muted);margin-top:6px;font-style:italic">Missing a vendor category? Note it in the Sources & verification notes field and we'll add it to the list.</div>':''}
-          </div>
+                      </div>
         </div>
         \${canEdit?\`<div class="item-actions"><button class="btn btn-sm btn-danger" onclick="removeItem('ceremony_sequence',\${i})">Remove event</button></div>\`:''}
       </div>
