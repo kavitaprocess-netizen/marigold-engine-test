@@ -1706,33 +1706,40 @@ function showResults() {
 
 function populateResults() {
   if (!S.plan) { console.error('populateResults: S.plan is null'); return; }
-  const p = S.plan;
-  const names = S.name2?`${S.name1} & ${S.name2}`:S.name1;
-  const tradNames = S.traditions.map(function(s){ var t=TRADS.find(function(t){return t.slug===s;}); return t?t.label:s; }).join(' + ');
+  var p = S.plan;
+  var names = S.name2 ? (S.name1 + ' & ' + S.name2) : S.name1;
+  var tradNames = S.traditions.map(function(s){
+    var t = TRADS.find(function(t){ return t.slug===s; });
+    return t ? t.label : s;
+  }).join(' + ');
 
-  document.getElementById('results-title').innerHTML = `<em>${names}</em> — your wedding plan`;
-  const dateStr = S.date
+  document.getElementById('results-title').innerHTML = '<em>' + names + '</em> — your wedding plan';
+  var dateStr = S.date
     ? new Date(S.date).toLocaleDateString('en-US',{month:'long',year:'numeric'})
     : 'Date to be confirmed';
-  document.getElementById('results-subtitle').textContent = `${tradNames} · ${S.budget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0})} · ${S.guests} guests · ${dateStr}`;
+  var budgetStr = (S.budget||0).toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0});
+  document.getElementById('results-subtitle').textContent = tradNames + ' · ' + budgetStr + ' · ' + S.guests + ' guests · ' + dateStr;
 
-  // Date not confirmed banner
+  document.getElementById('conflicts-wrap').innerHTML = '';
   if (!S.dateSure) {
-    const dateNote = document.createElement('div');
+    var dateNote = document.createElement('div');
     dateNote.className = 'conflict-banner';
     dateNote.innerHTML = '<em>Wedding date not yet confirmed</em> — checklist milestones are shown relative to your wedding date. Add your date any time to get calendar-specific guidance.';
-    document.getElementById('conflicts-wrap').prepend(dateNote);
+    document.getElementById('conflicts-wrap').appendChild(dateNote);
   }
 
   if (p.conflicts && p.conflicts.length) {
-    document.getElementById('conflicts-wrap').innerHTML = p.conflicts.map(c=>
-      `<div class="conflict-banner">Note — ${c.description||c.message||JSON.stringify(c)}</div>`
-    ).join('');
+    p.conflicts.forEach(function(c) {
+      var div = document.createElement('div');
+      div.className = 'conflict-banner';
+      div.textContent = 'Note — ' + (c.description||c.message||'');
+      document.getElementById('conflicts-wrap').appendChild(div);
+    });
   }
 
-  renderChecklist(p.checklist||[]);
-  renderCeremonies(p.ceremonySequence||p.ceremonies||[]);
-  renderBudget(p.budget||p.budgetBreakdown||[]);
+  try { renderChecklist(p.checklist||[]); } catch(e) { console.error('renderChecklist:', e); }
+  try { renderCeremonies(p.ceremonySequence||p.ceremonies||[]); } catch(e) { console.error('renderCeremonies:', e); }
+  try { renderBudget(p.budget||p.budgetBreakdown||{}); } catch(e) { console.error('renderBudget:', e); }
 }
 
 function switchTab(name, btn) {
