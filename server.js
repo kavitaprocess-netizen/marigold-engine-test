@@ -3016,8 +3016,8 @@ function renderCeremonies(items) {
     return '<div style="display:flex;align-items:center;margin-bottom:5px;gap:6px">'
       +'<div style="width:160px;flex-shrink:0;font-size:11px;font-style:italic;color:var(--tx);text-align:right;padding-right:8px;line-height:1.3;position:sticky;left:0;background:var(--cream);z-index:2">'+name+'</div>'
       +'<div style="flex:1;height:28px;position:relative">'
-        +'<div style="position:absolute;left:'+(b*(100/BUCKETS.length)).toFixed(1)+'%;width:'+colW+'%;height:100%;background:'+color+';border-radius:4px;display:flex;align-items:center;padding:0 6px;box-sizing:border-box" title="'+timing+'">'
-          +'<span style="font-size:9px;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+timing+'</span>'
+        +'<div title="'+name+(timing?' — '+timing:'')+'" style="position:absolute;left:'+(b*(100/BUCKETS.length)).toFixed(1)+'%;width:'+colW+'%;height:100%;background:'+color+';border-radius:4px;box-sizing:border-box;overflow:hidden;cursor:default">'
+          +'<div style="position:absolute;top:2px;left:4px;right:2px;font-size:9px;color:white;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><b>'+name+'</b>'+(timing?' — '+timing:'')+'</div>'
         +'</div>'
       +'</div>'
     +'</div>';
@@ -3486,6 +3486,7 @@ function buildConfirmation() {
 function buildFinalPlan() {
   window.budgetExclusions = {};
   window._budgetTab = null;
+  window._ceremonyView = null;
   var selected = getSelectedCeremonies();
   if (S.plan) {
     S.plan.selectedCeremonies = selected;
@@ -3510,7 +3511,7 @@ document.addEventListener('click', function(e) {
 });
 
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' && typeof currentQ !== 'undefined' && currentQ <= 6) {
+  if (e.key === 'Enter' && typeof currentQ !== 'undefined' && currentQ >= 1 && currentQ <= 6) {
     var btn = document.querySelector('.screen.active .cta');
     if (btn) btn.click();
   }
@@ -3554,14 +3555,34 @@ async function parseParagraph() {
     if (parsed.budget) { S.budget=parsed.budget; var sl=document.getElementById('budget-slider'); if(sl){sl.value=parsed.budget; onBudgetChange();} }
     if (parsed.guests) { guests=parsed.guests; S.guests=parsed.guests; var el=document.getElementById('guest-count'); if(el) el.textContent=parsed.guests; }
     personalise();
-    if (!pname1||!pname2||!prole1||!prole2) { transitionTo('q0b','q1'); currentQ=1; updateProgress(); setTimeout(function(){ updateRoleLabels(); updateQ1Continue(); }, 270); }
-    else if (!p.date) { transitionTo('q0b','q2'); currentQ=2; updateProgress(); }
-    else if (!p.location) { transitionTo('q0b','q3'); currentQ=3; updateProgress(); }
-    else if (!p.traditions||!p.traditions.length) { transitionTo('q0b','q4'); currentQ=4; updateProgress(); }
-    else if (!p.budget) { transitionTo('q0b','q5'); currentQ=5; updateProgress(); }
-    else if (!p.guests) { transitionTo('q0b','q6'); currentQ=6; updateProgress(); }
-    else { submitPlan(); currentQ=6; }
-    updateProgress();
+    // Determine first missing field and jump to it — skip all answered ones
+    var hasNames = pname1 && pname2;
+    var hasRoles = prole1 && prole2;
+    var hasDate  = !!(parsed.date && parsed.date.length > 4);
+    var hasLoc   = !!(parsed.location && parsed.location.length > 1);
+    var hasTrads = !!(parsed.traditions && parsed.traditions.length);
+    var hasBudget= !!(parsed.budget && parsed.budget > 0);
+    var hasGuests= !!(parsed.guests && parsed.guests > 0);
+
+    if (!hasNames || !hasRoles) {
+      transitionTo('q0b','q1'); currentQ=1; updateProgress();
+      setTimeout(function(){ updateRoleLabels(); updateQ1Continue(); }, 270);
+    } else if (!hasDate) {
+      transitionTo('q0b','q2'); currentQ=2; updateProgress();
+    } else if (!hasLoc) {
+      transitionTo('q0b','q3'); currentQ=3; updateProgress();
+    } else if (!hasTrads) {
+      transitionTo('q0b','q4'); currentQ=4; updateProgress();
+    } else if (!hasBudget) {
+      transitionTo('q0b','q5'); currentQ=5; updateProgress();
+    } else if (!hasGuests) {
+      transitionTo('q0b','q6'); currentQ=6; updateProgress();
+    } else {
+      // Everything extracted — go straight to plan generation
+      transitionTo('q0b','loading-screen');
+      currentQ=6; updateProgress();
+      submitPlan();
+    }
   } catch(err) {
     console.error('Parse error:',err);
     transitionTo('q0b','q1'); currentQ=1; updateProgress();
