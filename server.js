@@ -2318,6 +2318,14 @@ const QUESTIONNAIRE_HTML = `<!DOCTYPE html>
       <div class="tab-panel on" id="tab-checklist"></div>
       <div class="tab-panel" id="tab-ceremonies"></div>
       <div class="tab-panel" id="tab-budget"></div>
+      <div style="margin-top:48px;padding-top:32px;border-top:1px solid var(--bdr);text-align:center">
+        <div style="font-size:13px;color:var(--muted);font-style:italic;margin-bottom:16px">Your plan is ready. A Marigold advisor will be in touch to review it with you.</div>
+        <button class="cta" style="margin-bottom:20px" onclick="alert('Save and share — coming soon')">Save my plan →</button>
+        <div style="display:flex;justify-content:center;gap:20px;margin-top:12px">
+          <button class="btn-back" onclick="transitionTo('results-screen','q8');currentQ=8;updateProgress();">← back to selections</button>
+          <button style="background:none;border:none;color:var(--muted);font-size:12px;font-family:'Playfair Display',serif;font-style:italic;cursor:pointer;" onclick="if(confirm('Start a new plan?'))location.reload()">Start again</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -3022,11 +3030,39 @@ function renderCeremonies(items) {
     +'<div style="flex:1;display:flex">'
     +BUCKETS.map(function(b){ return '<div style="flex:1;font-size:9px;color:var(--muted);font-style:italic;text-align:center;border-left:1px solid var(--bdr);padding:2px 0">'+b+'</div>'; }).join('')
     +'</div></div>';
-  el.innerHTML='<div style="overflow-x:auto"><div style="min-width:600px">'+header
+  var ganttHtml='<div style="overflow-x:auto"><div style="min-width:600px">'+header
     +section(n1+'’s ceremonies',side1,COLORS.side1)
     +section(n2+'’s ceremonies',side2,COLORS.side2)
     +section('Common ceremonies',both,COLORS.both)
     +'</div></div>';
+
+  function listSection(title,arr) {
+    if (!arr.length) return '';
+    return '<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:16px 0 8px;font-style:italic;display:flex;align-items:center;gap:8px">'+title+'<div style="flex:1;height:1px;background:var(--bdr)"></div></div>'
+      +arr.map(function(item){
+        var name=item.name||item.event||'';
+        var timing=item.timing||'';
+        var notes=item.notes||'';
+        return '<div style="padding:12px 0;border-bottom:1px solid var(--warm)">'
+          +'<div style="display:flex;justify-content:space-between;align-items:baseline">'
+            +'<div style="font-size:14px;font-style:italic;color:var(--deep)">'+name+'</div>'
+            +'<div style="font-size:11px;color:var(--muted);font-style:italic;margin-left:12px;flex-shrink:0">'+timing+'</div>'
+          +'</div>'
+          +(notes?'<div style="font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5">'+notes+'</div>':'')
+        +'</div>';
+      }).join('');
+  }
+  var listHtml=listSection(n1+'’s ceremonies',side1)
+    +listSection(n2+'’s ceremonies',side2)
+    +listSection('Common ceremonies',both);
+
+  var av=window._ceremonyView||'gantt';
+  var subTabs='<div style="display:flex;border-bottom:1px solid var(--bdr);margin-bottom:16px">'
+    +'<button data-view="gantt" onclick="window._ceremonyView=this.dataset.view;renderCeremonies(S.plan.selectedCeremonies||S.plan.ceremonySequence||[])" style="padding:6px 16px;border:none;background:none;font-size:11px;letter-spacing:1px;font-style:italic;cursor:pointer;border-bottom:2px solid '+(av==='gantt'?'var(--deep)':'transparent')+';color:'+(av==='gantt'?'var(--deep)':'var(--muted)')+'">Timeline</button>'
+    +'<button data-view="list" onclick="window._ceremonyView=this.dataset.view;renderCeremonies(S.plan.selectedCeremonies||S.plan.ceremonySequence||[])" style="padding:6px 16px;border:none;background:none;font-size:11px;letter-spacing:1px;font-style:italic;cursor:pointer;border-bottom:2px solid '+(av==='list'?'var(--deep)':'transparent')+';color:'+(av==='list'?'var(--deep)':'var(--muted)')+'">List</button>'
+    +'</div>';
+
+  el.innerHTML=subTabs+(av==='gantt'?ganttHtml:listHtml);
 }
 
 
