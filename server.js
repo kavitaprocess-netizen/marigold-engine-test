@@ -3417,7 +3417,10 @@ function buildConfirmation() {
     var sel = ceremonySelections[tradSlug] || {side1:{},side2:{},both:{}};
     function getSel(g) {
       return Object.entries(sel[g]||{}).filter(function(e){ return e[1]!==false; })
-        .map(function(e){ return planCeremonies[parseInt(e[0])]; }).filter(Boolean);
+        .map(function(e){
+          var idx = parseInt(e[0]);
+          return planCeremonies[idx] || (idx>=10000 ? planCeremonies[idx-10000] : null);
+        }).filter(Boolean);
     }
     var s1=getSel('side1'), s2=getSel('side2'), sb=getSel('both');
     if (!s1.length && !s2.length && !sb.length) return;
