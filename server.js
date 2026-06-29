@@ -2995,7 +2995,9 @@ function renderCeremonies(items) {
   items.forEach(function(item) {
     var side = item.side || 'both';
     var nm = item.name || item.event || '';
-    if (side === 'bride+groom') {
+    var sameRole = (n1Role === n2Role);
+    if (side === 'bride+groom' || (sameRole && (side === n1Role))) {
+      // Same role or explicitly both — appears on both sides
       if (!seenS1[nm]) { seenS1[nm]=true; side1.push(item); }
       if (!seenS2[nm]) { seenS2[nm]=true; side2.push(item); }
     } else if (side === n1Role) {
@@ -3012,8 +3014,8 @@ function renderCeremonies(items) {
     var name = item.name || item.event || '';
     var timing = item.timing || '';
     return '<div style="display:flex;align-items:center;margin-bottom:5px;gap:6px">'
-      +'<div style="width:160px;flex-shrink:0;font-size:11px;font-style:italic;color:var(--tx);text-align:right;padding-right:8px;line-height:1.3">'+name+'</div>'
-      +'<div style="flex:1;height:24px;position:relative">'
+      +'<div style="width:160px;flex-shrink:0;font-size:11px;font-style:italic;color:var(--tx);text-align:right;padding-right:8px;line-height:1.3;position:sticky;left:0;background:var(--cream);z-index:2">'+name+'</div>'
+      +'<div style="flex:1;height:28px;position:relative">'
         +'<div style="position:absolute;left:'+(b*(100/BUCKETS.length)).toFixed(1)+'%;width:'+colW+'%;height:100%;background:'+color+';border-radius:4px;display:flex;align-items:center;padding:0 6px;box-sizing:border-box" title="'+timing+'">'
           +'<span style="font-size:9px;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+timing+'</span>'
         +'</div>'
@@ -3025,8 +3027,8 @@ function renderCeremonies(items) {
     return '<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:16px 0 8px;font-style:italic">'+title+'</div>'
       +arr.map(function(i){ return ganttRow(i,color); }).join('');
   }
-  var header='<div style="display:flex;align-items:center;margin-bottom:8px;position:sticky;top:0;background:var(--cream);padding:4px 0;z-index:5">'
-    +'<div style="width:160px;flex-shrink:0"></div>'
+  var header='<div style="display:flex;align-items:center;margin-bottom:8px;position:sticky;top:0;background:#FDFAF5;padding:4px 0 6px;z-index:10;box-shadow:0 2px 0 #FDFAF5">'
+    +'<div style="width:160px;flex-shrink:0;position:sticky;left:0;background:var(--cream);z-index:6"></div>'
     +'<div style="flex:1;display:flex">'
     +BUCKETS.map(function(b){ return '<div style="flex:1;font-size:9px;color:var(--muted);font-style:italic;text-align:center;border-left:1px solid var(--bdr);padding:2px 0">'+b+'</div>'; }).join('')
     +'</div></div>';
@@ -3552,12 +3554,12 @@ async function parseParagraph() {
     if (parsed.budget) { S.budget=parsed.budget; var sl=document.getElementById('budget-slider'); if(sl){sl.value=parsed.budget; onBudgetChange();} }
     if (parsed.guests) { guests=parsed.guests; S.guests=parsed.guests; var el=document.getElementById('guest-count'); if(el) el.textContent=parsed.guests; }
     personalise();
-    if (!pname1||!pname2||!prole1||!prole2) { transitionTo('q0b','q1'); currentQ=1; setTimeout(function(){ updateRoleLabels(); updateQ1Continue(); }, 270); }
-    else if (!p.date) { transitionTo('q0b','q2'); currentQ=2; }
-    else if (!p.location) { transitionTo('q0b','q3'); currentQ=3; }
-    else if (!p.traditions||!p.traditions.length) { transitionTo('q0b','q4'); currentQ=4; }
-    else if (!p.budget) { transitionTo('q0b','q5'); currentQ=5; }
-    else if (!p.guests) { transitionTo('q0b','q6'); currentQ=6; }
+    if (!pname1||!pname2||!prole1||!prole2) { transitionTo('q0b','q1'); currentQ=1; updateProgress(); setTimeout(function(){ updateRoleLabels(); updateQ1Continue(); }, 270); }
+    else if (!p.date) { transitionTo('q0b','q2'); currentQ=2; updateProgress(); }
+    else if (!p.location) { transitionTo('q0b','q3'); currentQ=3; updateProgress(); }
+    else if (!p.traditions||!p.traditions.length) { transitionTo('q0b','q4'); currentQ=4; updateProgress(); }
+    else if (!p.budget) { transitionTo('q0b','q5'); currentQ=5; updateProgress(); }
+    else if (!p.guests) { transitionTo('q0b','q6'); currentQ=6; updateProgress(); }
     else { submitPlan(); currentQ=6; }
     updateProgress();
   } catch(err) {
