@@ -13,7 +13,7 @@
   "routes": [
     {
       "src": "/questionnaire",
-      "dest": "/advisor-review/questionnaire.html"
+      "dest": "/server.js"
     },
     {
       "src": "/advisor",
