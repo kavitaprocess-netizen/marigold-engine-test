@@ -1172,6 +1172,7 @@
       </div>
     </div>
   </div>
+  </div>
 
   <!-- Loading -->
   <div class="screen" id="loading-screen">
@@ -2479,7 +2480,6 @@ async function parseParagraph() {
     if (pname1) { S.name1=pname1; var el=document.getElementById('name1'); if(el) el.value=pname1; }
     if (pname2) { S.name2=pname2; var el=document.getElementById('name2'); if(el) el.value=pname2; }
     if (pname1 || pname2) updateRoleLabels();
-    if (pname1 || pname2) updateRoleLabels();
     if (prole1) { S.role1=prole1; pickRole(1,prole1); }
     if (prole2) { S.role2=prole2; pickRole(2,prole2); }
     if (parsed.traditions && parsed.traditions.length) {
@@ -2491,7 +2491,7 @@ async function parseParagraph() {
     if (parsed.budget) { S.budget=parsed.budget; var sl=document.getElementById('budget-slider'); if(sl){sl.value=parsed.budget; onBudgetChange();} }
     if (parsed.guests) { guests=parsed.guests; S.guests=parsed.guests; var el=document.getElementById('guest-count'); if(el) el.textContent=parsed.guests; }
     personalise();
-    if (!pname1||!pname2||!prole1||!prole2) { transitionTo('q0b','q1'); currentQ=1; }
+    if (!pname1||!pname2||!prole1||!prole2) { transitionTo('q0b','q1'); currentQ=1; setTimeout(updateRoleLabels, 270); }
     else if (!p.date) { transitionTo('q0b','q2'); currentQ=2; }
     else if (!p.location) { transitionTo('q0b','q3'); currentQ=3; }
     else if (!p.traditions||!p.traditions.length) { transitionTo('q0b','q4'); currentQ=4; }
