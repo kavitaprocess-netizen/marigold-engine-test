@@ -2239,6 +2239,19 @@ const QUESTIONNAIRE_HTML = `<!DOCTYPE html>
       </div>
     </div>
   </div>
+  <!-- Q6b: Review before generating plan -->
+  <div class="screen" id="q6b">
+    <div class="q-wrap" style="max-width:520px">
+      <div class="ql">Before we build your plan</div>
+      <div class="qt">Here's what we have</div>
+      <div class="qs" style="margin-bottom:24px">Quick check — tap any line to go back and adjust it.</div>
+      <div id="review-summary" style="display:flex;flex-direction:column;gap:0"></div>
+      <div class="cta-row" style="margin-top:28px">
+        <button class="btn-back" onclick="goBack()">← back</button>
+        <button class="cta" onclick="submitPlan()">Build my plan →</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Q7: Ceremony selection -->
   <!-- Q7: Ceremony selection -->
@@ -2650,7 +2663,7 @@ function goNext(from, skip=false) {
     return;
   }
   if (from===5 && !skip) S.budget = parseInt(document.getElementById('budget-slider').value);
-  if (from===6) { S.guests=guests; submitPlan(); return; }
+  if (from===6) { S.guests=guests; showReviewScreen(); return; }
 
   // If coming from the paragraph-entry flow, skip any screen whose field was already extracted
   var ex = window._extracted;
@@ -2665,7 +2678,7 @@ function goNext(from, skip=false) {
     ) {
       next++;
     }
-    if (next === 7 && ex.guests) { S.guests = S.guests || guests; submitPlan(); return; }
+    if (next === 7 && ex.guests) { S.guests = S.guests || guests; showReviewScreen(); return; }
   }
 
   doTransition(currentQ, next);
@@ -2687,9 +2700,9 @@ function updateProgress() {
     document.getElementById('step-indicator').textContent = '';
     return;
   }
-  const step = currentQ === '4b' ? 4.5 : (currentQ === 7 ? 7 : currentQ === 8 ? 8 : currentQ);
+  const step = currentQ === '4b' ? 4.5 : currentQ === '6b' ? 6.5 : (currentQ === 7 ? 7 : currentQ === 8 ? 8 : currentQ);
   document.getElementById('progress-fill').style.width = (step/TOTAL_STEPS*100)+'%';
-  const label = currentQ === '4b' ? '4 of '+TOTAL_STEPS : currentQ + ' of ' + TOTAL_STEPS;
+  const label = currentQ === '4b' ? '4 of '+TOTAL_STEPS : currentQ === '6b' ? 'Review' : currentQ + ' of ' + TOTAL_STEPS;
   document.getElementById('step-indicator').textContent = label;
 }
 
@@ -2706,6 +2719,7 @@ function goBack() {
     if (S.traditions.length >= 2) { prevId = 'q4b'; prevQ = '4b'; }
     else { prevId = 'q4'; prevQ = 4; }
   }
+  else if (currentQ === '6b') { prevId = 'q6'; prevQ = 6; }
   else { prevQ = currentQ - 1; prevId = 'q' + prevQ; }
 
   const cur = document.getElementById('q' + currentQ);
@@ -2820,6 +2834,44 @@ function transitionTo(fromId, toId) {
   }, 260);
 }
 
+function showReviewScreen() {
+  transitionTo(document.getElementById('q6').classList.contains('active') ? 'q6' : 'q0b', 'q6b');
+  currentQ = '6b';
+  updateProgress();
+  setTimeout(buildReviewSummary, 270);
+}
+function buildReviewSummary() {
+  var n1 = S.name1 || 'Partner one';
+  var n2 = S.name2 || 'Partner two';
+  var roleLabel = function(r) { return r==='bride'?'Bride':r==='groom'?'Groom':'Partner'; };
+  var dateStr = S.dateSure && S.date ? new Date(S.date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : 'Not decided yet';
+  var locStr = S.location || 'Not decided yet';
+  var tradStr = (S.traditions||[]).map(function(slug){
+    var t = TRADS.find(function(x){return x.slug===slug;});
+    return t ? t.label : slug;
+  }).join(' + ') || 'None selected';
+  var budgetStr = S.budget ? S.budget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) : 'Not decided yet';
+  var guestStr = (S.guests||guests) + ' guests';
+  function row(label, value, q) {
+    return '<div onclick="jumpToReview(\\''+q+'\\')" style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--warm);cursor:pointer">'
+      +'<div><div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-style:italic;margin-bottom:3px">'+label+'</div>'
+      +'<div style="font-size:14px;font-style:italic;color:var(--deep)">'+value+'</div></div>'
+      +'<span style="color:var(--muted);font-size:14px">edit ›</span></div>';
+  }
+  var html = row('Names', n1+' ('+roleLabel(S.role1)+') &amp; '+n2+' ('+roleLabel(S.role2)+')', 1)
+    + row('Date', dateStr, 2)
+    + row('Location', locStr, 3)
+    + row('Traditions', tradStr, 4)
+    + row('Budget', budgetStr, 5)
+    + row('Guests', guestStr, 6);
+  var el = document.getElementById('review-summary');
+  if (el) el.innerHTML = html;
+}
+function jumpToReview(qnum) {
+  transitionTo('q6b', 'q' + qnum);
+  currentQ = qnum;
+  updateProgress();
+}
 function showResults() {
   transitionTo('loading-screen', 'results-screen');
   document.getElementById('progress-fill').style.width='100%';
@@ -3641,10 +3693,10 @@ async function parseParagraph() {
     } else if (!hasGuests) {
       transitionTo('q0b','q6'); currentQ=6; updateProgress();
     } else {
-      // Everything extracted — go straight to plan generation
-      transitionTo('q0b','loading-screen');
-      currentQ=6; updateProgress();
-      submitPlan();
+      // Everything extracted — show review screen
+      transitionTo('q0b','q6b');
+      currentQ='6b'; updateProgress();
+      setTimeout(showReviewScreen, 270);
     }
   } catch(err) {
     console.error('Parse error:',err);
