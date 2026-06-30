@@ -1,4 +1,4 @@
-// ============================================================================
+'// ============================================================================
 // MARIGOLD ENGINE TEST SERVER v3.0
 // Landing / Questionnaire / Advisor / brand.css / API
 // ============================================================================
@@ -2642,6 +2642,14 @@ function goNext(from, skip=false) {
       // Transition to q4b
       const cur = document.getElementById('q' + currentQ);
       const next = document.getElementById('q4b');
+      if (window._editingFromReview) {
+        window._editingFromReview = false;
+        transitionTo('q4', 'q6b');
+        currentQ = '6b';
+        updateProgress();
+        setTimeout(buildReviewSummary, 270);
+        return;
+      }
       cur.classList.add('exit-left'); cur.classList.remove('active');
       setTimeout(function() {
         cur.classList.remove('exit-left');
@@ -2653,6 +2661,14 @@ function goNext(from, skip=false) {
     }
   }
   if (from==='4b') {
+    if (window._editingFromReview) {
+      window._editingFromReview = false;
+      transitionTo('q4b', 'q6b');
+      currentQ = '6b';
+      updateProgress();
+      setTimeout(buildReviewSummary, 270);
+      return;
+    }
     // Go to Q5
     const cur = document.getElementById('q4b');
     const next = document.getElementById('q5');
@@ -2664,6 +2680,16 @@ function goNext(from, skip=false) {
   }
   if (from===5 && !skip) S.budget = parseInt(document.getElementById('budget-slider').value);
   if (from===6) { S.guests=guests; showReviewScreen(); return; }
+
+  // If editing a single field from the review screen, go straight back to review
+  if (window._editingFromReview) {
+    window._editingFromReview = false;
+    transitionTo('q'+from, 'q6b');
+    currentQ = '6b';
+    updateProgress();
+    setTimeout(buildReviewSummary, 270);
+    return;
+  }
 
   // If coming from the paragraph-entry flow, skip any screen whose field was already extracted
   var ex = window._extracted;
@@ -2708,6 +2734,14 @@ function updateProgress() {
 
 function goBack() {
   if (currentQ === 1 || currentQ === '1') return;
+  if (currentQ === 7 || currentQ === 8) window._editingFromReview = false;
+  if (window._editingFromReview) {
+    window._editingFromReview = false;
+    transitionTo('q'+currentQ, 'q6b');
+    currentQ = '6b'; updateProgress();
+    setTimeout(buildReviewSummary, 270);
+    return;
+  }
   if (currentQ === 7) {
     transitionTo('q7', 'q6');
     currentQ = 6; updateProgress(); return;
@@ -2748,6 +2782,7 @@ const LOADING_MSGS = [
 ];
 
 async function submitPlan() {
+  window._editingFromReview = false;
   var activeScreen = document.querySelector('.screen.active');
   if (activeScreen) { activeScreen.classList.add('exit-left'); activeScreen.classList.remove('active'); }
   setTimeout(function(){ if(activeScreen) activeScreen.classList.remove('exit-left'); document.getElementById('loading-screen').classList.add('active'); }, 260);
@@ -2868,6 +2903,7 @@ function buildReviewSummary() {
   if (el) el.innerHTML = html;
 }
 function jumpToReview(qnum) {
+  window._editingFromReview = true;
   transitionTo('q6b', 'q' + qnum);
   currentQ = qnum;
   updateProgress();
@@ -3532,6 +3568,7 @@ function getSelectedCeremonies() {
 }
 
 function goToConfirmation() {
+  window._editingFromReview = false;
   buildConfirmation();
   transitionTo('q7','q8');
   currentQ = 8;
@@ -3539,6 +3576,7 @@ function goToConfirmation() {
 }
 
 function goBackFromConf() {
+  window._editingFromReview = false;
   transitionTo('q8','q7');
   currentQ = 7;
   updateProgress();
