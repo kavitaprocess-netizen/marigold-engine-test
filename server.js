@@ -2652,8 +2652,24 @@ function goNext(from, skip=false) {
   if (from===5 && !skip) S.budget = parseInt(document.getElementById('budget-slider').value);
   if (from===6) { S.guests=guests; submitPlan(); return; }
 
-  doTransition(currentQ, from+1);
-  currentQ = from+1;
+  // If coming from the paragraph-entry flow, skip any screen whose field was already extracted
+  var ex = window._extracted;
+  var next = from + 1;
+  if (ex) {
+    while (
+      (next===2 && ex.date) ||
+      (next===3 && ex.location) ||
+      (next===4 && ex.traditions) ||
+      (next===5 && ex.budget) ||
+      (next===6 && ex.guests)
+    ) {
+      next++;
+    }
+    if (next === 7 && ex.guests) { S.guests = S.guests || guests; submitPlan(); return; }
+  }
+
+  doTransition(currentQ, next);
+  currentQ = next;
   updateProgress();
 }
 
@@ -3608,6 +3624,8 @@ async function parseParagraph() {
     var hasTrads = !!(parsed.traditions && parsed.traditions.length);
     var hasBudget= !!(parsed.budget && parsed.budget > 0);
     var hasGuests= !!(parsed.guests && parsed.guests > 0);
+    // Remember what was extracted so goNext() can skip pre-filled screens
+    window._extracted = { date: hasDate, location: hasLoc, traditions: hasTrads, budget: hasBudget, guests: hasGuests };
 
     if (!hasNames || !hasRoles) {
       transitionTo('q0b','q1'); currentQ=1; updateProgress();
