@@ -3038,19 +3038,64 @@ function renderCeremonies(items) {
     +section('Common ceremonies',both,COLORS.both)
     +'</div></div>';
 
+  function toggleListCard(id) {
+    var b = document.getElementById(id);
+    if (!b) return;
+    var open = b.style.display === 'block';
+    b.style.display = open ? 'none' : 'block';
+    var tog = document.querySelector('[data-ltog="' + id + '"]');
+    if (tog) tog.style.transform = open ? '' : 'rotate(90deg)';
+  }
+  function listSection(title, arr) {
+    if (!arr.length) return '';
+    return '<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:16px 0 8px;font-style:italic;display:flex;align-items:center;gap:8px">' + title + '<div style="flex:1;height:1px;background:var(--bdr)"></div></div>'
+      + arr.map(function(item, i) {
+        var name = item.name || item.event || '';
+        var timing = item.timing || '';
+        var notes = item.notes || '';
+        var duration = item.duration || '';
+        var lid = 'lc' + Math.random().toString(36).slice(2,7);
+        return '<div style="border-bottom:1px solid var(--warm)">'
+          + '<div data-lid="' + lid + '" onclick="toggleListCard(this.dataset.lid)" style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;cursor:pointer">'
+            + '<div style="display:flex;align-items:center;gap:8px">'
+              + '<span data-ltog="' + lid + '" style="color:var(--muted);font-size:12px;display:inline-block;transition:transform 0.2s">›</span>'
+              + '<span style="font-size:14px;font-style:italic;color:var(--deep)">' + name + '</span>'
+            + '</div>'
+            + '<span style="font-size:11px;color:var(--muted);font-style:italic;flex-shrink:0;margin-left:12px">' + timing + '</span>'
+          + '</div>'
+          + '<div id="' + lid + '" style="display:none;padding:0 0 12px 22px">'
+            + (duration ? '<div style="font-size:11px;color:var(--muted);font-style:italic;margin-bottom:6px">⏱ ' + duration + '</div>' : '')
+            + (notes ? '<div style="font-size:12px;color:var(--tx);line-height:1.6">' + notes + '</div>' : '<div style="font-size:12px;color:var(--muted);font-style:italic">No additional details</div>')
+          + '</div>'
+        + '</div>';
+      }).join('');
+  }
+
+  var ganttHtml='<div style="overflow-x:auto"><div style="min-width:600px">'+header
+    +section(n1+'’s ceremonies',side1,COLORS.side1)
+    +section(n2+'’s ceremonies',side2,COLORS.side2)
+    +section('Common ceremonies',both,COLORS.both)
+    +'</div></div>';
+
+  var _listOpen = {};
   function listSection(title,arr) {
     if (!arr.length) return '';
     return '<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:16px 0 8px;font-style:italic;display:flex;align-items:center;gap:8px">'+title+'<div style="flex:1;height:1px;background:var(--bdr)"></div></div>'
-      +arr.map(function(item){
+      +arr.map(function(item,i){
         var name=item.name||item.event||'';
         var timing=item.timing||'';
         var notes=item.notes||'';
-        return '<div style="padding:12px 0;border-bottom:1px solid var(--warm)">'
-          +'<div style="display:flex;justify-content:space-between;align-items:baseline">'
-            +'<div style="font-size:14px;font-style:italic;color:var(--deep)">'+name+'</div>'
-            +'<div style="font-size:11px;color:var(--muted);font-style:italic;margin-left:12px;flex-shrink:0">'+timing+'</div>'
+        var duration=item.duration||'';
+        var lid='lc-'+name.replace(/[^a-z0-9]/gi,'');
+        return '<div style="border-bottom:1px solid var(--warm)">'
+          +'<div onclick="var b=document.getElementById(\\'' + lid + '\\');b.style.display=b.style.display===\\'block\\'?\\'none\\':\\'block\\';this.querySelector(\\'.ltog\\').textContent=b.style.display===\\'block\\'?\\'› \\':\\'\\u203a \\'" style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;cursor:pointer">'
+            +'<div style="display:flex;align-items:baseline;gap:8px"><span class="ltog" style="color:var(--muted);font-size:14px">› </span><span style="font-size:14px;font-style:italic;color:var(--deep)">'+name+'</span></div>'
+            +'<span style="font-size:11px;color:var(--muted);font-style:italic;flex-shrink:0;margin-left:12px">'+timing+'</span>'
           +'</div>'
-          +(notes?'<div style="font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5">'+notes+'</div>':'')
+          +'<div id="'+lid+'" style="display:none;padding:0 0 12px 22px">'
+            +(duration?'<div style="font-size:11px;color:var(--muted);font-style:italic;margin-bottom:4px">⏱ '+duration+'</div>':'')
+            +(notes?'<div style="font-size:12px;color:var(--tx);line-height:1.6">'+notes+'</div>':'<div style="font-size:12px;color:var(--muted);font-style:italic">No additional details</div>')
+          +'</div>'
         +'</div>';
       }).join('');
   }
