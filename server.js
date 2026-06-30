@@ -1,4 +1,4 @@
-'// ============================================================================
+// ============================================================================
 // MARIGOLD ENGINE TEST SERVER v3.0
 // Landing / Questionnaire / Advisor / brand.css / API
 // ============================================================================
@@ -2888,7 +2888,7 @@ function buildReviewSummary() {
   var budgetStr = S.budget ? S.budget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) : 'Not decided yet';
   var guestStr = (S.guests||guests) + ' guests';
   function row(label, value, q) {
-    return '<div onclick="jumpToReview(\\''+q+'\\')" style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--warm);cursor:pointer">'
+    return '<div onclick="jumpToReview(\''+q+'\')" style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--warm);cursor:pointer">'
       +'<div><div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-style:italic;margin-bottom:3px">'+label+'</div>'
       +'<div style="font-size:14px;font-style:italic;color:var(--deep)">'+value+'</div></div>'
       +'<span style="color:var(--muted);font-size:14px">edit ›</span></div>';
@@ -3181,28 +3181,6 @@ function renderCeremonies(items) {
     +section('Common ceremonies',both,COLORS.both)
     +'</div></div>';
 
-  var _listOpen = {};
-  function listSection(title,arr) {
-    if (!arr.length) return '';
-    return '<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:16px 0 8px;font-style:italic;display:flex;align-items:center;gap:8px">'+title+'<div style="flex:1;height:1px;background:var(--bdr)"></div></div>'
-      +arr.map(function(item,i){
-        var name=item.name||item.event||'';
-        var timing=item.timing||'';
-        var notes=item.notes||'';
-        var duration=item.duration||'';
-        var lid='lc-'+name.replace(/[^a-z0-9]/gi,'');
-        return '<div style="border-bottom:1px solid var(--warm)">'
-          +'<div onclick="var b=document.getElementById(\\'' + lid + '\\');b.style.display=b.style.display===\\'block\\'?\\'none\\':\\'block\\';this.querySelector(\\'.ltog\\').textContent=b.style.display===\\'block\\'?\\'› \\':\\'\\u203a \\'" style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;cursor:pointer">'
-            +'<div style="display:flex;align-items:baseline;gap:8px"><span class="ltog" style="color:var(--muted);font-size:14px">› </span><span style="font-size:14px;font-style:italic;color:var(--deep)">'+name+'</span></div>'
-            +'<span style="font-size:11px;color:var(--muted);font-style:italic;flex-shrink:0;margin-left:12px">'+timing+'</span>'
-          +'</div>'
-          +'<div id="'+lid+'" style="display:none;padding:0 0 12px 22px">'
-            +(duration?'<div style="font-size:11px;color:var(--muted);font-style:italic;margin-bottom:4px">⏱ '+duration+'</div>':'')
-            +(notes?'<div style="font-size:12px;color:var(--tx);line-height:1.6">'+notes+'</div>':'<div style="font-size:12px;color:var(--muted);font-style:italic">No additional details</div>')
-          +'</div>'
-        +'</div>';
-      }).join('');
-  }
   var listHtml=listSection(n1+'’s ceremonies',side1)
     +listSection(n2+'’s ceremonies',side2)
     +listSection('Common ceremonies',both);
