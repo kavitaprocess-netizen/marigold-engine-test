@@ -2459,8 +2459,7 @@ function buildConfirmation() {
     '</div>';
   });
 
-  var ratio = Math.max(0.5, totalSelected / Math.max(planCeremonies.length,1));
-  var adj = Math.round(S.budget * ratio);
+var adj = S.budget;
   html += '<div class="conf-budget"><div class="conf-budget-total">' +
     adj.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}) +
     '</div><div class="conf-budget-sub">estimated for '+totalSelected+' ceremonies</div></div>';
