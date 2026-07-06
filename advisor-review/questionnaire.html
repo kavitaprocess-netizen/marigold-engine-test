@@ -2216,8 +2216,8 @@ var perCer=cers.length?Math.round(sectionBudget/cers.length):0;    cers.forEach(
     var segs=Object.entries(catTotals).sort(function(a,b){return b[1]-a[1];}).slice(0,6).map(function(e){return {label:e[0],value:e[1]};});
     var sectionTotal=cers.reduce(function(s,e){return s+cerSubtotal(e.item,perCer);},0);
     var html=segs.length?donutChart(segs):'';
-    cers.forEach(function(entry,i){ html+=cerAccordion(entry,perCer,sectionType,i,i>0?cers[i-1].slug:null); });
-cers.forEach(function(entry,i){ html+=cerAccordion(entry,perCer,sectionType,i,i>0?cers[i-1].slug:null); });    return html;
+cers.forEach(function(entry,i){ html+=cerAccordion(entry,perCer,sectionType,i,i>0?cers[i-1].slug:null); });
+    return html;
   }
 
   var sections=[
