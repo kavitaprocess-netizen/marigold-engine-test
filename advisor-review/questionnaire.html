@@ -2201,6 +2201,7 @@ function renderBudget(budgetData) {
     if (!cers.length) return '<div style="padding:24px;text-align:center;color:var(--muted);font-style:italic">No ceremonies</div>';
 var perCer=cers.length?Math.round(sectionBudget/cers.length):0;    cers.forEach(function(entry){
    
+   var catTotals={};
     cers.forEach(function(entry){
       var item=entry.item;
       var cats=item.vendor_categories&&item.vendor_categories.length?item.vendor_categories.map(function(v){return v.category;}):null;
