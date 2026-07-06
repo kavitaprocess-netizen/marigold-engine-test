@@ -2199,9 +2199,8 @@ function renderBudget(budgetData) {
 
   function sectionTab(cers,sectionBudget,sectionType) {
     if (!cers.length) return '<div style="padding:24px;text-align:center;color:var(--muted);font-style:italic">No ceremonies</div>';
-var perCer=cers.length?Math.round(sectionBudget/cers.length):0;    cers.forEach(function(entry){
-   
-   var catTotals={};
+    var perCer=cers.length?Math.round(sectionBudget/cers.length):0;
+    var catTotals={};
     cers.forEach(function(entry){
       var item=entry.item;
       var cats=item.vendor_categories&&item.vendor_categories.length?item.vendor_categories.map(function(v){return v.category;}):null;
@@ -2217,7 +2216,8 @@ var perCer=cers.length?Math.round(sectionBudget/cers.length):0;    cers.forEach(
     var segs=Object.entries(catTotals).sort(function(a,b){return b[1]-a[1];}).slice(0,6).map(function(e){return {label:e[0],value:e[1]};});
     var sectionTotal=cers.reduce(function(s,e){return s+cerSubtotal(e.item,perCer);},0);
     var html=segs.length?donutChart(segs):'';
-cers.forEach(function(entry,i){ html+=cerAccordion(entry,perCer,sectionType,i,i>0?cers[i-1].slug:null); });
+    cers.forEach(function(entry,i){ html+=cerAccordion(entry,perCer,sectionType,i,i>0?cers[i-1].slug:null); });
+    html+='<div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--warm);border-radius:8px;margin-top:4px"><span style="font-size:13px;font-style:italic;color:var(--deep)">Section total</span><span style="font-size:14px;font-style:italic;color:var(--deep)">'+sectionTotal.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0})+'</span></div>';
     return html;
   }
 
