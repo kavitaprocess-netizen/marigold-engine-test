@@ -2415,6 +2415,7 @@ function goToConfirmation() {
 
 function goBackFromConf() {
   window._editingFromReview=false;
+  document.getElementById('loading-screen').classList.remove('active');
   transitionTo('q8','q7');
   currentQ = 7;
   updateProgress();
