@@ -2279,8 +2279,8 @@ function showCeremonySelection(ceremonies) {
       var globalIdx = ceremonies.indexOf(item);
       var side = item.side || 'both';
       var nm = item.name || item.event || '';
-      if (side === 'bride+groom') {
-        if (!seenS1[nm]) { seenS1[nm]=true; side1.push({item:item,idx:globalIdx}); }
+var sameRole = (n1Role === n2Role);
+      if (side === 'bride+groom' || (sameRole && side === n1Role)) {        if (!seenS1[nm]) { seenS1[nm]=true; side1.push({item:item,idx:globalIdx}); }
         if (!seenS2[nm]) { seenS2[nm]=true; side2.push({item:item,idx:globalIdx+10000}); }
       } else if (side === n1Role) {
         if (!seenS1[nm]) { seenS1[nm]=true; side1.push({item:item,idx:globalIdx}); }
