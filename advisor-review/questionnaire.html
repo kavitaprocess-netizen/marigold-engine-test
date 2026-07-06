@@ -2473,6 +2473,7 @@ function buildFinalPlan() {
   window.budgetExclusions={};
   window._budgetTab=null;
   window._ceremonyView=null;
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
   var selected = getSelectedCeremonies();
   if (S.plan) {
     S.plan.selectedCeremonies = selected;
