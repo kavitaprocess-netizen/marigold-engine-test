@@ -2541,14 +2541,15 @@ async function parseParagraph() {
     if (parsed.budget) { S.budget=parsed.budget; var sl=document.getElementById('budget-slider'); if(sl){sl.value=parsed.budget; onBudgetChange();} }
     if (parsed.guests) { guests=parsed.guests; S.guests=parsed.guests; var el=document.getElementById('guest-count'); if(el) el.textContent=parsed.guests; }
     personalise();
-    if (!pname1||!pname2||!prole1||!prole2) { transitionTo('q0b','q1'); currentQ=1; setTimeout(function(){ updateRoleLabels(); updateQ1Continue(); }, 270); }
-    else if (!p.date) { transitionTo('q0b','q2'); currentQ=2; }
-    else if (!p.location) { transitionTo('q0b','q3'); currentQ=3; }
-    else if (!p.traditions||!p.traditions.length) { transitionTo('q0b','q4'); currentQ=4; }
-    else if (!p.budget) { transitionTo('q0b','q5'); currentQ=5; }
-    else if (!p.guests) { transitionTo('q0b','q6'); currentQ=6; }
-    else { submitPlan(); currentQ=6; }
-    updateProgress();
+    var hN=!!(pname1&&pname2),hR=!!(prole1&&prole2),hD=!!(parsed.date&&parsed.date.length>4),hL=!!(parsed.location&&parsed.location.length>1),hT=!!(parsed.traditions&&parsed.traditions.length),hB=!!(parsed.budget&&parsed.budget>0),hG=!!(parsed.guests&&parsed.guests>0);
+    _extracted={date:hD,location:hL,traditions:hT,budget:hB,guests:hG};
+    if(!hN||!hR){transitionTo('q0b','q1');currentQ=1;updateProgress();setTimeout(function(){updateRoleLabels();updateQ1Continue();},270);}
+    else if(!hD){transitionTo('q0b','q2');currentQ=2;updateProgress();}
+    else if(!hL){transitionTo('q0b','q3');currentQ=3;updateProgress();}
+    else if(!hT){transitionTo('q0b','q4');currentQ=4;updateProgress();}
+    else if(!hB){transitionTo('q0b','q5');currentQ=5;updateProgress();}
+    else if(!hG){transitionTo('q0b','q6');currentQ=6;updateProgress();}
+    else{transitionTo('q0b','q6b');currentQ='6b';updateProgress();setTimeout(showReviewScreen,270);}
   } catch(err) {
     console.error('Parse error:',err);
     transitionTo('q0b','q1'); currentQ=1; updateProgress();
