@@ -2199,8 +2199,7 @@ function renderBudget(budgetData) {
 
   function sectionTab(cers,sectionBudget,sectionType) {
     if (!cers.length) return '<div style="padding:24px;text-align:center;color:var(--muted);font-style:italic">No ceremonies</div>';
-function cerWeight(item){var n=(item.name||item.event||'').toLowerCase();if(/reception|main ceremony|mandap|pheras|saptapadi|nikah|mass|ceremony/i.test(n))return 3;if(/garba|sangeet|rehearsal dinner|mehndi|baraat/i.test(n))return 2;return 1;}var totalWeight=cers.reduce(function(sum,e){return sum+cerWeight(e.item);},0)||1;var perCer=0;    var catTotals={};
-    cers.forEach(function(entry){
+var perCer=cers.length?Math.round(sectionBudget/cers.length):0;    cers.forEach(function(entry){
       var item=entry.item;
       var cats=item.vendor_categories&&item.vendor_categories.length?item.vendor_categories.map(function(v){return v.category;}):null;
       if (!cats) return;
