@@ -2220,8 +2220,8 @@ cers.forEach(function(entry,i){ var cp=Math.round(sectionBudget*cerWeight(entry.
   }
 
   var sections=[
-    {id:'s1',label:pos(n1)+"'s ceremonies",cers:s1,budget:s1B,type:'side1'},
-    {id:'s2',label:pos(n2)+"'s ceremonies",cers:s2,budget:s2B,type:'side2'},
+    {id:'s1',label:n1+"'s ceremonies",cers:s1,budget:s1B,type:'side1'},
+    {id:'s2',label:n2+"'s ceremonies",cers:s2,budget:s2B,type:'side2'},
     {id:'sb',label:'Common ceremonies',cers:sb,budget:sbB,type:'both'},
   ].filter(function(s){return s.cers.length>0;});
   if (!sections.length){el.innerHTML='<div style="padding:40px;text-align:center;color:var(--muted);font-style:italic">No ceremonies selected.</div>';return;}
