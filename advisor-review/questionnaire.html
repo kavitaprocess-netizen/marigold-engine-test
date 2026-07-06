@@ -2452,8 +2452,8 @@ function buildConfirmation() {
     html += '<div class="conf-block">' +
       (trad2 ? '<div class="conf-trad-header">'+tradInfo.label+'</div>' : '') +
       '<div class="conf-cols">' +
-        '<div><div class="conf-col-header">'+pos(n1)+' ceremonies</div>'+(s1.length?s1.map(ci).join(''):ni)+'</div>' +
-        '<div><div class="conf-col-header">'+pos(n2)+' ceremonies</div>'+(s2.length?s2.map(ci).join(''):ni)+'</div>' +
+        '<div><div class="conf-col-header">'+n1+'\'s ceremonies</div>'+(s1.length?s1.map(ci).join(''):ni)+'</div>' +
+        '<div><div class="conf-col-header">'+n2+'\'s ceremonies</div>'+(s2.length?s2.map(ci).join(''):ni)+'</div>' +
       '</div>' +
       (sb.length ? '<div class="conf-shared-header">For both of you</div>'+sb.map(ci).join('') : '') +
     '</div>';
