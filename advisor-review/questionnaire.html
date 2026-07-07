@@ -1663,7 +1663,7 @@ async function submitPlan() {
   window._editingFromReview=false;
   var activeScreen = document.querySelector('.screen.active');
   if (activeScreen) { activeScreen.classList.add('exit-left'); activeScreen.classList.remove('active'); }
-  setTimeout(function(){ if(activeScreen) activeScreen.classList.remove('exit-left'); document.getElementById('loading-screen').classList.add('active'); }, 260);
+  var _loadingTimer = setTimeout(function(){ if(activeScreen) activeScreen.classList.remove('exit-left'); document.getElementById('loading-screen').classList.add('active'); }, 260);
   document.getElementById('progress-fill').style.width='90%';
   document.getElementById('step-indicator').textContent='';
 
@@ -1684,6 +1684,7 @@ async function submitPlan() {
       signal: controller.signal,
     });
     clearTimeout(timeout);
+    clearTimeout(_loadingTimer);
     const data = await res.json();
     clearInterval(iv);
     if (!data.success) { showErr(data.error||'Something went wrong generating your plan.'); return; }
