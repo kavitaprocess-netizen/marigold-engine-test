@@ -2103,9 +2103,7 @@ function renderBudget(budgetData) {
       +'</div>';
   }
 
-  function sectionTab(cers,sectionBudget,sectionType) {
-    if (!cers.length) return '<div style="padding:24px;text-align:center;color:var(--muted);font-style:italic">No ceremonies</div>';
-    var perCer=cers.length?Math.round(sectionBudget/cers.length):0;
+  function computeSegments(cers,perCer) {
     var catTotals={};
     cers.forEach(function(entry){
       var item=entry.item;
@@ -2119,9 +2117,14 @@ function renderBudget(budgetData) {
         }
       });
     });
-    var segs=Object.entries(catTotals).sort(function(a,b){return b[1]-a[1];}).slice(0,6).map(function(e){return {label:e[0],value:e[1]};});
+    return Object.entries(catTotals).sort(function(a,b){return b[1]-a[1];}).slice(0,6).map(function(e){return {label:e[0],value:e[1]};});
+  }
+
+  function sectionTab(cers,sectionBudget,sectionType) {
+    if (!cers.length) return '<div style="padding:24px;text-align:center;color:var(--muted);font-style:italic">No ceremonies</div>';
+    var perCer=cers.length?Math.round(sectionBudget/cers.length):0;
     var sectionTotal=cers.reduce(function(s,e){return s+cerSubtotal(e.item,perCer);},0);
-    var html=segs.length?donutChart(segs):'';
+    var html='';
     cers.forEach(function(entry,i){ html+=cerAccordion(entry,perCer,sectionType,i,i>0?cers[i-1].slug:null); });
     html+='<div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--warm);border-radius:8px;margin-top:4px"><span style="font-size:13px;font-style:italic;color:var(--deep)">Section total</span><span style="font-size:14px;font-style:italic;color:var(--deep)">'+sectionTotal.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0})+'</span></div>';
     return html;
@@ -2142,7 +2145,15 @@ function renderBudget(budgetData) {
       return '<button data-tabid="'+s.id+'" onclick="switchBudgetTab(this.dataset.tabid)" style="'+st+'">'+s.label+'</button>';
     }).join('')+'</div>';
   var activeSection=sections.find(function(s){return s.id===activeTab;});
-  el.innerHTML='<div style="text-align:center;margin-bottom:20px"><div class="budget-total-display">'+totalBudget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0})+'</div><div class="budget-sub">total budget &middot; '+total+' ceremonies</div></div>'+tabBar+'<div id="budget-tab-content">'+sectionTab(activeSection.cers,activeSection.budget,activeSection.type)+'</div>';
+  var activePerCer=activeSection.cers.length?Math.round(activeSection.budget/activeSection.cers.length):0;
+  var activeSegs=computeSegments(activeSection.cers,activePerCer);
+  var donutHtml=activeSegs.length?donutChart(activeSegs):'';
+  el.innerHTML='<div id="budget-sticky-summary" style="position:sticky;top:-32px;padding-top:32px;margin-top:-32px;padding-bottom:16px;background:#FDFAF0;z-index:50">'+
+    '<div style="text-align:center;margin-bottom:16px"><div class="budget-total-display">'+totalBudget.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0})+'</div><div class="budget-sub">total budget &middot; '+total+' ceremonies</div></div>'+
+    tabBar+
+    donutHtml+
+  '</div>'+
+  '<div id="budget-tab-content">'+sectionTab(activeSection.cers,activeSection.budget,activeSection.type)+'</div>';
 }
 function switchBudgetTab(id){window._budgetTab=id;renderBudget({});}
 function toggleBudgetAcc(id){var el=document.getElementById(id);var arrow=document.getElementById(id+'-arrow');if(!el)return;var open=el.style.display!=='none';el.style.display=open?'none':'block';if(arrow)arrow.style.transform=open?'':'rotate(90deg)';}
