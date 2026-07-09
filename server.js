@@ -21,6 +21,7 @@ const BRAND_CSS = fs.readFileSync(path.join(__dirname, 'public', 'brand.css'), '
 const LANDING_HTML = fs.readFileSync(path.join(__dirname, 'views', 'landing.html'), 'utf8');
 const ADVISOR_HTML = fs.readFileSync(path.join(__dirname, 'views', 'advisor.html'), 'utf8');
 const QUESTIONNAIRE_HTML = fs.readFileSync(path.join(__dirname, 'views', 'questionnaire.html'), 'utf8');
+const DASHBOARD_HTML = fs.readFileSync(path.join(__dirname, 'views', 'dashboard.html'), 'utf8');
 
 // ── Routes: brand CSS (single source of truth) ──
 app.get('/brand.css', (req, res) => {
@@ -45,6 +46,11 @@ app.get('/questionnaire', (req, res) => {
 app.get('/advisor', (req, res) => {
   res.setHeader('Content-Type', 'text/html');
   res.send(ADVISOR_HTML);
+});
+
+app.get('/dashboard', (req, res) => {
+  res.setHeader('Content-Type', 'text/html');
+  res.send(DASHBOARD_HTML);
 });
 
 // ── Routes: health ──
