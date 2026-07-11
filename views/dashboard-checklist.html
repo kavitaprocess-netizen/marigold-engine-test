@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marigold — Checklist</title>
+<link rel="stylesheet" href="/brand.css">
+<style>
+html,body{min-height:100vh;background:var(--cream);}
+#header{border-bottom:1px solid var(--bdr);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--cream);z-index:100}
+#header .brand{display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--deep);font-style:italic;font-size:16px}
+#header .back-link{font-size:12px;color:var(--muted);font-style:italic;text-decoration:none;transition:color 0.15s}
+#header .back-link:hover{color:var(--deep)}
+.wrap{max-width:640px;margin:0 auto;padding:32px 24px 80px}
+.center-wrap{max-width:400px;margin:80px auto;padding:0 24px;text-align:center}
+.dash-input{width:100%;padding:10px 12px;border:1px solid var(--bdr);border-radius:8px;font-family:'Playfair Display',Georgia,serif;font-style:italic;font-size:14px;color:var(--tx);background:#FDFAF0;margin-bottom:16px;box-sizing:border-box}
+.dash-input:focus{outline:none;border-color:var(--gd)}
+.dash-err{color:#B23;font-size:12px;font-style:italic;margin:-10px 0 16px;display:none}
+.dash-title{font-size:26px;font-style:italic;color:var(--deep);margin-bottom:8px}
+.dash-sub{font-size:13px;color:var(--muted);font-style:italic;line-height:1.6;margin-bottom:28px}
+.page-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.page-title{font-size:24px;font-style:italic;color:var(--deep)}
+.page-progress{font-size:13px;color:var(--muted);font-style:italic}
+.page-sub{font-size:13px;color:var(--muted);font-style:italic;margin-bottom:28px}
+.checklist-milestone{position:sticky;background:var(--cream);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--deep);font-style:italic;padding:10px 0;margin-top:8px;border-bottom:1px solid var(--bdr);z-index:10}
+.checklist-tradition-heading{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gk);font-style:italic;margin:14px 0 6px;padding-left:2px}
+.checklist-row{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--warm)}
+.checklist-checkbox{width:17px;height:17px;flex-shrink:0;accent-color:var(--gk);cursor:pointer}
+.checklist-label{font-size:14px;color:var(--tx);flex:1}
+.checklist-label.done{color:var(--muted);text-decoration:line-through}
+.checklist-tag{font-size:10px;color:var(--gk);background:var(--warm);padding:2px 7px;border-radius:10px;font-style:italic}
+#checklist-save-indicator{font-size:11px;color:var(--muted);font-style:italic}
+.loading-state{text-align:center;padding:80px 24px;color:var(--muted);font-style:italic}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+
+<div id="header">
+  <a class="brand" href="/">
+    <svg width="20" height="20" viewBox="0 0 34 34" xmlns="http://www.w3.org/2000/svg">
+      <g fill="#E0B030" stroke="#C8941A" stroke-width="0.4"><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(0 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(25.7 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(51.4 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(77.1 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(102.8 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(128.5 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(154.2 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(180 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(205.7 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(231.4 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(257.1 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(282.8 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(308.5 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(334.2 17 17)"/></g>
+      <g fill="#F7D44C" stroke="#E0B030" stroke-width="0.3"><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(0 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(20 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(60 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(120 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(180 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(240 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(300 17 17)"/></g>
+      <circle cx="17" cy="17" r="4.1" fill="#6B5318" stroke="#5A4512" stroke-width="0.3"/>
+    </svg>
+    marigold
+  </a>
+  <a class="back-link" href="/dashboard">&larr; Back to dashboard</a>
+</div>
+
+<div id="app-root">
+  <div class="loading-state">Loading&hellip;</div>
+</div>
+
+<script>
+var supabaseClient = window.supabase.createClient(
+  'https://palatnljuhrmidpokjtq.supabase.co',
+  'sb_publishable_q-3NcTJcFBYo8bmEggiEkA_q5dPwnKR'
+);
+
+var root = document.getElementById('app-root');
+var currentPlanId = null;
+var currentPlanData = null;
+
+function renderSignIn() {
+  root.innerHTML =
+    '<div class="center-wrap">' +
+      '<div class="dash-title">Sign in</div>' +
+      '<div class="dash-sub">Enter the email you used to save your plan.</div>' +
+      '<input type="email" id="dash-email-input" class="dash-input" placeholder="you@example.com" autocomplete="email">' +
+      '<div id="dash-email-err" class="dash-err"></div>' +
+      '<button class="cta" id="dash-send-btn">Send link</button>' +
+    '</div>';
+
+  document.getElementById('dash-send-btn').onclick = async function() {
+    var btn = this;
+    var input = document.getElementById('dash-email-input');
+    var err = document.getElementById('dash-email-err');
+    var email = (input.value || '').trim();
+    if (!email || email.indexOf('@') === -1 || email.indexOf('.') === -1) {
+      err.textContent = 'Please enter a valid email.';
+      err.style.display = 'block';
+      return;
+    }
+    err.style.display = 'none';
+    btn.textContent = 'Sending...'; btn.disabled = true;
+    try {
+      var redirectTo = window.location.origin + window.location.pathname;
+      var result = await supabaseClient.auth.signInWithOtp({ email: email, options: { emailRedirectTo: redirectTo } });
+      if (result.error) {
+        err.textContent = 'We couldn\'t send that link. Please double-check your email and try again.';
+        err.style.display = 'block';
+        btn.textContent = 'Send link'; btn.disabled = false;
+        return;
+      }
+      root.innerHTML = '<div class="center-wrap"><div class="dash-title">Check your email</div><div class="dash-sub">We sent a link to ' + email + ' — click it to open your checklist.</div></div>';
+    } catch (e) {
+      err.textContent = 'Something went wrong. Please try again.';
+      err.style.display = 'block';
+      btn.textContent = 'Send link'; btn.disabled = false;
+    }
+  };
+  setTimeout(function(){ var el = document.getElementById('dash-email-input'); if (el) el.focus(); }, 50);
+}
+
+function tradShortName(slug, S) {
+  if (!slug || slug === 'Universal' || slug === 'both' || slug === 'Interfaith') return null;
+  var t1 = S.traditions ? S.traditions[0] : null;
+  var t2 = S.traditions ? S.traditions[1] : null;
+  if (slug === t1) return S.name1 || 'Partner 1';
+  if (slug === t2) return S.name2 || 'Partner 2';
+  return null;
+}
+
+function checklistItemId(item, i) {
+  var label = item.label || item.task || item.description || ('item' + i);
+  var slug = label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  return 'ci-' + i + '-' + slug.slice(0, 40);
+}
+
+function checklistRowHtml(item, i, progress) {
+  var id = checklistItemId(item, i);
+  var label = item.label || item.task || item.description || '';
+  var srcSlug = item.tradition || item.source || item._sourceTradition || '';
+  var checked = !!progress[id];
+  return '<div class="checklist-row" data-id="' + id + '">' +
+    '<input type="checkbox" class="checklist-checkbox" ' + (checked ? 'checked' : '') + ' data-id="' + id + '">' +
+    '<span class="checklist-label' + (checked ? ' done' : '') + '">' + label + '</span>' +
+  '</div>';
+}
+
+function renderChecklistPage(items, progress, S) {
+  var hasTwoTraditions = S.traditions && S.traditions.length > 1;
+  var doneCount = items.filter(function(item, i) { return !!progress[checklistItemId(item, i)]; }).length;
+
+  var groups = {};
+  var order = [];
+  items.forEach(function(item, i) {
+    var m = item.milestone || item.timeframe || 'General';
+    if (!groups[m]) { groups[m] = []; order.push(m); }
+    groups[m].push({ item: item, index: i });
+  });
+
+  var body = order.map(function(m) {
+    var entries = groups[m];
+    var innerHtml;
+    if (hasTwoTraditions) {
+      // Split into sub-groups by tradition, matching the Budget tab's pattern --
+      // each partner's tasks under their own heading, shared tasks last.
+      var t1 = S.traditions[0], t2 = S.traditions[1];
+      var side1 = entries.filter(function(e) { return (e.item.tradition || e.item.source || e.item._sourceTradition) === t1; });
+      var side2 = entries.filter(function(e) { return (e.item.tradition || e.item.source || e.item._sourceTradition) === t2; });
+      var shared = entries.filter(function(e) {
+        var s = e.item.tradition || e.item.source || e.item._sourceTradition || '';
+        return s !== t1 && s !== t2;
+      });
+      innerHtml = '';
+      if (side1.length) {
+        innerHtml += '<div class="checklist-tradition-heading">' + (S.name1 || 'Partner 1') + '\'s tasks</div>' +
+          side1.map(function(e) { return checklistRowHtml(e.item, e.index, progress); }).join('');
+      }
+      if (side2.length) {
+        innerHtml += '<div class="checklist-tradition-heading">' + (S.name2 || 'Partner 2') + '\'s tasks</div>' +
+          side2.map(function(e) { return checklistRowHtml(e.item, e.index, progress); }).join('');
+      }
+      if (shared.length) {
+        innerHtml += '<div class="checklist-tradition-heading">Shared tasks</div>' +
+          shared.map(function(e) { return checklistRowHtml(e.item, e.index, progress); }).join('');
+      }
+    } else {
+      innerHtml = entries.map(function(e) { return checklistRowHtml(e.item, e.index, progress); }).join('');
+    }
+    return '<div class="checklist-milestone" data-milestone="1">' + m + '</div>' + innerHtml;
+  }).join('');
+
+  root.innerHTML =
+    '<div class="wrap">' +
+      '<div class="page-title-row">' +
+        '<div class="page-title">Checklist</div>' +
+        '<div class="page-progress" id="checklist-save-indicator">' + doneCount + ' / ' + items.length + '</div>' +
+      '</div>' +
+      '<div class="page-sub">Track your planning tasks and check them off as you go.</div>' +
+      body +
+    '</div>';
+
+  // Position sticky milestone headers just below the page header, measured
+  // dynamically rather than assuming a fixed value -- this page's layout is
+  // different from the questionnaire's, so the offset must be its own.
+  requestAnimationFrame(function() {
+    var headerEl = document.getElementById('header');
+    var gap = headerEl ? headerEl.offsetHeight : 0;
+    document.querySelectorAll('.checklist-milestone').forEach(function(m) { m.style.top = gap + 'px'; });
+  });
+}
+
+var checklistSaveTimer = null;
+function scheduleChecklistSave() {
+  if (checklistSaveTimer) clearTimeout(checklistSaveTimer);
+  var indicator = document.getElementById('checklist-save-indicator');
+  var savedLabel = indicator ? indicator.textContent : '';
+  checklistSaveTimer = setTimeout(async function() {
+    try {
+      await supabaseClient.from('plans').update({ plan_data: currentPlanData }).eq('id', currentPlanId);
+    } catch (e) {
+      console.error('Checklist save failed:', e);
+    }
+  }, 700);
+}
+
+function attachChecklistHandlers() {
+  if (!currentPlanData.checklistProgress) currentPlanData.checklistProgress = {};
+  document.querySelectorAll('.checklist-checkbox').forEach(function(cb) {
+    cb.onchange = function() {
+      var id = cb.getAttribute('data-id');
+      currentPlanData.checklistProgress[id] = cb.checked;
+      var row = cb.closest('.checklist-row');
+      var label = row.querySelector('.checklist-label');
+      if (cb.checked) label.classList.add('done'); else label.classList.remove('done');
+      var S = currentPlanData.S || {};
+      var items = (S.plan && S.plan.checklist) || [];
+      var doneCount = items.filter(function(item, i) { return !!currentPlanData.checklistProgress[checklistItemId(item, i)]; }).length;
+      var progressEl = document.getElementById('checklist-save-indicator');
+      if (progressEl) progressEl.textContent = doneCount + ' / ' + items.length;
+      scheduleChecklistSave();
+    };
+  });
+}
+
+async function loadChecklist() {
+  var sessionResult = await supabaseClient.auth.getSession();
+  var session = sessionResult.data.session;
+  if (!session) {
+    renderSignIn();
+    return;
+  }
+  var result = await supabaseClient.from('plans').select('*').eq('user_id', session.user.id).maybeSingle();
+  if (result.error) {
+    root.innerHTML = '<div class="center-wrap"><div class="dash-title">Something went wrong</div><div class="dash-sub">We couldn\u2019t load your checklist. Please try refreshing the page.</div></div>';
+    return;
+  }
+  if (!result.data) {
+    root.innerHTML = '<div class="center-wrap"><div class="dash-title">No saved plan yet</div><div class="dash-sub">Once you save a plan from the questionnaire, your checklist will show up here.</div><a href="/questionnaire" class="cta" style="display:inline-block;text-decoration:none;margin-top:8px">Start your plan &rarr;</a></div>';
+    return;
+  }
+  currentPlanId = result.data.id;
+  currentPlanData = result.data.plan_data || {};
+  var S = currentPlanData.S || {};
+  var items = (S.plan && S.plan.checklist) || [];
+  var progress = currentPlanData.checklistProgress || {};
+  renderChecklistPage(items, progress, S);
+  attachChecklistHandlers();
+}
+
+supabaseClient.auth.onAuthStateChange(function(event, session) {
+  if (event === 'SIGNED_IN') { loadChecklist(); }
+});
+
+window.onload = loadChecklist;
+</script>
+
+</body>
+</html>
