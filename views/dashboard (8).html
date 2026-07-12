@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marigold — Your dashboard</title>
+<link rel="stylesheet" href="/brand.css">
+<style>
+html,body{min-height:100vh;background:var(--cream);}
+#header{border-bottom:1px solid var(--bdr);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--cream);z-index:10}
+#header .brand{display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--deep);font-style:italic;font-size:16px}
+.continue-planning{display:block;width:100%;box-sizing:border-box;font-size:12px;color:var(--muted);font-style:italic;text-decoration:none;transition:color 0.15s;position:sticky;background:var(--cream);padding:6px 0;z-index:95}
+.continue-planning:hover{color:var(--deep)}
+#header .continue-planning:hover{color:var(--deep)}
+.wrap{max-width:640px;margin:0 auto;padding:48px 24px}
+.center-wrap{max-width:400px;margin:80px auto;padding:0 24px;text-align:center}
+.dash-input{width:100%;padding:10px 12px;border:1px solid var(--bdr);border-radius:8px;font-family:'Playfair Display',Georgia,serif;font-style:italic;font-size:14px;color:var(--tx);background:#FDFAF0;margin-bottom:16px;box-sizing:border-box}
+.dash-input:focus{outline:none;border-color:var(--gd)}
+.dash-err{color:#B23;font-size:12px;font-style:italic;margin:-10px 0 16px;display:none}
+.dash-title{font-size:26px;font-style:italic;color:var(--deep);margin-bottom:8px}
+.dash-sub{font-size:13px;color:var(--muted);font-style:italic;line-height:1.6;margin-bottom:28px}
+.plan-summary{border:1px solid var(--bdr);border-radius:12px;padding:22px;margin-bottom:24px;background:#FDFAF0}
+.plan-summary-title{font-size:20px;font-style:italic;color:var(--deep);margin-bottom:6px}
+.plan-summary-sub{font-size:12px;color:var(--muted);font-style:italic}
+.section-card{border:1px solid var(--bdr);border-radius:12px;padding:20px 22px;margin-bottom:16px;background:white;transition:border-color 0.15s}
+a.section-card:hover{border-color:var(--gd)}
+.section-card-title{font-size:15px;font-style:italic;color:var(--deep);margin-bottom:4px;display:flex;align-items:center;justify-content:space-between}
+.section-card-sub{font-size:12px;color:var(--muted);font-style:italic;line-height:1.5}
+.coming-soon-badge{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--gk);font-style:italic;background:var(--warm);padding:3px 8px;border-radius:20px}
+.checklist-progress{font-size:11px;color:var(--muted);font-style:italic;font-weight:normal}
+.checklist-milestone{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-style:italic;margin:16px 0 8px;padding-top:8px;border-top:1px solid var(--warm)}
+.checklist-milestone:first-child{margin-top:0;padding-top:0;border-top:none}
+.checklist-row{display:flex;align-items:center;gap:10px;padding:7px 0}
+.checklist-checkbox{width:16px;height:16px;flex-shrink:0;accent-color:var(--gk);cursor:pointer}
+.checklist-label{font-size:13px;color:var(--tx);flex:1}
+.checklist-label.done{color:var(--muted);text-decoration:line-through}
+.checklist-tag{font-size:10px;color:var(--gk);background:var(--warm);padding:2px 7px;border-radius:10px;font-style:italic}
+#checklist-save-indicator{font-size:11px;color:var(--muted);font-style:italic;float:right}
+.btn-back{background:none;border:none;color:var(--muted);font-size:12px;font-family:'Playfair Display',Georgia,serif;font-style:italic;cursor:pointer;padding:4px 0;letter-spacing:0.3px;transition:color 0.15s}
+.btn-back:hover{color:var(--deep)}
+.loading-state{text-align:center;padding:80px 24px;color:var(--muted);font-style:italic}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+
+<div id="header">
+  <a class="brand" href="/">
+    <svg width="20" height="20" viewBox="0 0 34 34" xmlns="http://www.w3.org/2000/svg">
+      <g fill="#E0B030" stroke="#C8941A" stroke-width="0.4"><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(0 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(25.7 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(51.4 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(77.1 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(102.8 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(128.5 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(154.2 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(180 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(205.7 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(231.4 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(257.1 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(282.8 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(308.5 17 17)"/><ellipse cx="17" cy="5.8" rx="1.9" ry="4.4" transform="rotate(334.2 17 17)"/></g>
+      <g fill="#F7D44C" stroke="#E0B030" stroke-width="0.3"><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(0 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(20 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(60 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(120 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(180 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(240 17 17)"/><ellipse cx="17" cy="10.2" rx="1.3" ry="2.4" transform="rotate(300 17 17)"/></g>
+      <circle cx="17" cy="17" r="4.1" fill="#6B5318" stroke="#5A4512" stroke-width="0.3"/>
+    </svg>
+    marigold
+  </a>
+</div>
+
+<div id="app-root">
+  <div class="loading-state">Loading&hellip;</div>
+</div>
+
+<script>
+var supabaseClient = window.supabase.createClient(
+  'https://palatnljuhrmidpokjtq.supabase.co',
+  'sb_publishable_q-3NcTJcFBYo8bmEggiEkA_q5dPwnKR'
+);
+
+var root = document.getElementById('app-root');
+
+function renderSignIn(message) {
+  root.innerHTML =
+    '<div class="center-wrap">' +
+      '<div class="dash-title">Welcome back</div>' +
+      '<div class="dash-sub">' + (message || 'Enter the email you used to save your plan, and we\u2019ll send you a link to access it.') + '</div>' +
+      '<input type="email" id="dash-email-input" class="dash-input" placeholder="you@example.com" autocomplete="email">' +
+      '<div id="dash-email-err" class="dash-err">Please enter a valid email.</div>' +
+      '<button class="cta" id="dash-send-btn">Send link</button>' +
+    '</div>';
+
+  document.getElementById('dash-send-btn').onclick = async function() {
+    var btn = this;
+    var input = document.getElementById('dash-email-input');
+    var err = document.getElementById('dash-email-err');
+    var email = (input.value || '').trim();
+    if (!email || email.indexOf('@') === -1 || email.indexOf('.') === -1) {
+      err.style.display = 'block';
+      return;
+    }
+    err.style.display = 'none';
+    btn.textContent = 'Sending...'; btn.disabled = true;
+    try {
+      var redirectTo = window.location.origin + window.location.pathname;
+      var result = await supabaseClient.auth.signInWithOtp({ email: email, options: { emailRedirectTo: redirectTo } });
+      if (result.error) {
+        err.textContent = 'We couldn\'t send that link. Please double-check your email and try again.';
+        err.style.display = 'block';
+        btn.textContent = 'Send link'; btn.disabled = false;
+        return;
+      }
+      root.innerHTML = '<div class="center-wrap"><div class="dash-title">Check your email</div><div class="dash-sub">We sent a link to ' + email + ' — click it to open your dashboard.</div></div>';
+    } catch (e) {
+      err.textContent = 'Something went wrong. Please try again.';
+      err.style.display = 'block';
+      btn.textContent = 'Send link'; btn.disabled = false;
+    }
+  };
+
+  setTimeout(function(){ var el = document.getElementById('dash-email-input'); if (el) el.focus(); }, 50);
+}
+
+function fmtDate(iso) {
+  if (!iso) return null;
+  try { return new Date(iso).toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'}); }
+  catch(e) { return null; }
+}
+
+function renderDashboard(planRow) {
+  var pd = (planRow && planRow.plan_data) || {};
+  var S = pd.S || {};
+  var names = (planRow.couple_name1 || S.name1 || 'Partner one') + (planRow.couple_name2 || S.name2 ? ' & ' + (planRow.couple_name2 || S.name2) : '');
+  var dateStr = fmtDate(S.date);
+  var budgetStr = S.budget ? Number(S.budget).toLocaleString('en-US', {style:'currency', currency:'USD', maximumFractionDigits:0}) : null;
+  var guestStr = S.guests ? S.guests + ' guests' : null;
+  var savedAt = pd.savedAt ? new Date(pd.savedAt).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit'}) : null;
+
+  var subParts = [];
+  if (dateStr) subParts.push(dateStr); else subParts.push('Date to be confirmed');
+  if (budgetStr) subParts.push(budgetStr);
+  if (guestStr) subParts.push(guestStr);
+
+  var checklistItems = (S.plan && S.plan.checklist) || [];
+  var checklistProgress = pd.checklistProgress || {};
+  var checklistDone = checklistItems.filter(function(item, i) {
+    var label = item.label || item.task || item.description || ('item' + i);
+    var slug = label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    var id = 'ci-' + i + '-' + slug.slice(0, 40);
+    return !!checklistProgress[id];
+  }).length;
+  var checklistSummaryCard = checklistItems.length
+    ? '<a href="/dashboard/checklist" class="section-card" style="display:block;text-decoration:none;color:inherit"><div class="section-card-title">Checklist<span class="checklist-progress">' + checklistDone + ' / ' + checklistItems.length + '</span></div><div class="section-card-sub">Track your planning tasks and check them off as you go.</div></a>'
+    : '<div class="section-card"><div class="section-card-title">Checklist</div><div class="section-card-sub">No checklist items in this plan yet.</div></div>';
+
+  root.innerHTML =
+    '<div class="wrap">' +
+      '<a class="continue-planning" id="continue-planning" href="/questionnaire">&larr; Back to questionnaire</a>' +
+      '<div class="plan-summary">' +
+        '<div class="plan-summary-title">' + names + '</div>' +
+        '<div class="plan-summary-sub">' + subParts.join(' &middot; ') + '</div>' +
+        (savedAt ? '<div class="plan-summary-sub" style="margin-top:8px">Last saved ' + savedAt + '</div>' : '') +
+      '</div>' +
+
+      checklistSummaryCard +
+      '<div class="section-card"><div class="section-card-title">Vendors<span class="coming-soon-badge">Coming soon</span></div><div class="section-card-sub">Track vendor conversations, bookings, and confirmations.</div></div>' +
+      '<div class="section-card"><div class="section-card-title">Budget<span class="coming-soon-badge">Coming soon</span></div><div class="section-card-sub">Update your budget as real quotes and costs come in.</div></div>' +
+      '<div class="section-card"><div class="section-card-title">Guest list<span class="coming-soon-badge">Coming soon</span></div><div class="section-card-sub">Manage invitations, RSVPs, and seating.</div></div>' +
+      '<div class="section-card"><div class="section-card-title">Day-of schedule<span class="coming-soon-badge">Coming soon</span></div><div class="section-card-sub">Hour-by-hour itinerary across every day of your celebration.</div></div>' +
+
+      '<button class="btn-back" id="dash-signout-btn" style="margin-top:12px">Sign out</button>' +
+    '</div>';
+
+  document.getElementById('dash-signout-btn').onclick = async function() {
+    await supabaseClient.auth.signOut();
+    renderSignIn();
+  };
+
+  // Position the sticky continue-planning link just below the nav header,
+  // measured dynamically rather than assumed, since header height can vary.
+  requestAnimationFrame(function() {
+    var headerEl = document.getElementById('header');
+    var cpEl = document.getElementById('continue-planning');
+    if (headerEl && cpEl) {
+      cpEl.style.top = headerEl.offsetHeight + 'px';
+    }
+  });
+}
+
+async function loadDashboard() {
+  var sessionResult = await supabaseClient.auth.getSession();
+  var session = sessionResult.data.session;
+  if (!session) {
+    renderSignIn();
+    return;
+  }
+  var result = await supabaseClient.from('plans').select('*').eq('user_id', session.user.id).maybeSingle();
+  if (result.error) {
+    root.innerHTML = '<div class="center-wrap"><div class="dash-title">Something went wrong</div><div class="dash-sub">We couldn\u2019t load your plan. Please try refreshing the page.</div></div>';
+    return;
+  }
+  if (!result.data) {
+    root.innerHTML = '<div class="center-wrap"><div class="dash-title">No saved plan yet</div><div class="dash-sub">Once you save a plan from the questionnaire, it\u2019ll show up here.</div><a href="/questionnaire" class="cta" style="display:inline-block;text-decoration:none;margin-top:8px">Start your plan &rarr;</a></div>';
+    return;
+  }
+  renderDashboard(result.data);
+}
+
+supabaseClient.auth.onAuthStateChange(function(event, session) {
+  if (event === 'SIGNED_IN') { loadDashboard(); }
+});
+
+loadDashboard();
+</script>
+
+</body>
+</html>
