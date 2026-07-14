@@ -51,10 +51,20 @@ html,body{min-height:100vh;background:var(--cream);}
 
 .faith-heading{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--deep);font-style:italic;margin:16px 0 4px;padding-top:10px;border-top:1px solid var(--bdr)}
 .faith-heading:first-child{margin-top:4px;padding-top:0;border-top:none}
+.ceremony-heading{font-size:13px;font-style:italic;color:var(--gd);margin:14px 0 2px;font-family:'Playfair Display',Georgia,serif}
+.ceremony-heading:first-of-type{margin-top:6px}
 .side-heading{display:flex;align-items:center;gap:6px;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-style:italic;margin:10px 0 6px}
 .side-heading:first-child{margin-top:6px}
 .side-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.checklist-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--warm)}
+.checklist-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--warm);position:relative}
+.checklist-row.has-menu{padding-right:28px}
+.cs-dots{position:absolute;right:0;top:8px;background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:2px 6px;border-radius:6px;opacity:0;transition:opacity .15s}
+.checklist-row.has-menu:hover .cs-dots{opacity:1}
+.cs-dots:hover{background:var(--warm);color:var(--deep)}
+.cs-pop{display:none;position:absolute;right:0;top:28px;background:var(--cream);border:1px solid var(--bdr);border-radius:8px;box-shadow:0 4px 16px rgba(60,48,16,.12);z-index:20;min-width:150px;overflow:hidden}
+.cs-pop.open{display:block}
+.cs-pop button{display:block;width:100%;text-align:left;padding:9px 14px;background:none;border:none;font-family:'Playfair Display',Georgia,serif;font-style:italic;font-size:13px;color:var(--deep);cursor:pointer}
+.cs-pop button:hover{background:var(--warm)}
 .checklist-row:last-child{border-bottom:none}
 .checklist-checkbox{width:17px;height:17px;flex-shrink:0;cursor:pointer}
 .checklist-label{font-size:14px;color:var(--tx);flex:1;transition:color 0.2s}
@@ -218,24 +228,69 @@ function approxDateForMilestone(weddingDateIso, months) {
 // per partner, each with its own suffixed id), everything else stays one.
 // Each instance also gets its faith and side bucket computed once here, so
 // counting and rendering can never disagree with each other.
-function expandChecklistInstances(items, S) {
+//
+// A _nearMatch item (e.g. a tradition's own "book venue" collapsed with the
+// universal one) is a THIRD case, orthogonal to bride+groom: by default it
+// renders as one shared instance, exactly like any other shared item. Only
+// when the couple has explicitly chosen to split it (splits[id] is true)
+// does it expand into two instances -- one per original _alternates entry,
+// each restored exactly as it was before merging, each placed under its own
+// tradition's faith bucket rather than "shared".
+function expandChecklistInstances(items, S, splits) {
+  splits = splits || {};
   var t1 = S.traditions ? S.traditions[0] : null;
   var t2 = S.traditions ? S.traditions[1] : null;
   var hasTwoTraditions = !!(t1 && t2);
+  var GENERIC_CEREMONY_GROUP = 'General planning';
+
+  function faithBucketFor(faith) {
+    return !hasTwoTraditions ? 'single' : (faith === t1 ? 'faith1' : (faith === t2 ? 'faith2' : 'sharedFaith'));
+  }
+  function sideBucketFor(side) {
+    return side === 'bride' ? 'side1' : (side === 'groom' ? 'side2' : 'shared');
+  }
+  function ceremonyGroupFor(itm) {
+    return (itm.related_ceremony && itm.related_ceremony.trim()) || GENERIC_CEREMONY_GROUP;
+  }
+
   var out = [];
   items.forEach(function(item, i) {
+    var baseId = checklistItemId(item, i);
+    if (item._nearMatch && splits[baseId] && item._alternates && item._alternates.length === 2) {
+      item._alternates.forEach(function(alt, ai) {
+        var altFaith = itemFaith(alt);
+        out.push({
+          item: alt, index: i, id: baseId + '-split' + ai,
+          nearMatchGroupId: baseId, isSplitPart: true,
+          sideBucket: sideBucketFor(alt.side || 'both'),
+          faithBucket: faithBucketFor(altFaith),
+          ceremonyGroup: ceremonyGroupFor(alt),
+        });
+      });
+      return;
+    }
+
     var side = item.side || 'both';
     var faith = itemFaith(item);
-    var faithBucket = !hasTwoTraditions ? 'single' : (faith === t1 ? 'faith1' : (faith === t2 ? 'faith2' : 'sharedFaith'));
+    var faithBucket = faithBucketFor(faith);
+    var ceremonyGroup = ceremonyGroupFor(item);
+    // Splitting only means something when there are two traditions to
+    // actually divide between -- for a single tradition, the two
+    // _alternates are just two slightly different wordings of the same
+    // task (the tradition's own version and the universal one), and
+    // splitting would just show both side by side with no meaningful
+    // separation. So the option is deliberately withheld there, even
+    // though the underlying merge/dedup fix still correctly applies.
+    var canSplit = !!(hasTwoTraditions && item._nearMatch && item._alternates && item._alternates.length === 2);
     if (side === 'bride+groom') {
-      out.push({ item: item, index: i, id: checklistItemId(item, i, '-s1'), sideBucket: 'side1', faithBucket: faithBucket });
-      out.push({ item: item, index: i, id: checklistItemId(item, i, '-s2'), sideBucket: 'side2', faithBucket: faithBucket });
+      out.push({ item: item, index: i, id: checklistItemId(item, i, '-s1'), sideBucket: 'side1', faithBucket: faithBucket, canSplit: canSplit, nearMatchGroupId: baseId, ceremonyGroup: ceremonyGroup });
+      out.push({ item: item, index: i, id: checklistItemId(item, i, '-s2'), sideBucket: 'side2', faithBucket: faithBucket, canSplit: canSplit, nearMatchGroupId: baseId, ceremonyGroup: ceremonyGroup });
     } else if (side === 'bride') {
-      out.push({ item: item, index: i, id: checklistItemId(item, i), sideBucket: 'side1', faithBucket: faithBucket });
+      out.push({ item: item, index: i, id: checklistItemId(item, i), sideBucket: 'side1', faithBucket: faithBucket, canSplit: canSplit, nearMatchGroupId: baseId, ceremonyGroup: ceremonyGroup });
     } else if (side === 'groom') {
-      out.push({ item: item, index: i, id: checklistItemId(item, i), sideBucket: 'side2', faithBucket: faithBucket });
+      out.push({ item: item, index: i, id: checklistItemId(item, i), sideBucket: 'side2', faithBucket: faithBucket, canSplit: canSplit, nearMatchGroupId: baseId, ceremonyGroup: ceremonyGroup });
     } else {
-      out.push({ item: item, index: i, id: checklistItemId(item, i), sideBucket: 'shared', faithBucket: faithBucket });
+      out.push({ item: item, index: i, id: checklistItemId(item, i), sideBucket: 'shared', faithBucket: faithBucket, canSplit: canSplit, nearMatchGroupId: baseId, ceremonyGroup: ceremonyGroup });
     }
   });
   return out;
@@ -244,9 +299,22 @@ function expandChecklistInstances(items, S) {
 function checklistRowHtml(inst, progress) {
   var label = inst.item.label || inst.item.task || inst.item.description || '';
   var checked = !!progress[inst.id];
-  return '<div class="checklist-row" data-id="' + inst.id + '">' +
+  var menu = '';
+  if (inst.canSplit) {
+    menu = '<button class="cs-dots" data-nm-group="' + inst.nearMatchGroupId + '" data-nm-action="menu" title="Options">&#8942;</button>' +
+      '<div class="cs-pop" data-nm-pop="' + inst.nearMatchGroupId + '">' +
+        '<button data-nm-group="' + inst.nearMatchGroupId + '" data-nm-action="split">Split into two</button>' +
+      '</div>';
+  } else if (inst.isSplitPart) {
+    menu = '<button class="cs-dots" data-nm-group="' + inst.nearMatchGroupId + '" data-nm-action="menu" title="Options">&#8942;</button>' +
+      '<div class="cs-pop" data-nm-pop="' + inst.nearMatchGroupId + '">' +
+        '<button data-nm-group="' + inst.nearMatchGroupId + '" data-nm-action="merge">Merge back into one</button>' +
+      '</div>';
+  }
+  return '<div class="checklist-row' + (menu ? ' has-menu' : '') + '" data-id="' + inst.id + '">' +
     '<input type="checkbox" class="checklist-checkbox" ' + (checked ? 'checked' : '') + ' data-id="' + inst.id + '">' +
     '<span class="checklist-label' + (checked ? ' done' : '') + '">' + label + '</span>' +
+    menu +
   '</div>';
 }
 
@@ -258,6 +326,7 @@ function sideHeadingHtml(text, color) {
 // when the wedding has two traditions), then by side within each faith.
 function groupedRowsHtml(instances, S) {
   var hasTwoTraditions = S.traditions && S.traditions.length > 1;
+  var GENERIC_CEREMONY_GROUP = 'General planning';
 
   function sideGroupsHtml(subset) {
     var side1 = subset.filter(function(inst) { return inst.sideBucket === 'side1'; });
@@ -279,8 +348,33 @@ function groupedRowsHtml(instances, S) {
     return html;
   }
 
+  // Groups a subset by which ceremony each item is actually for, specific
+  // ceremonies first (in the order they first appear) and the generic
+  // "General planning" bucket last, since a couple scanning their list is
+  // more likely to be looking for a specific ceremony's tasks than the
+  // catch-all ones.
+  function ceremonyGroupsHtml(subset) {
+    var order = [];
+    var byGroup = {};
+    subset.forEach(function(inst) {
+      var g = inst.ceremonyGroup || GENERIC_CEREMONY_GROUP;
+      if (!byGroup[g]) { byGroup[g] = []; order.push(g); }
+      byGroup[g].push(inst);
+    });
+    order.sort(function(a, b) {
+      if (a === GENERIC_CEREMONY_GROUP) return 1;
+      if (b === GENERIC_CEREMONY_GROUP) return -1;
+      return 0;
+    });
+    var html = '';
+    order.forEach(function(g) {
+      html += '<div class="ceremony-heading">' + g + '</div>' + sideGroupsHtml(byGroup[g]);
+    });
+    return html;
+  }
+
   if (!hasTwoTraditions) {
-    return sideGroupsHtml(instances);
+    return ceremonyGroupsHtml(instances);
   }
 
   var t1 = S.traditions[0], t2 = S.traditions[1];
@@ -294,9 +388,9 @@ function groupedRowsHtml(instances, S) {
   var sharedFaith = instances.filter(function(inst) { return inst.faithBucket === 'sharedFaith'; });
 
   var html = '';
-  if (faith1.length) html += '<div class="faith-heading">' + t1Label + '</div>' + sideGroupsHtml(faith1);
-  if (faith2.length) html += '<div class="faith-heading">' + t2Label + '</div>' + sideGroupsHtml(faith2);
-  if (sharedFaith.length) html += '<div class="faith-heading">Shared across both</div>' + sideGroupsHtml(sharedFaith);
+  if (faith1.length) html += '<div class="faith-heading">' + t1Label + '</div>' + ceremonyGroupsHtml(faith1);
+  if (faith2.length) html += '<div class="faith-heading">' + t2Label + '</div>' + ceremonyGroupsHtml(faith2);
+  if (sharedFaith.length) html += '<div class="faith-heading">Shared across both</div>' + ceremonyGroupsHtml(sharedFaith);
   return html;
 }
 
@@ -304,10 +398,12 @@ function groupedRowsHtml(instances, S) {
 // module-level reference set at render time avoids threading it through
 // every helper function individually.
 var progressRef = {};
+var splitsRef = {};
 
-function renderChecklistPage(items, progress, S) {
+function renderChecklistPage(items, progress, S, splits) {
   progressRef = progress;
-  var instances = expandChecklistInstances(items, S);
+  splitsRef = splits || {};
+  var instances = expandChecklistInstances(items, S, splitsRef);
   var doneCount = instances.filter(function(inst) { return !!progress[inst.id]; }).length;
   var totalCount = instances.length;
   var pct = totalCount ? Math.round((doneCount / totalCount) * 100) : 0;
@@ -424,17 +520,53 @@ function scheduleChecklistSave() {
 
 function attachChecklistHandlers() {
   if (!currentPlanData.checklistProgress) currentPlanData.checklistProgress = {};
+  if (!currentPlanData.checklistSplits) currentPlanData.checklistSplits = {};
   document.querySelectorAll('.checklist-checkbox').forEach(function(cb) {
     cb.onchange = function() {
       var id = cb.getAttribute('data-id');
       currentPlanData.checklistProgress[id] = cb.checked;
       var S = currentPlanData.S || {};
       var items = (S.plan && S.plan.checklist) || [];
-      renderChecklistPage(items, currentPlanData.checklistProgress, S);
+      renderChecklistPage(items, currentPlanData.checklistProgress, S, currentPlanData.checklistSplits);
+      attachChecklistHandlers();
       scheduleChecklistSave();
     };
   });
 }
+
+// Event delegation for the split/merge dots menu -- attached once to the
+// document root rather than per-row, since rows get rebuilt on every
+// re-render. Uses e.target (not e.currentTarget) since the listener is on
+// document but the actual click lands on a specific button inside it.
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest && e.target.closest('[data-nm-action]');
+  if (!btn) {
+    document.querySelectorAll('.cs-pop.open').forEach(function(p) { p.classList.remove('open'); });
+    return;
+  }
+  e.stopPropagation();
+  var groupId = btn.getAttribute('data-nm-group');
+  var action = btn.getAttribute('data-nm-action');
+
+  if (action === 'menu') {
+    var pop = document.querySelector('.cs-pop[data-nm-pop="' + groupId + '"]');
+    var wasOpen = pop && pop.classList.contains('open');
+    document.querySelectorAll('.cs-pop.open').forEach(function(p) { p.classList.remove('open'); });
+    if (pop && !wasOpen) pop.classList.add('open');
+    return;
+  }
+
+  if (action === 'split' || action === 'merge') {
+    document.querySelectorAll('.cs-pop.open').forEach(function(p) { p.classList.remove('open'); });
+    if (!currentPlanData.checklistSplits) currentPlanData.checklistSplits = {};
+    currentPlanData.checklistSplits[groupId] = (action === 'split');
+    var S = currentPlanData.S || {};
+    var items = (S.plan && S.plan.checklist) || [];
+    renderChecklistPage(items, currentPlanData.checklistProgress || {}, S, currentPlanData.checklistSplits);
+    attachChecklistHandlers();
+    scheduleChecklistSave();
+  }
+});
 
 async function loadChecklist() {
   var sessionResult = await supabaseClient.auth.getSession();
@@ -457,7 +589,8 @@ async function loadChecklist() {
   var S = currentPlanData.S || {};
   var items = (S.plan && S.plan.checklist) || [];
   var progress = currentPlanData.checklistProgress || {};
-  renderChecklistPage(items, progress, S);
+  var splits = currentPlanData.checklistSplits || {};
+  renderChecklistPage(items, progress, S, splits);
 }
 
 supabaseClient.auth.onAuthStateChange(function(event, session) {
